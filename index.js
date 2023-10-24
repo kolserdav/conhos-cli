@@ -1,5 +1,5 @@
 // @ts-check
-const { spawn, exec, fork, A } = require("child_process");
+const { spawn, exec } = require("child_process");
 const dotenv = require("dotenv");
 const package = require("./package.json");
 
