@@ -1,5 +1,5 @@
 // @ts-check
-const { spawn } = require("child_process");
+const { spawn, exec, fork, A } = require("child_process");
 const dotenv = require("dotenv");
 const package = require("./package.json");
 
@@ -27,16 +27,32 @@ function parseOpts(program) {
 }
 
 /**
- * @param {string} exec
+ * @param {string} ex
+ * @param {string[]} args
+ * @returns {Promise<StatusCode>}
+ */
+async function execCommand(ex, args) {
+  return new Promise((resolve) => {
+    exec(`${ex} ${args.join(" ")}`, (error, stdout, stderr) => {
+      console.log(1, error);
+      console.log(2, stdout);
+      console.log(3, stderr);
+      resolve(error === null ? 0 : 1);
+    });
+  });
+}
+
+/**
+ * @param {string} ex
  * @param {string[]} args
  * @param {{
  *  quiet?: boolean
  * }} options
  * @returns {Promise<StatusCode>}
  */
-async function spawnCommand(exec, args, { quiet } = {}) {
+async function spawnCommand(ex, args, { quiet } = {}) {
   return new Promise((resolve) => {
-    const command = spawn(exec, args);
+    const command = spawn(ex, args);
     command.on("error", (e) => {
       console.error("Command failed", e);
     });
@@ -55,7 +71,7 @@ async function spawnCommand(exec, args, { quiet } = {}) {
     command.on("close", (code) => {
       if (!quiet) {
         console.log(
-          `command "${exec} ${args.join(" ")}" exited with code ${code}`
+          `command "${ex} ${args.join(" ")}" exited with code ${code}`
         );
       }
       resolve(code);
@@ -82,15 +98,15 @@ const program = new Command();
 program
   .enablePositionalOptions()
   .usage(`[options] <command>`)
+  .version(package.version, "-v, --version")
   .description("Hosting client");
 
 program
   .command("login")
   .description("login via browser")
   .action(async (options) => {
-    console.log(2, options);
-    await openBrowser(LOGIN_PAGE);
+    openBrowser(LOGIN_PAGE);
   });
 program.parse();
 
-console.log(1, parseOpts(program));
+console.log(1, program.opts());
