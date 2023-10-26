@@ -8,7 +8,7 @@ const {
 } = require("./utils/constants");
 
 const WS = require("./utils/ws");
-const { getPackagePath, readUserValue, console } = require("./utils/lib");
+const { getPackagePath, console } = require("./utils/lib");
 
 const packageHomeDir = getPackagePath();
 if (!fs.existsSync(packageHomeDir)) {
@@ -16,7 +16,7 @@ if (!fs.existsSync(packageHomeDir)) {
 }
 
 console.info(`Starting "${PACKAGE_NAME}" v${PACKAGE_VERSION} ...`);
-console.info("Package data path:", packageHomeDir, "\n");
+console.info("Package data dir:", packageHomeDir, "\n");
 
 const program = new Command();
 
@@ -29,11 +29,17 @@ program
 
 program
   .command("login")
-  .description("login via browser")
+  .description("Login via browser")
   .option("-c, --crypt", "encrypt session token with password")
+  .option("-r, --remove", "remove session token from this device")
   .action(async (options) => {
-    new WS(WEBSOCKET_ADDRESS, "login", {
-      crypt: options.crypt,
-    });
+    new WS(WEBSOCKET_ADDRESS, "login", options);
+  });
+
+program
+  .command("deploy")
+  .description("Upload files and run app in cloud")
+  .action(async (options) => {
+    new WS(WEBSOCKET_ADDRESS, "deploy", options);
   });
 program.parse();

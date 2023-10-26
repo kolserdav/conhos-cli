@@ -8,6 +8,8 @@ dotenv.config();
 const LOGIN_PAGE =
   process.env.LOGIN_PAGE || "http://localhost:3000/account/sign-in";
 
+const SERVER_ADDRESS = process.env.SERVER_ADDRESS || "http://localhost:3001";
+
 const WEBSOCKET_ADDRESS =
   process.env.WEBSOCKET_ADDRESS || "http://localhost:3002";
 
@@ -15,14 +17,7 @@ const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || "strong-string";
 
 const CRYPTO_SALT = process.env.CRYPTO_SALT || "strong-string";
 
-/**
- * @type {0 | 1 | 2 | 3}
- */
-const LOG_LEVEL_DEFAULT = 2;
-
-const logLevel = parseInt(process.env.LOG_LEVEL || `${LOG_LEVEL_DEFAULT}`, 10);
-
-const LOG_LEVEL = Number.isNaN(logLevel) ? LOG_LEVEL_DEFAULT : logLevel;
+const DEBUG = process.env.DEBUG === "1";
 
 const CRYPTO_IV = process.env.CRYPTO_IV || "string";
 
@@ -34,6 +29,7 @@ const HOME_DIR = os.homedir();
 const PACKAGE_VERSION = package.version;
 const PACKAGE_NAME = package.name;
 const SESSION_FILE_NAME = "auth";
+const PACKAGES_DIR_NAME = "packages";
 
 module.exports = {
   LOGIN_PAGE,
@@ -47,5 +43,7 @@ module.exports = {
   PACKAGE_NAME,
   PACKAGE_VERSION,
   SESSION_FILE_NAME,
-  LOG_LEVEL,
+  DEBUG,
+  PACKAGES_DIR_NAME,
+  SERVER_ADDRESS,
 };

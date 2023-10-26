@@ -14,14 +14,18 @@ const {
   getPackagePath,
   readUserValue,
   console,
+  getPackage,
 } = require("./lib");
 const Crypto = require("./crypto");
-const { writeFileSync, readFileSync, existsSync } = require("fs");
+const { writeFileSync, readFileSync, existsSync, rmSync } = require("fs");
+const path = require("path");
+const Http = require("./http");
 
 const crypto = new Crypto();
+const http = new Http();
 
 /**
- * @typedef {'login'} Protocol
+ * @typedef {'login' | 'deploy'} Protocol
  */
 
 /**
@@ -38,6 +42,7 @@ const crypto = new Crypto();
 /**
  * @typedef {{
  *  crypt: boolean;
+ *  remove: boolean;
  * }} Options
  */
 
@@ -140,16 +145,20 @@ module.exports = class WS {
       });
     });
 
+    // Listen commands
     switch (this.protocol) {
       case "login":
-        this.login();
+        this.loginCommandListeners();
+        break;
+      case "deploy":
+        this.deployCommandListeners();
         break;
       default:
         console.warn("Default protocol case", this.protocol);
     }
   }
 
-  login() {
+  loginCommandListeners() {
     if (!this.conn) {
       return;
     }
@@ -175,7 +184,35 @@ module.exports = class WS {
           await this.listenLogin(rawMessage);
           break;
         default:
-          console.warn("Default case", rawMessage);
+          console.warn("Default case", this.protocol, rawMessage);
+      }
+    });
+  }
+
+  deployCommandListeners() {
+    if (!this.conn) {
+      return;
+    }
+
+    const connId = v4();
+
+    this.conn.on("message", async (d) => {
+      const rawMessage = /** @type {typeof parseMessage<any>} */ (parseMessage)(
+        d.toString()
+      );
+      if (rawMessage === null) {
+        return;
+      }
+      const { type } = rawMessage;
+      switch (type) {
+        case "test":
+          await this.listenTest(connId);
+          break;
+        case "checkToken":
+          await this.listenCheckToken(rawMessage, connId);
+          break;
+        default:
+          console.warn("Default case", this.protocol, rawMessage);
       }
     });
   }
@@ -186,7 +223,8 @@ module.exports = class WS {
    * @param {string} connId
    * @returns
    */
-  async listenCheckToken({ data }, connId) {
+  async listenCheckToken({ data, token }, connId) {
+    this.token = token;
     this.startLogic(connId, { failedLogin: !data, sessionExists: true });
   }
 
@@ -241,26 +279,58 @@ module.exports = class WS {
   }
 
   /**
-   *
-   * @param {string} connId
-   * @param {{
+   * @typedef {{
    *  failedLogin: boolean
-   *  sessionExists?: boolean
-   * }} options
+   *   sessionExists?: boolean
+   * }} CommandOptions
+   * @param {string} connId
+   * @param {CommandOptions} options
    */
-  async startLogic(connId, { failedLogin, sessionExists }) {
+  async startLogic(connId, options) {
     switch (this.protocol) {
       case "login":
-        if (failedLogin || !sessionExists) {
-          this.openNewSession(connId);
-        } else {
-          console.info("You already logged in");
-          process.exit(0);
-        }
+        this.login(connId, options);
+        break;
+      case "deploy":
+        this.deploy(options);
         break;
       default:
         console.warn("Default case of logic");
     }
+  }
+
+  /**
+   * @param {string} connId
+   * @param {CommandOptions} options
+   */
+  login(connId, { failedLogin, sessionExists }) {
+    const authPath = getPackagePath(SESSION_FILE_NAME);
+    if (!this.options.remove) {
+      if (failedLogin || !sessionExists) {
+        this.openNewSession(connId);
+      } else {
+        console.info("You have already signed in");
+        process.exit(0);
+      }
+    } else {
+      if (existsSync(authPath)) {
+        rmSync(authPath);
+        console.info("Session token was deleted");
+      } else {
+        console.info("Session token file not found");
+      }
+      process.exit(0);
+    }
+  }
+
+  /**
+   * @param {CommandOptions} options
+   */
+  deploy({ failedLogin, sessionExists }) {
+    const root = process.cwd();
+    const fileEnv = path.resolve(root, "./.env");
+    const pack = getPackage();
+    http.uploadFile(fileEnv);
   }
 
   /**
@@ -295,7 +365,7 @@ module.exports = class WS {
           status: "info",
         });
       } else {
-        console.info("Now using the saved session token");
+        console.info("Now it's using the saved session token");
         /** @type {typeof sendMessage<MessageData['checkTocken']>} */ (
           sendMessage
         )(this.conn, {

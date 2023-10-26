@@ -1,7 +1,8 @@
 // @ts-check
 const { spawn } = require("child_process");
-const { HOME_DIR, PACKAGE_NAME, LOG_LEVEL } = require("./constants");
-const Console = require("node:console");
+const { HOME_DIR, PACKAGE_NAME, DEBUG } = require("./constants");
+const Console = require("console");
+const path = require("path");
 
 /**
  * @typedef {number | null} StatusCode
@@ -20,7 +21,7 @@ const console = {
    * @returns {void}
    */
   log: (...args) => {
-    if (LOG_LEVEL === 0) {
+    if (DEBUG) {
       Console.log(...args);
     }
   },
@@ -30,9 +31,7 @@ const console = {
    * @returns {void}
    */
   info: (...args) => {
-    if (LOG_LEVEL <= 1) {
-      Console.info(...args);
-    }
+    Console.info(...args);
   },
   /**
    *
@@ -40,9 +39,7 @@ const console = {
    * @returns {void}
    */
   warn: (...args) => {
-    if (LOG_LEVEL <= 2) {
-      Console.warn(...args);
-    }
+    Console.warn(...args);
   },
   /**
    *
@@ -50,9 +47,7 @@ const console = {
    * @returns {void}
    */
   error: (...args) => {
-    if (LOG_LEVEL <= 3) {
-      Console.error(...args);
-    }
+    Console.error(...args);
   },
 };
 
@@ -125,7 +120,7 @@ function getPackagePath(postfix = "") {
  * @returns {Promise<string>}
  */
 async function readUserValue(title, options = {}) {
-  const hidden = options?.hidden;
+  const hidden = options ? options.hidden : false;
   return new Promise((resolve) => {
     let content = "";
     const stdin = process.stdin;
@@ -166,4 +161,16 @@ async function readUserValue(title, options = {}) {
   });
 }
 
-module.exports = { openBrowser, getPackagePath, readUserValue, console };
+function getPackage() {
+  const cwd = process.cwd();
+  const package = require(path.resolve(cwd, "package.json"));
+  return package;
+}
+
+module.exports = {
+  openBrowser,
+  getPackagePath,
+  readUserValue,
+  console,
+  getPackage,
+};
