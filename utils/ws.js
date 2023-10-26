@@ -19,12 +19,6 @@ const { writeFileSync, readFileSync, existsSync } = require("fs");
 
 const crypto = new Crypto();
 
-const MessageType = {
-  setSocket: "setSocket",
-  test: "test",
-  login: "login",
-};
-
 /**
  * @typedef {'login'} Protocol
  */
@@ -34,29 +28,41 @@ const MessageType = {
  */
 
 /**
- * @template T
- * @typedef {T extends typeof MessageType.setSocket ? string :
- *  T extends typeof MessageType.test ? string :
- *  T extends typeof MessageType.login ? string : unknown
- * } ArgsSubset
- */
-
-/**
- * @template T
  * @typedef {{
- *  status: Status;
- *  type: T;
- *  message: string;
- *  lang: 'en';
- *  data: ArgsSubset<T>;
- *  token: string | null;
- * }} WsMessage
+ *  iv: string;
+ *  content: string;
+ * }} Session
  */
 
 /**
  * @typedef {{
  *  crypt: boolean;
  * }} Options
+ */
+
+/**
+ * @typedef {'login' | 'setSocket' | 'test' | 'checkToken'} MessageTypeValue
+ *
+ */
+
+/**
+ * @typedef {object} ArgsSubset
+ * @property {string} setSocket
+ * @property {string} test
+ * @property {string} login
+ * @property {boolean} checkTocken
+ */
+
+/**
+ * @template T
+ * @typedef {{
+ *  status: Status;
+ *  type: MessageTypeValue;
+ *  message: string;
+ *  lang: 'en';
+ *  data: T;
+ *  token: string | null;
+ * }} WsMessage
  */
 
 /**
@@ -122,9 +128,11 @@ module.exports = class WS {
 
     this.conn.on("open", function open() {
       console.log("Open WS connection:", WEBSOCKET_ADDRESS);
-      sendMessage(this, {
+      /** @type {typeof sendMessage<ArgsSubset['setSocket']>} */ (
+        sendMessage
+      )(this, {
         status: "info",
-        type: MessageType.setSocket,
+        type: "setSocket",
         message: "",
         lang: LANG,
         data: "",
@@ -157,10 +165,10 @@ module.exports = class WS {
       }
       const { type, token } = rawMessage;
       switch (type) {
-        case MessageType.test:
+        case "test":
           await this.listenTest(connId);
           break;
-        case MessageType.login:
+        case "login":
           await this.listenLogin(rawMessage);
           break;
         default:
@@ -171,7 +179,7 @@ module.exports = class WS {
 
   /**
    *
-   * @param {WsMessage<typeof MessageType.login>} param0
+   * @param {WsMessage<ArgsSubset['login']>} param0
    * @returns
    */
   async listenLogin({ token }) {
@@ -180,6 +188,9 @@ module.exports = class WS {
       return;
     }
     console.info("Successfully login on the service");
+    /**
+     * @type {Session}
+     */
     let session = {
       iv: "",
       content: token,
@@ -200,6 +211,43 @@ module.exports = class WS {
     }
     const authPath = getPackagePath(SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
+    console.info("Successfully logged in");
+    process.exit(0);
+  }
+
+  /**
+   *
+   * @returns {Session | null}
+   */
+  readSessionFile() {
+    const sessionFilePath = getPackagePath(SESSION_FILE_NAME);
+    if (!existsSync(sessionFilePath)) {
+      return null;
+    }
+    const authStr = readFileSync(sessionFilePath).toString();
+    return JSON.parse(authStr);
+  }
+
+  /**
+   *
+   * @param {string} connId
+   * @param {{
+   *  failedLogin: boolean
+   *  sessionExists?: boolean
+   * }} options
+   */
+  async startLogic(connId, { failedLogin, sessionExists }) {
+    switch (this.protocol) {
+      case "login":
+        if (failedLogin || !sessionExists) {
+          this.openNewSession(connId);
+        } else {
+          process.exit(0);
+        }
+        break;
+      default:
+        console.warn("Default case of logic");
+    }
   }
 
   /**
@@ -207,30 +255,39 @@ module.exports = class WS {
    * @param {string} connId
    */
   async listenTest(connId) {
-    const sessionFilePath = getPackagePath(SESSION_FILE_NAME);
-    if (existsSync(sessionFilePath)) {
-      const authStr = readFileSync(sessionFilePath).toString();
-      const authData = JSON.parse(authStr);
+    const authData = this.readSessionFile();
+    if (authData) {
       let password = "";
-      if (authData.iv) {
-        console.info("Session file was encrypted");
+      if (authData.iv !== "") {
+        console.info("Session token was encrypted");
         password = await readUserValue("Enter password: ", {
           hidden: true,
         });
         const key = crypto.createHash(password);
         const token = crypto.decrypt(authData, key);
         if (token === null) {
-          console.warn(
-            "Password is wrong, current session can't be use, trying to create a new session..."
-          );
-          this.openNewSession(connId);
+          console.warn("Password is wrong, current session can't be use");
+          this.startLogic(connId, { failedLogin: true });
           return;
         }
+
+        /** @type {typeof sendMessage<ArgsSubset['checkTocken']>} */ (
+          sendMessage
+        )(this.conn, {
+          token,
+          type: "checkToken",
+          data: false,
+          lang: LANG,
+          message: "",
+          status: "info",
+        });
         console.info("Current session is authenticated");
       }
-      return;
     }
-    this.openNewSession(connId);
+    this.startLogic(connId, {
+      failedLogin: false,
+      sessionExists: authData !== null,
+    });
   }
 
   /**
@@ -238,14 +295,18 @@ module.exports = class WS {
    * @param {string} connId
    */
   openNewSession(connId) {
-    sendMessage(this.conn, {
-      status: "info",
-      type: MessageType.login,
-      message: "",
-      lang: LANG,
-      data: connId,
-      token: null,
-    });
+    console.info("Trying to create a new session...");
+    /** @type {typeof sendMessage<ArgsSubset['login']>} */ (sendMessage)(
+      this.conn,
+      {
+        status: "info",
+        type: "login",
+        message: "",
+        lang: LANG,
+        data: connId,
+        token: null,
+      }
+    );
     openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${connId}`);
   }
 };

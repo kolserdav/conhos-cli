@@ -32,7 +32,7 @@ program
   .description("login via browser")
   .option("-c, --crypt", "encrypt your session with password")
   .action(async (options) => {
-    const ws = new WS(WEBSOCKET_ADDRESS, "login", {
+    new WS(WEBSOCKET_ADDRESS, "login", {
       crypt: options.crypt,
     });
   });
