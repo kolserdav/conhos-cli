@@ -15,6 +15,15 @@ const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || "strong-string";
 
 const CRYPTO_SALT = process.env.CRYPTO_SALT || "strong-string";
 
+/**
+ * @type {0 | 1 | 2 | 3}
+ */
+const LOG_LEVEL_DEFAULT = 2;
+
+const logLevel = parseInt(process.env.LOG_LEVEL || `${LOG_LEVEL_DEFAULT}`, 10);
+
+const LOG_LEVEL = Number.isNaN(logLevel) ? LOG_LEVEL_DEFAULT : logLevel;
+
 const CRYPTO_IV = process.env.CRYPTO_IV || "string";
 
 const LANG = "en";
@@ -38,4 +47,5 @@ module.exports = {
   PACKAGE_NAME,
   PACKAGE_VERSION,
   SESSION_FILE_NAME,
+  LOG_LEVEL,
 };

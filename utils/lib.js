@@ -1,6 +1,6 @@
 // @ts-check
 const { spawn } = require("child_process");
-const { HOME_DIR, PACKAGE_NAME } = require("./constants");
+const { HOME_DIR, PACKAGE_NAME, LOG_LEVEL } = require("./constants");
 const Console = require("node:console");
 
 /**
@@ -19,25 +19,41 @@ const console = {
    * @param  {...any} args
    * @returns {void}
    */
-  log: (...args) => Console.log(...args),
+  log: (...args) => {
+    if (LOG_LEVEL === 0) {
+      Console.log(...args);
+    }
+  },
   /**
    *
    * @param  {...any} args
    * @returns {void}
    */
-  info: (...args) => Console.info(...args),
+  info: (...args) => {
+    if (LOG_LEVEL <= 1) {
+      Console.info(...args);
+    }
+  },
   /**
    *
    * @param  {...any} args
    * @returns {void}
    */
-  warn: (...args) => Console.warn(...args),
+  warn: (...args) => {
+    if (LOG_LEVEL <= 2) {
+      Console.warn(...args);
+    }
+  },
   /**
    *
    * @param  {...any} args
    * @returns {void}
    */
-  error: (...args) => Console.error(...args),
+  error: (...args) => {
+    if (LOG_LEVEL <= 3) {
+      Console.error(...args);
+    }
+  },
 };
 
 /**

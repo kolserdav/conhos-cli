@@ -7,6 +7,7 @@ const {
   LOGIN_PAGE,
   QUERY_STRING_CONN_ID,
   SESSION_FILE_NAME,
+  PACKAGE_NAME,
 } = require("./constants");
 const {
   openBrowser,
@@ -71,6 +72,7 @@ function sendMessage(conn, data) {
     console.warn("Missing connection in send message");
     return;
   }
+  console.log("Send message", data);
   conn.send(JSON.stringify(data));
 }
 
@@ -85,6 +87,9 @@ function parseMessage(msg) {
     data = JSON.parse(msg);
   } catch (e) {
     console.error("Failed parse message", e);
+  }
+  if (data) {
+    console.log("Parse message", data);
   }
   return data;
 }
@@ -163,6 +168,9 @@ module.exports = class WS {
         case "test":
           await this.listenTest(connId);
           break;
+        case "checkToken":
+          await this.listenCheckToken(rawMessage, connId);
+          break;
         case "login":
           await this.listenLogin(rawMessage);
           break;
@@ -170,6 +178,16 @@ module.exports = class WS {
           console.warn("Default case", rawMessage);
       }
     });
+  }
+
+  /**
+   *
+   * @param {WsMessage<MessageData['checkTocken']>} param0
+   * @param {string} connId
+   * @returns
+   */
+  async listenCheckToken({ data }, connId) {
+    this.startLogic(connId, { failedLogin: !data, sessionExists: true });
   }
 
   /**
@@ -182,7 +200,6 @@ module.exports = class WS {
       console.warn("Session token wasn't get from server");
       return;
     }
-    console.info("Successfully login on the service");
     /**
      * @type {Session}
      */
@@ -237,6 +254,7 @@ module.exports = class WS {
         if (failedLogin || !sessionExists) {
           this.openNewSession(connId);
         } else {
+          console.info("You already logged in");
           process.exit(0);
         }
         break;
@@ -276,13 +294,27 @@ module.exports = class WS {
           message: "",
           status: "info",
         });
-        console.info("Current session is authenticated");
+      } else {
+        console.info("Now using the saved session token");
+        /** @type {typeof sendMessage<MessageData['checkTocken']>} */ (
+          sendMessage
+        )(this.conn, {
+          token: authData.content,
+          type: "checkToken",
+          data: false,
+          lang: LANG,
+          message: "",
+          status: "info",
+        });
       }
+    } else if (this.protocol !== "login") {
+      console.warn(
+        `You are not authenticated, run "${PACKAGE_NAME} login" first`
+      );
+      process.exit(1);
+    } else {
+      this.startLogic(connId, { failedLogin: false, sessionExists: false });
     }
-    this.startLogic(connId, {
-      failedLogin: false,
-      sessionExists: authData !== null,
-    });
   }
 
   /**
