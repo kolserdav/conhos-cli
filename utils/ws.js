@@ -41,28 +41,23 @@ const crypto = new Crypto();
  */
 
 /**
- * @typedef {'login' | 'setSocket' | 'test' | 'checkToken'} MessageTypeValue
- *
- */
-
-/**
- * @typedef {object} ArgsSubset
- * @property {string} setSocket
- * @property {string} test
- * @property {string} login
- * @property {boolean} checkTocken
- */
-
-/**
  * @template T
  * @typedef {{
  *  status: Status;
- *  type: MessageTypeValue;
+ *  type: 'login' | 'setSocket' | 'test' | 'checkToken';
  *  message: string;
  *  lang: 'en';
  *  data: T;
  *  token: string | null;
  * }} WsMessage
+ */
+
+/**
+ * @typedef {object} MessageData
+ * @property {string} setSocket
+ * @property {string} test
+ * @property {string} login
+ * @property {boolean} checkTocken
  */
 
 /**
@@ -128,7 +123,7 @@ module.exports = class WS {
 
     this.conn.on("open", function open() {
       console.log("Open WS connection:", WEBSOCKET_ADDRESS);
-      /** @type {typeof sendMessage<ArgsSubset['setSocket']>} */ (
+      /** @type {typeof sendMessage<MessageData['setSocket']>} */ (
         sendMessage
       )(this, {
         status: "info",
@@ -179,7 +174,7 @@ module.exports = class WS {
 
   /**
    *
-   * @param {WsMessage<ArgsSubset['login']>} param0
+   * @param {WsMessage<MessageData['login']>} param0
    * @returns
    */
   async listenLogin({ token }) {
@@ -271,7 +266,7 @@ module.exports = class WS {
           return;
         }
 
-        /** @type {typeof sendMessage<ArgsSubset['checkTocken']>} */ (
+        /** @type {typeof sendMessage<MessageData['checkTocken']>} */ (
           sendMessage
         )(this.conn, {
           token,
@@ -296,7 +291,7 @@ module.exports = class WS {
    */
   openNewSession(connId) {
     console.info("Trying to create a new session...");
-    /** @type {typeof sendMessage<ArgsSubset['login']>} */ (sendMessage)(
+    /** @type {typeof sendMessage<MessageData['login']>} */ (sendMessage)(
       this.conn,
       {
         status: "info",
