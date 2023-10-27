@@ -17,12 +17,16 @@ const {
   getPackage,
 } = require("./lib");
 const Crypto = require("./crypto");
-const { writeFileSync, readFileSync, existsSync, rmSync } = require("fs");
+const {
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+  createReadStream,
+} = require("fs");
 const path = require("path");
-const Http = require("./http");
 
 const crypto = new Crypto();
-const http = new Http();
 
 /**
  * @typedef {'login' | 'deploy'} Protocol
@@ -50,7 +54,8 @@ const http = new Http();
  * @template T
  * @typedef {{
  *  status: Status;
- *  type: 'login' | 'setSocket' | 'test' | 'checkToken';
+ *  type: 'login' | 'setSocket' | 'test' | 'checkToken' |
+ *  'upload';
  *  message: string;
  *  lang: 'en';
  *  data: T;
@@ -64,6 +69,12 @@ const http = new Http();
  * @property {string} test
  * @property {string} login
  * @property {boolean} checkTocken
+ * @property {{
+ *  num: number;
+ *  project: string;
+ *  last: boolean;
+ *  chunk: Uint8Array
+ * }} upload
  */
 
 /**
@@ -119,6 +130,10 @@ module.exports = class WS {
      * @type {Options}
      */
     this.options = options;
+    /**
+     * @type {string | null}
+     */
+    this.token = null;
     this.start();
   }
 
@@ -328,9 +343,48 @@ module.exports = class WS {
    */
   deploy({ failedLogin, sessionExists }) {
     const root = process.cwd();
-    const fileEnv = path.resolve(root, "./.env");
+    const filePath = "./package-lock.json";
+    const fileEnv = path.resolve(root, filePath);
     const pack = getPackage();
-    http.uploadFile(fileEnv);
+    const rStream = createReadStream(fileEnv);
+    let num = 0;
+    rStream.on("data", (chunk) => {
+      /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(
+        this.conn,
+        {
+          token: this.token,
+          message: "",
+          type: "upload",
+          data: {
+            num,
+            project: pack.name,
+            last: false,
+            chunk: new Uint8Array(Buffer.from(chunk)),
+          },
+          lang: LANG,
+          status: "info",
+        }
+      );
+      num++;
+    });
+    rStream.on("close", () => {
+      /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(
+        this.conn,
+        {
+          token: this.token,
+          message: "",
+          type: "upload",
+          data: {
+            num,
+            project: pack.name,
+            last: true,
+            chunk: new Uint8Array(),
+          },
+          lang: LANG,
+          status: "info",
+        }
+      );
+    });
   }
 
   /**
