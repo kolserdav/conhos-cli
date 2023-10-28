@@ -15,6 +15,7 @@ const {
   readUserValue,
   console,
   getPackage,
+  doGzip,
 } = require("./lib");
 const Crypto = require("./crypto");
 const {
@@ -25,6 +26,7 @@ const {
   createReadStream,
 } = require("fs");
 const path = require("path");
+const { tmpdir } = require("os");
 
 const crypto = new Crypto();
 
@@ -341,12 +343,19 @@ module.exports = class WS {
   /**
    * @param {CommandOptions} options
    */
-  deploy({ failedLogin, sessionExists }) {
+  async deploy({ failedLogin, sessionExists }) {
+    console.info("Starting deploy the project...");
     const root = process.cwd();
-    const filePath = "./package-lock.json";
-    const fileEnv = path.resolve(root, filePath);
+    const filePath = path.resolve(root, "./package-lock.json");
+    const fileGzip = path.resolve(tmpdir(), "tmp.gz");
+
+    await doGzip(filePath, fileGzip).catch((e) => {
+      console.error("Failed gzip files", e);
+    });
+
     const pack = getPackage();
-    const rStream = createReadStream(fileEnv);
+
+    const rStream = createReadStream(fileGzip);
     let num = 0;
     rStream.on("data", (chunk) => {
       /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(

@@ -3,6 +3,19 @@ const { spawn } = require("child_process");
 const { HOME_DIR, PACKAGE_NAME, DEBUG } = require("./constants");
 const Console = require("console");
 const path = require("path");
+const open = require("opn");
+const { promisify } = require("node:util");
+const { createGzip } = require("node:zlib");
+const { pipeline } = require("node:stream");
+const { createReadStream, createWriteStream } = require("fs");
+const pipe = promisify(pipeline);
+
+async function doGzip(input, output) {
+  const gzip = createGzip();
+  const source = createReadStream(input);
+  const destination = createWriteStream(output);
+  await pipe(source, gzip, destination);
+}
 
 /**
  * @typedef {number | null} StatusCode
@@ -90,16 +103,10 @@ async function spawnCommand(ex, args, { quiet } = {}) {
 
 /**
  * @param {string} url
- * @returns {Promise<StatusCode>}
+ * @returns {Promise<any>}
  */
 async function openBrowser(url) {
-  const start =
-    process.platform == "darwin"
-      ? "open"
-      : process.platform == "win32"
-      ? "start"
-      : "xdg-open";
-  return spawnCommand(start, [url]);
+  return open(url);
 }
 
 /**
@@ -108,7 +115,7 @@ async function openBrowser(url) {
  * @returns
  */
 function getPackagePath(postfix = "") {
-  return `${HOME_DIR}/.${PACKAGE_NAME}/${postfix}`;
+  return path.normalize(`${HOME_DIR}/.${PACKAGE_NAME}/${postfix}`);
 }
 
 /**
@@ -173,4 +180,5 @@ module.exports = {
   readUserValue,
   console,
   getPackage,
+  doGzip,
 };
