@@ -10,6 +10,11 @@ const { pipeline } = require("node:stream");
 const { createReadStream, createWriteStream } = require("fs");
 const pipe = promisify(pipeline);
 
+/**
+ *
+ * @param {string} input
+ * @param {string} output
+ */
 async function doGzip(input, output) {
   const gzip = createGzip();
   const source = createReadStream(input);
