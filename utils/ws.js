@@ -30,6 +30,7 @@ const path = require("path");
 const { tmpdir } = require("os");
 const { promisify } = require("util");
 const { unzip, createUnzip } = require("zlib");
+const Archiver = require("./archiver");
 
 const crypto = new Crypto();
 
@@ -350,15 +351,14 @@ module.exports = class WS {
     console.info("Starting deploy the project...");
     const root = process.cwd();
     const filePath = path.resolve(root, "./package-lock.json");
-    const fileGzip = path.resolve(tmpdir(), "tmp.gz");
-
-    await doGzip(filePath, fileGzip).catch((e) => {
-      console.error("Failed gzip files", e);
-    });
+    const fileZip = path.resolve(tmpdir(), "tmp.zip");
+    console.info(tmpdir());
+    const archiver = new Archiver({ dir: root, outputPath: fileZip });
+    await archiver.compress();
 
     const pack = getPackage();
 
-    const rStream = createReadStream(fileGzip);
+    const rStream = createReadStream(fileZip);
     let num = 0;
     rStream.on("data", (chunk) => {
       /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(
@@ -379,7 +379,7 @@ module.exports = class WS {
       );
       num++;
     });
-    rStream.on("close", () => {
+    rStream.on("close", (d) => {
       /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(
         this.conn,
         {
