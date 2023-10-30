@@ -1,14 +1,8 @@
-// @ts-check
-const { spawn } = require("child_process");
-const { HOME_DIR, PACKAGE_NAME, DEBUG } = require("./constants");
-const Console = require("console");
-const path = require("path");
-const open = require("opn");
-const { promisify } = require("node:util");
-const { createGzip } = require("node:zlib");
-const { pipeline } = require("node:stream");
-const { createReadStream, createWriteStream } = require("fs");
-const pipe = promisify(pipeline);
+const { spawn } = require('child_process');
+const { HOME_DIR, PACKAGE_NAME, DEBUG } = require('./constants');
+const Console = require('console');
+const path = require('path');
+const open = require('opn');
 
 /**
  * @typedef {number | null} StatusCode
@@ -68,26 +62,24 @@ const console = {
 async function spawnCommand(ex, args, { quiet } = {}) {
   return new Promise((resolve) => {
     const command = spawn(ex, args);
-    command.on("error", (e) => {
-      console.error("Command failed", e);
+    command.on('error', (e) => {
+      console.error('Command failed', e);
     });
-    command.stdout.on("data", (data) => {
+    command.stdout.on('data', (data) => {
       if (!quiet) {
         console.log(`stdout: ${data}`);
       }
     });
 
-    command.stderr.on("data", (data) => {
+    command.stderr.on('data', (data) => {
       if (!quiet) {
         console.log(`stderr: ${data}`);
       }
     });
 
-    command.on("close", (code) => {
+    command.on('close', (code) => {
       if (!quiet) {
-        console.log(
-          `command "${ex} ${args.join(" ")}" exited with code ${code}`
-        );
+        console.log(`command "${ex} ${args.join(' ')}" exited with code ${code}`);
       }
       resolve(code);
     });
@@ -107,7 +99,7 @@ async function openBrowser(url) {
  * @param {string} postfix
  * @returns
  */
-function getPackagePath(postfix = "") {
+function getPackagePath(postfix = '') {
   return path.normalize(`${HOME_DIR}/.${PACKAGE_NAME}/${postfix}`);
 }
 
@@ -122,20 +114,20 @@ function getPackagePath(postfix = "") {
 async function readUserValue(title, options = {}) {
   const hidden = options ? options.hidden : false;
   return new Promise((resolve) => {
-    let content = "";
+    let content = '';
     const stdin = process.stdin;
     stdin.setRawMode(true);
     process.stdout.write(title);
 
     stdin.resume();
 
-    stdin.on("data", (d) => {
+    stdin.on('data', (d) => {
       const chunk = d.toLocaleString();
       const chunkJson = d.toJSON();
       const code = chunkJson.data[0];
       // Enter
       if (code === 13) {
-        process.stdout.write("\n");
+        process.stdout.write('\n');
         resolve(content);
       }
       // Ctrl+c
@@ -163,8 +155,7 @@ async function readUserValue(title, options = {}) {
 
 function getPackage() {
   const cwd = process.cwd();
-  const package = require(path.resolve(cwd, "package.json"));
-  return package;
+  return require(path.resolve(cwd, 'package.json'));
 }
 
 module.exports = {

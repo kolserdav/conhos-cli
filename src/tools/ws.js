@@ -1,15 +1,10 @@
 // @ts-check
-const WebSocket = require("ws");
-const { v4 } = require("uuid");
-const {
-  LANG,
-  WEBSOCKET_ADDRESS,
-  SESSION_FILE_NAME,
-  PACKAGE_NAME,
-} = require("../utils/constants");
-const { getPackagePath, readUserValue, console } = require("../utils/lib");
-const Crypto = require("../utils/crypto");
-const { writeFileSync, readFileSync, existsSync } = require("fs");
+const WebSocket = require('ws');
+const { v4 } = require('uuid');
+const { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } = require('../utils/constants');
+const { getPackagePath, readUserValue, console } = require('../utils/lib');
+const Crypto = require('../utils/crypto');
+const { writeFileSync, readFileSync, existsSync } = require('fs');
 
 const crypto = new Crypto();
 
@@ -79,7 +74,7 @@ class WSInterface {
    * @abstract
    */
   listener() {
-    console.warn("Listener must be impelemented");
+    console.warn('Listener must be impelemented');
   }
 
   /**
@@ -88,7 +83,7 @@ class WSInterface {
    * @param {CommandOptions} options
    */
   handler(connId, options) {
-    console.warn("Handler must be impelemented");
+    console.warn('Handler must be impelemented');
   }
 }
 
@@ -104,7 +99,7 @@ module.exports = class WS {
     /**
      * @type {WebSocket | null}
      */
-    this.conn = new WebSocket(WEBSOCKET_ADDRESS, "cli");
+    this.conn = new WebSocket(WEBSOCKET_ADDRESS, 'cli');
     /**
      * @type {Options}
      */
@@ -120,14 +115,14 @@ module.exports = class WS {
    * @type {WSInterface['listener']}
    */
   listener() {
-    console.warn("Default WS listener");
+    console.warn('Default WS listener');
   }
 
   /**
    * @type {WSInterface['handler']}
    */
   handler(connId, options) {
-    console.warn("Default WS handler", { connId, options });
+    console.warn('Default WS handler', { connId, options });
   }
 
   /**
@@ -138,10 +133,10 @@ module.exports = class WS {
    */
   sendMessage(conn, data) {
     if (!conn) {
-      console.warn("Missing connection in send message");
+      console.warn('Missing connection in send message');
       return;
     }
-    console.log("Send message", data);
+    console.log('Send message', data);
     conn.send(JSON.stringify(data));
   }
 
@@ -155,33 +150,31 @@ module.exports = class WS {
     try {
       data = JSON.parse(msg);
     } catch (e) {
-      console.error("Failed parse message", e);
+      console.error('Failed parse message', e);
     }
     if (data) {
-      console.log("Parse message", data);
+      console.log('Parse message', data);
     }
     return data;
   }
 
   start() {
     if (!this.conn) {
-      console.warn("WebSocket is missing");
+      console.warn('WebSocket is missing');
       return;
     }
-    this.conn.on("error", (e) => {
-      console.error("Failed WS connection", e);
+    this.conn.on('error', (e) => {
+      console.error('Failed WS connection', e);
     });
     const ws = this;
-    this.conn.on("open", function open() {
-      console.log("Open WS connection:", WEBSOCKET_ADDRESS);
-      /** @type {typeof ws.sendMessage<MessageData['setSocket']>} */ (
-        ws.sendMessage
-      )(this, {
-        status: "info",
-        type: "setSocket",
-        message: "",
+    this.conn.on('open', function open() {
+      console.log('Open WS connection:', WEBSOCKET_ADDRESS);
+      /** @type {typeof ws.sendMessage<MessageData['setSocket']>} */ (ws.sendMessage)(this, {
+        status: 'info',
+        type: 'setSocket',
+        message: '',
         lang: LANG,
-        data: "",
+        data: '',
         token: null,
       });
     });
@@ -218,10 +211,10 @@ module.exports = class WS {
   async listenTest(connId) {
     const authData = this.readSessionFile();
     if (authData) {
-      let password = "";
-      if (authData.iv !== "") {
-        console.info("Session token was encrypted");
-        password = await readUserValue("Enter password: ", {
+      let password = '';
+      if (authData.iv !== '') {
+        console.info('Session token was encrypted');
+        password = await readUserValue('Enter password: ', {
           hidden: true,
         });
         const key = crypto.createHash(password);
@@ -232,33 +225,33 @@ module.exports = class WS {
           return;
         }
 
-        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (
-          this.sendMessage
-        )(this.conn, {
-          token,
-          type: "checkToken",
-          data: false,
-          lang: LANG,
-          message: "",
-          status: "info",
-        });
+        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)(
+          this.conn,
+          {
+            token,
+            type: 'checkToken',
+            data: false,
+            lang: LANG,
+            message: '',
+            status: 'info',
+          }
+        );
       } else {
         console.info("Now it's using the saved session token");
-        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (
-          this.sendMessage
-        )(this.conn, {
-          token: authData.content,
-          type: "checkToken",
-          data: false,
-          lang: LANG,
-          message: "",
-          status: "info",
-        });
+        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)(
+          this.conn,
+          {
+            token: authData.content,
+            type: 'checkToken',
+            data: false,
+            lang: LANG,
+            message: '',
+            status: 'info',
+          }
+        );
       }
     } else if (!this.options.isLogin) {
-      console.warn(
-        `You are not authenticated, run "${PACKAGE_NAME} login" first`
-      );
+      console.warn(`You are not authenticated, run "${PACKAGE_NAME} login" first`);
       process.exit(1);
     } else {
       this.handler(connId, { failedLogin: false, sessionExists: false });

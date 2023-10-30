@@ -1,12 +1,11 @@
-// @ts-check
-const { v4 } = require("uuid");
-const WS = require("../tools/ws");
-const path = require("path");
-const { tmpdir } = require("os");
-const Tar = require("../utils/tar");
-const { getPackage } = require("../utils/lib");
-const { createReadStream } = require("fs");
-const { LANG } = require("../utils/constants");
+const { v4 } = require('uuid');
+const WS = require('../tools/ws');
+const path = require('path');
+const { tmpdir } = require('os');
+const Tar = require('../utils/tar');
+const { getPackage } = require('../utils/lib');
+const { createReadStream } = require('fs');
+const { LANG } = require('../utils/constants');
 
 /**
  * @typedef {import('../tools/ws').Options} Options
@@ -35,23 +34,21 @@ module.exports = class Login extends WS {
     const connId = v4();
 
     const ws = this;
-    this.conn.on("message", async (d) => {
-      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (
-        ws.parseMessage
-      )(d.toString());
+    this.conn.on('message', async (d) => {
+      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (ws.parseMessage)(d.toString());
       if (rawMessage === null) {
         return;
       }
       const { type } = rawMessage;
       switch (type) {
-        case "test":
+        case 'test':
           await this.listenTest(connId);
           break;
-        case "checkToken":
+        case 'checkToken':
           await this.listenCheckToken(rawMessage, connId);
           break;
         default:
-          console.warn("Default message case for command deploy", rawMessage);
+          console.warn('Default message case for command deploy', rawMessage);
       }
     });
   }
@@ -61,21 +58,19 @@ module.exports = class Login extends WS {
    * @param {CommandOptions} options
    */
   async handler(connId, { failedLogin, sessionExists }) {
-    console.info("Starting deploy the project...");
-    const fileZip = path.resolve(tmpdir(), "tmp.tgz");
+    console.info('Starting deploy the project...');
+    const fileZip = path.resolve(tmpdir(), 'tmp.tgz');
     const tar = new Tar();
-    await tar.create({ fileList: ["./"], file: fileZip });
+    await tar.create({ fileList: ['./'], file: fileZip });
     const pack = getPackage();
 
     const rStream = createReadStream(fileZip);
     let num = 0;
-    rStream.on("data", (chunk) => {
-      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (
-        this.sendMessage
-      )(this.conn, {
+    rStream.on('data', (chunk) => {
+      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (this.sendMessage)(this.conn, {
         token: this.token,
-        message: "",
-        type: "upload",
+        message: '',
+        type: 'upload',
         data: {
           num,
           project: pack.name,
@@ -83,17 +78,15 @@ module.exports = class Login extends WS {
           chunk: new Uint8Array(Buffer.from(chunk)),
         },
         lang: LANG,
-        status: "info",
+        status: 'info',
       });
       num++;
     });
-    rStream.on("close", (d) => {
-      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (
-        this.sendMessage
-      )(this.conn, {
+    rStream.on('close', () => {
+      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (this.sendMessage)(this.conn, {
         token: this.token,
-        message: "",
-        type: "upload",
+        message: '',
+        type: 'upload',
         data: {
           num,
           project: pack.name,
@@ -101,7 +94,7 @@ module.exports = class Login extends WS {
           chunk: new Uint8Array(),
         },
         lang: LANG,
-        status: "info",
+        status: 'info',
       });
     });
   }

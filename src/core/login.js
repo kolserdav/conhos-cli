@@ -1,15 +1,9 @@
-// @ts-check
-const { v4 } = require("uuid");
-const WS = require("../tools/ws");
-const { getPackagePath, openBrowser, readUserValue } = require("../utils/lib");
-const {
-  SESSION_FILE_NAME,
-  LANG,
-  LOGIN_PAGE,
-  QUERY_STRING_CONN_ID,
-} = require("../utils/constants");
-const { existsSync, rmSync, writeFileSync } = require("fs");
-const Crypto = require("../utils/crypto");
+const { v4 } = require('uuid');
+const WS = require('../tools/ws');
+const { getPackagePath, openBrowser, readUserValue } = require('../utils/lib');
+const { SESSION_FILE_NAME, LANG, LOGIN_PAGE, QUERY_STRING_CONN_ID } = require('../utils/constants');
+const { existsSync, rmSync, writeFileSync } = require('fs');
+const Crypto = require('../utils/crypto');
 
 /**
  * @typedef {import('../tools/ws').Options} Options
@@ -42,26 +36,24 @@ module.exports = class Login extends WS {
 
     const connId = v4();
     const ws = this;
-    this.conn.on("message", async (d) => {
-      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (
-        ws.parseMessage
-      )(d.toString());
+    this.conn.on('message', async (d) => {
+      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (ws.parseMessage)(d.toString());
       if (rawMessage === null) {
         return;
       }
       const { type, token } = rawMessage;
       switch (type) {
-        case "test":
+        case 'test':
           await this.listenTest(connId);
           break;
-        case "checkToken":
+        case 'checkToken':
           await this.listenCheckToken(rawMessage, connId);
           break;
-        case "login":
+        case 'login':
           await this.listenLogin(rawMessage);
           break;
         default:
-          console.warn("Default message case of login command", rawMessage);
+          console.warn('Default message case of login command', rawMessage);
       }
     });
   }
@@ -76,15 +68,15 @@ module.exports = class Login extends WS {
       if (failedLogin || !sessionExists) {
         this.openNewSession(connId);
       } else {
-        console.info("You have already signed in");
+        console.info('You have already signed in');
         process.exit(0);
       }
     } else {
       if (existsSync(authPath)) {
         rmSync(authPath);
-        console.info("Session token was deleted");
+        console.info('Session token was deleted');
       } else {
-        console.info("Session token file not found");
+        console.info('Session token file not found');
       }
       process.exit(0);
     }
@@ -104,7 +96,7 @@ module.exports = class Login extends WS {
      * @type {Session}
      */
     let session = {
-      iv: "",
+      iv: '',
       content: token,
     };
     if (this.options.crypt) {
@@ -112,18 +104,18 @@ module.exports = class Login extends WS {
        * @type {string | undefined}
        */
       let cryptoPassword = undefined;
-      console.info("Session token will be encrypted with your password");
-      cryptoPassword = await readUserValue("Enter a new password: ", {
+      console.info('Session token will be encrypted with your password');
+      cryptoPassword = await readUserValue('Enter a new password: ', {
         hidden: true,
       });
-      console.info("Specifyed password length is", cryptoPassword.length);
+      console.info('Specifyed password length is', cryptoPassword.length);
 
       const key = crypto.createHash(cryptoPassword);
       session = crypto.encrypt(token, key);
     }
     const authPath = getPackagePath(SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
-    console.info("Successfully logged in");
+    console.info('Successfully logged in');
     process.exit(0);
   }
 
@@ -132,13 +124,11 @@ module.exports = class Login extends WS {
    * @param {string} connId
    */
   openNewSession(connId) {
-    console.info("Trying to create a new session...");
-    /** @type {typeof this.sendMessage<MessageData['login']>} */ (
-      this.sendMessage
-    )(this.conn, {
-      status: "info",
-      type: "login",
-      message: "",
+    console.info('Trying to create a new session...');
+    /** @type {typeof this.sendMessage<MessageData['login']>} */ (this.sendMessage)(this.conn, {
+      status: 'info',
+      type: 'login',
+      message: '',
       lang: LANG,
       data: connId,
       token: null,

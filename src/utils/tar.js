@@ -1,5 +1,5 @@
 // @ts-check
-const tar = require("tar");
+const tar = require('tar');
 
 module.exports = class Tar {
   /**
@@ -20,12 +20,12 @@ module.exports = class Tar {
           },
           fileList
         )
-        .then((_) => {
-          console.info("Tarball created");
+        .then(() => {
+          console.info('Tarball created');
           resolve(0);
         })
         .catch((e) => {
-          console.error("Failed create tarball", e);
+          console.error('Failed create tarball', e);
           resolve(1);
         });
     });
@@ -49,12 +49,12 @@ module.exports = class Tar {
           },
           fileList
         )
-        .then((_) => {
-          console.info("Tarball updated");
+        .then(() => {
+          console.info('Tarball updated');
           resolve(0);
         })
         .catch((e) => {
-          console.error("Failed update tarball", e);
+          console.error('Failed update tarball', e);
           resolve(1);
         });
     });

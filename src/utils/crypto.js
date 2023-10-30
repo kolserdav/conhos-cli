@@ -1,13 +1,12 @@
-// @ts-check
-const crypto = require("crypto");
+const crypto = require('crypto');
 
-const ALGORITHM = "aes-256-cbc";
+const ALGORITHM = 'aes-256-cbc';
 
 module.exports = class Crypto {
   /**
    *
    * @param {string} text
-   * @param {Buffer} password
+   * @param {string | Buffer} password
    * @returns
    */
   encrypt(text, password) {
@@ -18,8 +17,8 @@ module.exports = class Crypto {
     const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
 
     return {
-      iv: iv.toString("hex"),
-      content: encrypted.toString("hex"),
+      iv: iv.toString('hex'),
+      content: encrypted.toString('hex'),
     };
   }
 
@@ -33,11 +32,7 @@ module.exports = class Crypto {
    * @returns {string | null}
    */
   decrypt(hash, password) {
-    const decipher = crypto.createDecipheriv(
-      ALGORITHM,
-      password,
-      Buffer.from(hash.iv, "hex")
-    );
+    const decipher = crypto.createDecipheriv(ALGORITHM, password, Buffer.from(hash.iv, 'hex'));
 
     /**
      * @type {Buffer | null}
@@ -45,7 +40,7 @@ module.exports = class Crypto {
     let decrpyted = null;
     try {
       decrpyted = Buffer.concat([
-        decipher.update(Buffer.from(hash.content, "hex")),
+        decipher.update(Buffer.from(hash.content, 'hex')),
         decipher.final(),
       ]);
     } catch (e) {
@@ -61,6 +56,6 @@ module.exports = class Crypto {
    * @returns
    */
   createHash(secret) {
-    return crypto.scryptSync(secret, "salt", 32);
+    return crypto.scryptSync(secret, 'salt', 32);
   }
 };
