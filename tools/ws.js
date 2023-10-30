@@ -8,7 +8,7 @@ const {
   QUERY_STRING_CONN_ID,
   SESSION_FILE_NAME,
   PACKAGE_NAME,
-} = require("./constants");
+} = require("../utils/constants");
 const {
   openBrowser,
   getPackagePath,
@@ -16,21 +16,18 @@ const {
   console,
   getPackage,
   doGzip,
-} = require("./lib");
-const Crypto = require("./crypto");
+} = require("../utils/lib");
+const Crypto = require("../utils/crypto");
 const {
   writeFileSync,
   readFileSync,
   existsSync,
   rmSync,
   createReadStream,
-  createWriteStream,
 } = require("fs");
 const path = require("path");
 const { tmpdir } = require("os");
-const { promisify } = require("util");
-const { unzip, createUnzip } = require("zlib");
-const Archiver = require("./archiver");
+const Tar = require("../utils/tar");
 
 const crypto = new Crypto();
 
@@ -83,51 +80,16 @@ const crypto = new Crypto();
  * }} upload
  */
 
-/**
- * @template T
- * @param {WebSocket | null} conn
- * @param {WsMessage<T>} data
- * @returns
- */
-function sendMessage(conn, data) {
-  if (!conn) {
-    console.warn("Missing connection in send message");
-    return;
-  }
-  console.log("Send message", data);
-  conn.send(JSON.stringify(data));
-}
-
-/**
- * @template T
- * @param {string} msg
- * @returns {WsMessage<T> | null}
- */
-function parseMessage(msg) {
-  let data = null;
-  try {
-    data = JSON.parse(msg);
-  } catch (e) {
-    console.error("Failed parse message", e);
-  }
-  if (data) {
-    console.log("Parse message", data);
-  }
-  return data;
-}
-
 module.exports = class WS {
   /**
-   *
-   * @param {string} url
    * @param {Protocol} protocol
    * @param {Options} options
    */
-  constructor(url, protocol, options) {
+  constructor(protocol, options) {
     /**
      * @type {WebSocket | null}
      */
-    this.conn = new WebSocket(url, protocol);
+    this.conn = new WebSocket(WEBSOCKET_ADDRESS, protocol);
     /**
      * @type {Protocol}
      */
@@ -143,6 +105,39 @@ module.exports = class WS {
     this.start();
   }
 
+  /**
+   * @template T
+   * @param {WebSocket | null} conn
+   * @param {WsMessage<T>} data
+   * @returns
+   */
+  sendMessage(conn, data) {
+    if (!conn) {
+      console.warn("Missing connection in send message");
+      return;
+    }
+    console.log("Send message", data);
+    conn.send(JSON.stringify(data));
+  }
+
+  /**
+   * @template T
+   * @param {string} msg
+   * @returns {WsMessage<T> | null}
+   */
+  parseMessage(msg) {
+    let data = null;
+    try {
+      data = JSON.parse(msg);
+    } catch (e) {
+      console.error("Failed parse message", e);
+    }
+    if (data) {
+      console.log("Parse message", data);
+    }
+    return data;
+  }
+
   start() {
     if (!this.conn) {
       console.warn("WebSocket is missing");
@@ -151,11 +146,11 @@ module.exports = class WS {
     this.conn.on("error", (e) => {
       console.error("Failed WS connection", e);
     });
-
+    const ws = this;
     this.conn.on("open", function open() {
       console.log("Open WS connection:", WEBSOCKET_ADDRESS);
-      /** @type {typeof sendMessage<MessageData['setSocket']>} */ (
-        sendMessage
+      /** @type {typeof ws.sendMessage<MessageData['setSocket']>} */ (
+        ws.sendMessage
       )(this, {
         status: "info",
         type: "setSocket",
@@ -185,11 +180,11 @@ module.exports = class WS {
     }
 
     const connId = v4();
-
+    const ws = this;
     this.conn.on("message", async (d) => {
-      const rawMessage = /** @type {typeof parseMessage<any>} */ (parseMessage)(
-        d.toString()
-      );
+      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (
+        ws.parseMessage
+      )(d.toString());
       if (rawMessage === null) {
         return;
       }
@@ -217,10 +212,11 @@ module.exports = class WS {
 
     const connId = v4();
 
+    const ws = this;
     this.conn.on("message", async (d) => {
-      const rawMessage = /** @type {typeof parseMessage<any>} */ (parseMessage)(
-        d.toString()
-      );
+      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (
+        ws.parseMessage
+      )(d.toString());
       if (rawMessage === null) {
         return;
       }
@@ -349,53 +345,48 @@ module.exports = class WS {
    */
   async deploy({ failedLogin, sessionExists }) {
     console.info("Starting deploy the project...");
-    const root = process.cwd();
-    const filePath = path.resolve(root, "./package-lock.json");
-    const fileZip = path.resolve(tmpdir(), "tmp.zip");
+    const fileZip = path.resolve(tmpdir(), "tmp.tgz");
     console.info(tmpdir());
-    const archiver = new Archiver({ dir: root, outputPath: fileZip });
-    await archiver.compress();
-
+    const tar = new Tar();
+    await tar.create({ fileList: ["./"], file: fileZip });
     const pack = getPackage();
 
     const rStream = createReadStream(fileZip);
     let num = 0;
     rStream.on("data", (chunk) => {
-      /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(
-        this.conn,
-        {
-          token: this.token,
-          message: "",
-          type: "upload",
-          data: {
-            num,
-            project: pack.name,
-            last: false,
-            chunk: new Uint8Array(Buffer.from(chunk)),
-          },
-          lang: LANG,
-          status: "info",
-        }
-      );
+      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (
+        this.sendMessage
+      )(this.conn, {
+        token: this.token,
+        message: "",
+        type: "upload",
+        data: {
+          num,
+          project: pack.name,
+          last: false,
+          chunk: new Uint8Array(Buffer.from(chunk)),
+        },
+        lang: LANG,
+        status: "info",
+      });
       num++;
     });
     rStream.on("close", (d) => {
-      /** @type {typeof sendMessage<MessageData['upload']>} */ (sendMessage)(
-        this.conn,
-        {
-          token: this.token,
-          message: "",
-          type: "upload",
-          data: {
-            num,
-            project: pack.name,
-            last: true,
-            chunk: new Uint8Array(),
-          },
-          lang: LANG,
-          status: "info",
-        }
-      );
+      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (
+        this.sendMessage
+      )(this.conn, {
+        token: this.token,
+        message: "",
+        type: "upload",
+        data: {
+          num,
+          project: pack.name,
+          last: true,
+          chunk: new Uint8Array(),
+        },
+        lang: LANG,
+        status: "info",
+      });
     });
   }
 
@@ -420,8 +411,8 @@ module.exports = class WS {
           return;
         }
 
-        /** @type {typeof sendMessage<MessageData['checkTocken']>} */ (
-          sendMessage
+        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (
+          this.sendMessage
         )(this.conn, {
           token,
           type: "checkToken",
@@ -432,8 +423,8 @@ module.exports = class WS {
         });
       } else {
         console.info("Now it's using the saved session token");
-        /** @type {typeof sendMessage<MessageData['checkTocken']>} */ (
-          sendMessage
+        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (
+          this.sendMessage
         )(this.conn, {
           token: authData.content,
           type: "checkToken",
@@ -459,17 +450,16 @@ module.exports = class WS {
    */
   openNewSession(connId) {
     console.info("Trying to create a new session...");
-    /** @type {typeof sendMessage<MessageData['login']>} */ (sendMessage)(
-      this.conn,
-      {
-        status: "info",
-        type: "login",
-        message: "",
-        lang: LANG,
-        data: connId,
-        token: null,
-      }
-    );
+    /** @type {typeof this.sendMessage<MessageData['login']>} */ (
+      this.sendMessage
+    )(this.conn, {
+      status: "info",
+      type: "login",
+      message: "",
+      lang: LANG,
+      data: connId,
+      token: null,
+    });
     openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${connId}`);
   }
 };

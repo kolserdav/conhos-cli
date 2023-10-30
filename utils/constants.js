@@ -2,7 +2,7 @@
 
 const dotenv = require("dotenv");
 const os = require("os");
-const package = require("../package.json");
+const pack = require("../package.json");
 
 dotenv.config();
 const LOGIN_PAGE =
@@ -26,8 +26,8 @@ const LANG = "en";
 const QUERY_STRING_CONN_ID = "conn";
 
 const HOME_DIR = os.homedir();
-const PACKAGE_VERSION = package.version;
-const PACKAGE_NAME = package.name;
+const PACKAGE_VERSION = pack.version;
+const PACKAGE_NAME = pack.name;
 const SESSION_FILE_NAME = "auth";
 const PACKAGES_DIR_NAME = "packages";
 
