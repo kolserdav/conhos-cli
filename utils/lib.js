@@ -11,18 +11,6 @@ const { createReadStream, createWriteStream } = require("fs");
 const pipe = promisify(pipeline);
 
 /**
- *
- * @param {string} input
- * @param {string} output
- */
-async function doGzip(input, output) {
-  const gzip = createGzip();
-  const source = createReadStream(input);
-  const destination = createWriteStream(output);
-  await pipe(source, gzip, destination);
-}
-
-/**
  * @typedef {number | null} StatusCode
  */
 
@@ -185,5 +173,4 @@ module.exports = {
   readUserValue,
   console,
   getPackage,
-  doGzip,
 };

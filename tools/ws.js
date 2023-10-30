@@ -4,30 +4,12 @@ const { v4 } = require("uuid");
 const {
   LANG,
   WEBSOCKET_ADDRESS,
-  LOGIN_PAGE,
-  QUERY_STRING_CONN_ID,
   SESSION_FILE_NAME,
   PACKAGE_NAME,
 } = require("../utils/constants");
-const {
-  openBrowser,
-  getPackagePath,
-  readUserValue,
-  console,
-  getPackage,
-  doGzip,
-} = require("../utils/lib");
+const { getPackagePath, readUserValue, console } = require("../utils/lib");
 const Crypto = require("../utils/crypto");
-const {
-  writeFileSync,
-  readFileSync,
-  existsSync,
-  rmSync,
-  createReadStream,
-} = require("fs");
-const path = require("path");
-const { tmpdir } = require("os");
-const Tar = require("../utils/tar");
+const { writeFileSync, readFileSync, existsSync } = require("fs");
 
 const crypto = new Crypto();
 
@@ -50,6 +32,7 @@ const crypto = new Crypto();
  * @typedef {{
  *  crypt: boolean;
  *  remove: boolean;
+ *  isLogin?: boolean;
  * }} Options
  */
 
@@ -67,6 +50,13 @@ const crypto = new Crypto();
  */
 
 /**
+ * @typedef {{
+ *  failedLogin: boolean
+ *   sessionExists?: boolean
+ * }} CommandOptions
+ */
+
+/**
  * @typedef {object} MessageData
  * @property {string} setSocket
  * @property {string} test
@@ -80,20 +70,41 @@ const crypto = new Crypto();
  * }} upload
  */
 
+/**
+ * @abstract
+ * @constructor
+ */
+class WSInterface {
+  /**
+   * @abstract
+   */
+  listener() {
+    console.warn("Listener must be impelemented");
+  }
+
+  /**
+   *
+   * @param {string} connId
+   * @param {CommandOptions} options
+   */
+  handler(connId, options) {
+    console.warn("Handler must be impelemented");
+  }
+}
+
+/**
+ * @class
+ * @implements WSInterface
+ */
 module.exports = class WS {
   /**
-   * @param {Protocol} protocol
    * @param {Options} options
    */
-  constructor(protocol, options) {
+  constructor(options) {
     /**
      * @type {WebSocket | null}
      */
-    this.conn = new WebSocket(WEBSOCKET_ADDRESS, protocol);
-    /**
-     * @type {Protocol}
-     */
-    this.protocol = protocol;
+    this.conn = new WebSocket(WEBSOCKET_ADDRESS, "cli");
     /**
      * @type {Options}
      */
@@ -103,6 +114,20 @@ module.exports = class WS {
      */
     this.token = null;
     this.start();
+  }
+
+  /**
+   * @type {WSInterface['listener']}
+   */
+  listener() {
+    console.warn("Default WS listener");
+  }
+
+  /**
+   * @type {WSInterface['handler']}
+   */
+  handler(connId, options) {
+    console.warn("Default WS handler", { connId, options });
   }
 
   /**
@@ -160,78 +185,6 @@ module.exports = class WS {
         token: null,
       });
     });
-
-    // Listen commands
-    switch (this.protocol) {
-      case "login":
-        this.loginCommandListeners();
-        break;
-      case "deploy":
-        this.deployCommandListeners();
-        break;
-      default:
-        console.warn("Default protocol case", this.protocol);
-    }
-  }
-
-  loginCommandListeners() {
-    if (!this.conn) {
-      return;
-    }
-
-    const connId = v4();
-    const ws = this;
-    this.conn.on("message", async (d) => {
-      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (
-        ws.parseMessage
-      )(d.toString());
-      if (rawMessage === null) {
-        return;
-      }
-      const { type, token } = rawMessage;
-      switch (type) {
-        case "test":
-          await this.listenTest(connId);
-          break;
-        case "checkToken":
-          await this.listenCheckToken(rawMessage, connId);
-          break;
-        case "login":
-          await this.listenLogin(rawMessage);
-          break;
-        default:
-          console.warn("Default case", this.protocol, rawMessage);
-      }
-    });
-  }
-
-  deployCommandListeners() {
-    if (!this.conn) {
-      return;
-    }
-
-    const connId = v4();
-
-    const ws = this;
-    this.conn.on("message", async (d) => {
-      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (
-        ws.parseMessage
-      )(d.toString());
-      if (rawMessage === null) {
-        return;
-      }
-      const { type } = rawMessage;
-      switch (type) {
-        case "test":
-          await this.listenTest(connId);
-          break;
-        case "checkToken":
-          await this.listenCheckToken(rawMessage, connId);
-          break;
-        default:
-          console.warn("Default case", this.protocol, rawMessage);
-      }
-    });
   }
 
   /**
@@ -242,44 +195,7 @@ module.exports = class WS {
    */
   async listenCheckToken({ data, token }, connId) {
     this.token = token;
-    this.startLogic(connId, { failedLogin: !data, sessionExists: true });
-  }
-
-  /**
-   *
-   * @param {WsMessage<MessageData['login']>} param0
-   * @returns
-   */
-  async listenLogin({ token }) {
-    if (!token) {
-      console.warn("Session token wasn't get from server");
-      return;
-    }
-    /**
-     * @type {Session}
-     */
-    let session = {
-      iv: "",
-      content: token,
-    };
-    if (this.options.crypt) {
-      /**
-       * @type {string | undefined}
-       */
-      let cryptoPassword = undefined;
-      console.info("Session token will be encrypted with your password");
-      cryptoPassword = await readUserValue("Enter a new password: ", {
-        hidden: true,
-      });
-      console.info("Specifyed password length is", cryptoPassword.length);
-
-      const key = crypto.createHash(cryptoPassword);
-      session = crypto.encrypt(token, key);
-    }
-    const authPath = getPackagePath(SESSION_FILE_NAME);
-    writeFileSync(authPath, JSON.stringify(session));
-    console.info("Successfully logged in");
-    process.exit(0);
+    this.handler(connId, { failedLogin: !data, sessionExists: true });
   }
 
   /**
@@ -293,101 +209,6 @@ module.exports = class WS {
     }
     const authStr = readFileSync(sessionFilePath).toString();
     return JSON.parse(authStr);
-  }
-
-  /**
-   * @typedef {{
-   *  failedLogin: boolean
-   *   sessionExists?: boolean
-   * }} CommandOptions
-   * @param {string} connId
-   * @param {CommandOptions} options
-   */
-  async startLogic(connId, options) {
-    switch (this.protocol) {
-      case "login":
-        this.login(connId, options);
-        break;
-      case "deploy":
-        this.deploy(options);
-        break;
-      default:
-        console.warn("Default case of logic");
-    }
-  }
-
-  /**
-   * @param {string} connId
-   * @param {CommandOptions} options
-   */
-  login(connId, { failedLogin, sessionExists }) {
-    const authPath = getPackagePath(SESSION_FILE_NAME);
-    if (!this.options.remove) {
-      if (failedLogin || !sessionExists) {
-        this.openNewSession(connId);
-      } else {
-        console.info("You have already signed in");
-        process.exit(0);
-      }
-    } else {
-      if (existsSync(authPath)) {
-        rmSync(authPath);
-        console.info("Session token was deleted");
-      } else {
-        console.info("Session token file not found");
-      }
-      process.exit(0);
-    }
-  }
-
-  /**
-   * @param {CommandOptions} options
-   */
-  async deploy({ failedLogin, sessionExists }) {
-    console.info("Starting deploy the project...");
-    const fileZip = path.resolve(tmpdir(), "tmp.tgz");
-    console.info(tmpdir());
-    const tar = new Tar();
-    await tar.create({ fileList: ["./"], file: fileZip });
-    const pack = getPackage();
-
-    const rStream = createReadStream(fileZip);
-    let num = 0;
-    rStream.on("data", (chunk) => {
-      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (
-        this.sendMessage
-      )(this.conn, {
-        token: this.token,
-        message: "",
-        type: "upload",
-        data: {
-          num,
-          project: pack.name,
-          last: false,
-          chunk: new Uint8Array(Buffer.from(chunk)),
-        },
-        lang: LANG,
-        status: "info",
-      });
-      num++;
-    });
-    rStream.on("close", (d) => {
-      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (
-        this.sendMessage
-      )(this.conn, {
-        token: this.token,
-        message: "",
-        type: "upload",
-        data: {
-          num,
-          project: pack.name,
-          last: true,
-          chunk: new Uint8Array(),
-        },
-        lang: LANG,
-        status: "info",
-      });
-    });
   }
 
   /**
@@ -407,7 +228,7 @@ module.exports = class WS {
         const token = crypto.decrypt(authData, key);
         if (token === null) {
           console.warn("Password is wrong, current session can't be use");
-          this.startLogic(connId, { failedLogin: true });
+          this.handler(connId, { failedLogin: true });
           return;
         }
 
@@ -434,32 +255,13 @@ module.exports = class WS {
           status: "info",
         });
       }
-    } else if (this.protocol !== "login") {
+    } else if (!this.options.isLogin) {
       console.warn(
         `You are not authenticated, run "${PACKAGE_NAME} login" first`
       );
       process.exit(1);
     } else {
-      this.startLogic(connId, { failedLogin: false, sessionExists: false });
+      this.handler(connId, { failedLogin: false, sessionExists: false });
     }
-  }
-
-  /**
-   *
-   * @param {string} connId
-   */
-  openNewSession(connId) {
-    console.info("Trying to create a new session...");
-    /** @type {typeof this.sendMessage<MessageData['login']>} */ (
-      this.sendMessage
-    )(this.conn, {
-      status: "info",
-      type: "login",
-      message: "",
-      lang: LANG,
-      data: connId,
-      token: null,
-    });
-    openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${connId}`);
   }
 };
