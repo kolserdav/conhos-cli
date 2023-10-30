@@ -1,3 +1,4 @@
+const { tmpdir } = require('os');
 const { spawn } = require('child_process');
 const { HOME_DIR, PACKAGE_NAME, DEBUG } = require('./constants');
 const Console = require('console');
@@ -106,51 +107,11 @@ function getPackagePath(postfix = '') {
 /**
  *
  * @param {string} title
- * @param {{
- *  hidden?: boolean
- * }?} options
- * @returns {Promise<string>}
  */
-async function readUserValue(title, options = {}) {
-  const hidden = options ? options.hidden : false;
-  return new Promise((resolve) => {
-    let content = '';
-    const stdin = process.stdin;
-    stdin.setRawMode(true);
-    process.stdout.write(title);
-
-    stdin.resume();
-
-    stdin.on('data', (d) => {
-      const chunk = d.toLocaleString();
-      const chunkJson = d.toJSON();
-      const code = chunkJson.data[0];
-      // Enter
-      if (code === 13) {
-        process.stdout.write('\n');
-        resolve(content);
-      }
-      // Ctrl+c
-      if (code === 3) {
-        process.exit();
-      }
-      // Backspace
-      if (code === 127) {
-        content = content.substring(0, content.length - 1);
-        if (!hidden) {
-          process.stdout.clearLine(0);
-          process.stdout.cursorTo(0);
-          process.stdout.write(title);
-          process.stdout.write(content);
-        }
-        return;
-      }
-      if (!hidden) {
-        process.stdout.write(chunk);
-      }
-      content += chunk;
-    });
-  });
+function stdoutWriteStart(title) {
+  process.stdout.clearLine(0);
+  process.stdout.cursorTo(0);
+  process.stdout.write(title);
 }
 
 function getPackage() {
@@ -158,10 +119,15 @@ function getPackage() {
   return require(path.resolve(cwd, 'package.json'));
 }
 
+function getTmpArchive() {
+  return path.resolve(tmpdir(), `${PACKAGE_NAME}_${getPackage().name}.tgz`);
+}
+
 module.exports = {
   openBrowser,
   getPackagePath,
-  readUserValue,
   console,
   getPackage,
+  getTmpArchive,
+  stdoutWriteStart,
 };

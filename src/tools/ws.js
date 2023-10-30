@@ -1,10 +1,10 @@
 // @ts-check
 const WebSocket = require('ws');
-const { v4 } = require('uuid');
 const { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } = require('../utils/constants');
-const { getPackagePath, readUserValue, console } = require('../utils/lib');
+const { getPackagePath, console } = require('../utils/lib');
 const Crypto = require('../utils/crypto');
-const { writeFileSync, readFileSync, existsSync } = require('fs');
+const { readFileSync, existsSync } = require('fs');
+const Inquirer = require('../utils/inquirer');
 
 const crypto = new Crypto();
 
@@ -64,6 +64,8 @@ const crypto = new Crypto();
  *  chunk: Uint8Array
  * }} upload
  */
+
+const inquirer = new Inquirer();
 
 /**
  * @abstract
@@ -211,14 +213,13 @@ module.exports = class WS {
   async listenTest(connId) {
     const authData = this.readSessionFile();
     if (authData) {
-      let password = '';
       if (authData.iv !== '') {
         console.info('Session token was encrypted');
-        password = await readUserValue('Enter password: ', {
-          hidden: true,
-        });
+
+        const password = await inquirer.promptPassword('Enter password');
         const key = crypto.createHash(password);
         const token = crypto.decrypt(authData, key);
+
         if (token === null) {
           console.warn("Password is wrong, current session can't be use");
           this.handler(connId, { failedLogin: true });

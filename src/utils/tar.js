@@ -11,6 +11,7 @@ module.exports = class Tar {
    * @returns
    */
   async create({ file, fileList }) {
+    console.info('Recursive compressing the list of files:', fileList);
     return new Promise((resolve) => {
       tar
         .c(
@@ -21,40 +22,11 @@ module.exports = class Tar {
           fileList
         )
         .then(() => {
-          console.info('Tarball created');
+          console.info('Tarball created', file);
           resolve(0);
         })
         .catch((e) => {
           console.error('Failed create tarball', e);
-          resolve(1);
-        });
-    });
-  }
-
-  /**
-   *
-   * @param {{
-   *  file: string;
-   *  fileList: string[];
-   * }} param0
-   * @returns
-   */
-  async update({ file, fileList }) {
-    return new Promise((resolve) => {
-      tar
-        .u(
-          {
-            gzip: true,
-            file,
-          },
-          fileList
-        )
-        .then(() => {
-          console.info('Tarball updated');
-          resolve(0);
-        })
-        .catch((e) => {
-          console.error('Failed update tarball', e);
           resolve(1);
         });
     });

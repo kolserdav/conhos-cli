@@ -3,8 +3,8 @@ const WS = require('../tools/ws');
 const path = require('path');
 const { tmpdir } = require('os');
 const Tar = require('../utils/tar');
-const { getPackage } = require('../utils/lib');
-const { createReadStream } = require('fs');
+const { getPackage, getTmpArchive, stdoutWriteStart } = require('../utils/lib');
+const { createReadStream, fstat, fstatSync, statSync } = require('fs');
 const { LANG } = require('../utils/constants');
 
 /**
@@ -54,17 +54,31 @@ module.exports = class Login extends WS {
   }
 
   /**
+   *
+   * @param {number} size
+   * @param {number} curSize
+   * @returns {number}
+   */
+  calculatePercents(size, curSize) {
+    const percent = (curSize / size) * 100;
+    return parseInt(percent.toFixed(0), 10);
+  }
+
+  /**
    * @param {string} connId
    * @param {CommandOptions} options
    */
   async handler(connId, { failedLogin, sessionExists }) {
-    console.info('Starting deploy the project...');
-    const fileZip = path.resolve(tmpdir(), 'tmp.tgz');
-    const tar = new Tar();
-    await tar.create({ fileList: ['./'], file: fileZip });
     const pack = getPackage();
+    console.info(`Starting deploy "${pack.name}" project`);
+    const fileTar = getTmpArchive();
+    const tar = new Tar();
+    await tar.create({ fileList: ['./'], file: fileTar });
+    const stats = statSync(fileTar);
+    const { size } = stats;
+    let curSize = 0;
 
-    const rStream = createReadStream(fileZip);
+    const rStream = createReadStream(fileTar);
     let num = 0;
     rStream.on('data', (chunk) => {
       /** @type {typeof this.sendMessage<MessageData['upload']>} */ (this.sendMessage)(this.conn, {
@@ -81,6 +95,10 @@ module.exports = class Login extends WS {
         status: 'info',
       });
       num++;
+      curSize += chunk.length;
+      stdoutWriteStart(
+        `Uploading the project to the cloud: ${this.calculatePercents(size, curSize)}%`
+      );
     });
     rStream.on('close', () => {
       /** @type {typeof this.sendMessage<MessageData['upload']>} */ (this.sendMessage)(this.conn, {
@@ -96,6 +114,9 @@ module.exports = class Login extends WS {
         lang: LANG,
         status: 'info',
       });
+      stdoutWriteStart('');
+      const percent = this.calculatePercents(size, curSize);
+      console.info(`Project files uploaded to the cloud: ${percent}%`);
     });
   }
 };

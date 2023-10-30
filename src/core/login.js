@@ -1,9 +1,10 @@
 const { v4 } = require('uuid');
 const WS = require('../tools/ws');
-const { getPackagePath, openBrowser, readUserValue } = require('../utils/lib');
+const { getPackagePath, openBrowser } = require('../utils/lib');
 const { SESSION_FILE_NAME, LANG, LOGIN_PAGE, QUERY_STRING_CONN_ID } = require('../utils/constants');
 const { existsSync, rmSync, writeFileSync } = require('fs');
 const Crypto = require('../utils/crypto');
+const Inquirer = require('../utils/inquirer');
 
 /**
  * @typedef {import('../tools/ws').Options} Options
@@ -16,6 +17,7 @@ const Crypto = require('../utils/crypto');
  * @typedef {import('../tools/ws').WsMessage<any>} WsMessage<T>
  */
 
+const inquirer = new Inquirer();
 const crypto = new Crypto();
 
 module.exports = class Login extends WS {
@@ -103,14 +105,11 @@ module.exports = class Login extends WS {
       /**
        * @type {string | undefined}
        */
-      let cryptoPassword = undefined;
+      let password = undefined;
       console.info('Session token will be encrypted with your password');
-      cryptoPassword = await readUserValue('Enter a new password: ', {
-        hidden: true,
-      });
-      console.info('Specifyed password length is', cryptoPassword.length);
 
-      const key = crypto.createHash(cryptoPassword);
+      password = await inquirer.promptPassword('Enter a new password');
+      const key = crypto.createHash(password);
       session = crypto.encrypt(token, key);
     }
     const authPath = getPackagePath(SESSION_FILE_NAME);
