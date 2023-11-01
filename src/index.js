@@ -6,6 +6,7 @@ const { PACKAGE_VERSION, PACKAGE_NAME } = require('./utils/constants');
 const Login = require('./core/login');
 const Deploy = require('./core/deploy');
 const { getPackagePath, console } = require('./utils/lib');
+const Init = require('./core/init');
 
 const packageHomeDir = getPackagePath();
 if (!fs.existsSync(packageHomeDir)) {
@@ -38,5 +39,12 @@ program
   .description('Upload files and run app in cloud')
   .action(async (options) => {
     new Deploy(options);
+  });
+
+program
+  .command('init')
+  .description('Set up project configuration')
+  .action(async (options) => {
+    new Init(options);
   });
 program.parse();

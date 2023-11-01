@@ -1,7 +1,5 @@
 const { v4 } = require('uuid');
 const WS = require('../tools/ws');
-const path = require('path');
-const { tmpdir } = require('os');
 const Tar = require('../utils/tar');
 const { getPackage, getTmpArchive, stdoutWriteStart } = require('../utils/lib');
 const { createReadStream, fstat, fstatSync, statSync } = require('fs');
@@ -41,14 +39,8 @@ module.exports = class Login extends WS {
       }
       const { type } = rawMessage;
       switch (type) {
-        case 'test':
-          await this.listenTest(connId);
-          break;
-        case 'checkToken':
-          await this.listenCheckToken(rawMessage, connId);
-          break;
         default:
-          console.warn('Default message case for command deploy', rawMessage);
+          await this.handleCommonMessages(connId, rawMessage);
       }
     });
   }
@@ -65,10 +57,9 @@ module.exports = class Login extends WS {
   }
 
   /**
-   * @param {string} connId
-   * @param {CommandOptions} options
+   * @type {WS['handler']}
    */
-  async handler(connId, { failedLogin, sessionExists }) {
+  async handler({ connId }) {
     const pack = getPackage();
     console.info(`Starting deploy "${pack.name}" project`);
     const fileTar = getTmpArchive();

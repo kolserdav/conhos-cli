@@ -5,6 +5,7 @@ const { getPackagePath, console } = require('../utils/lib');
 const Crypto = require('../utils/crypto');
 const { readFileSync, existsSync } = require('fs');
 const Inquirer = require('../utils/inquirer');
+const { v4 } = require('uuid');
 
 const crypto = new Crypto();
 
@@ -32,11 +33,23 @@ const crypto = new Crypto();
  */
 
 /**
+ * @typedef {{
+ *  connId: string;
+ *  failedLogin: boolean
+ *  sessionExists?: boolean
+ * }} CommandOptions
+ */
+
+/**
+ * @typedef {'node'} ServiceType
+ */
+
+/**
  * @template T
  * @typedef {{
  *  status: Status;
  *  type: 'login' | 'setSocket' | 'test' | 'checkToken' |
- *  'upload';
+ *  'upload' | 'deployData' | 'getDeployData';
  *  message: string;
  *  lang: 'en';
  *  data: T;
@@ -45,14 +58,8 @@ const crypto = new Crypto();
  */
 
 /**
- * @typedef {{
- *  failedLogin: boolean
- *   sessionExists?: boolean
- * }} CommandOptions
- */
-
-/**
  * @typedef {object} MessageData
+ * @property {any} any
  * @property {string} setSocket
  * @property {string} test
  * @property {string} login
@@ -62,7 +69,27 @@ const crypto = new Crypto();
  *  project: string;
  *  last: boolean;
  *  chunk: Uint8Array
+ *  options: {
+ *    serviceType: string;
+ *    serviceSize: string
+ *  }
  * }} upload
+ * @property {null} getDeployData
+ * @property {{
+ *  services: {
+ *    value: string;
+ *    name: string;
+ *    versions: string[];
+ * }[];
+ *  sizes: {
+ *    name: string;
+ *    memory: {
+ *     name: string;
+ *      value: number;
+ *    };
+ *    cpus: string;
+ *  };
+ * }} deployData
  */
 
 const inquirer = new Inquirer();
@@ -80,11 +107,9 @@ class WSInterface {
   }
 
   /**
-   *
-   * @param {string} connId
    * @param {CommandOptions} options
    */
-  handler(connId, options) {
+  handler(options) {
     console.warn('Handler must be impelemented');
   }
 }
@@ -123,23 +148,22 @@ module.exports = class WS {
   /**
    * @type {WSInterface['handler']}
    */
-  handler(connId, options) {
-    console.warn('Default WS handler', { connId, options });
+  handler(options) {
+    console.warn('Default WS handler', options);
   }
 
   /**
    * @template T
-   * @param {WebSocket | null} conn
    * @param {WsMessage<T>} data
    * @returns
    */
-  sendMessage(conn, data) {
-    if (!conn) {
+  sendMessage(data) {
+    if (!this.conn) {
       console.warn('Missing connection in send message');
       return;
     }
     console.log('Send message', data);
-    conn.send(JSON.stringify(data));
+    this.conn.send(JSON.stringify(data));
   }
 
   /**
@@ -171,7 +195,7 @@ module.exports = class WS {
     const ws = this;
     this.conn.on('open', function open() {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
-      /** @type {typeof ws.sendMessage<MessageData['setSocket']>} */ (ws.sendMessage)(this, {
+      /** @type {typeof ws.sendMessage<MessageData['setSocket']>} */ (ws.sendMessage)({
         status: 'info',
         type: 'setSocket',
         message: '',
@@ -190,7 +214,7 @@ module.exports = class WS {
    */
   async listenCheckToken({ data, token }, connId) {
     this.token = token;
-    this.handler(connId, { failedLogin: !data, sessionExists: true });
+    this.handler({ failedLogin: !data, sessionExists: true, connId });
   }
 
   /**
@@ -222,40 +246,53 @@ module.exports = class WS {
 
         if (token === null) {
           console.warn("Password is wrong, current session can't be use");
-          this.handler(connId, { failedLogin: true });
+          this.handler({ failedLogin: true, connId });
           return;
         }
 
-        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)(
-          this.conn,
-          {
-            token,
-            type: 'checkToken',
-            data: false,
-            lang: LANG,
-            message: '',
-            status: 'info',
-          }
-        );
+        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)({
+          token,
+          type: 'checkToken',
+          data: false,
+          lang: LANG,
+          message: '',
+          status: 'info',
+        });
       } else {
         console.info("Now it's using the saved session token");
-        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)(
-          this.conn,
-          {
-            token: authData.content,
-            type: 'checkToken',
-            data: false,
-            lang: LANG,
-            message: '',
-            status: 'info',
-          }
-        );
+        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)({
+          token: authData.content,
+          type: 'checkToken',
+          data: false,
+          lang: LANG,
+          message: '',
+          status: 'info',
+        });
       }
     } else if (!this.options.isLogin) {
       console.warn(`You are not authenticated, run "${PACKAGE_NAME} login" first`);
       process.exit(1);
     } else {
-      this.handler(connId, { failedLogin: false, sessionExists: false });
+      this.handler({ failedLogin: false, sessionExists: false, connId });
+    }
+  }
+
+  /**
+   *
+   * @param {string} connId
+   * @param {WsMessage<MessageData['any']>} message
+   */
+  async handleCommonMessages(connId, message) {
+    const { type } = message;
+    switch (type) {
+      case 'test':
+        await this.listenTest(connId);
+        break;
+      case 'checkToken':
+        await this.listenCheckToken(message, connId);
+        break;
+      default:
+        console.warn('Default message case of login command', message);
     }
   }
 };

@@ -29,9 +29,10 @@ module.exports = class Login extends WS {
     const _options = { ...options };
     _options.isLogin = true;
     super(_options);
+    this.listener();
   }
 
-  commandListeners() {
+  listener() {
     if (!this.conn) {
       return;
     }
@@ -43,28 +44,21 @@ module.exports = class Login extends WS {
       if (rawMessage === null) {
         return;
       }
-      const { type, token } = rawMessage;
+      const { type } = rawMessage;
       switch (type) {
-        case 'test':
-          await this.listenTest(connId);
-          break;
-        case 'checkToken':
-          await this.listenCheckToken(rawMessage, connId);
-          break;
         case 'login':
           await this.listenLogin(rawMessage);
           break;
         default:
-          console.warn('Default message case of login command', rawMessage);
+          await this.handleCommonMessages(connId, rawMessage);
       }
     });
   }
 
   /**
-   * @param {string} connId
-   * @param {CommandOptions} options
+   * @type {WS['handler']}
    */
-  handler(connId, { failedLogin, sessionExists }) {
+  handler({ failedLogin, sessionExists, connId }) {
     const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
       if (failedLogin || !sessionExists) {
@@ -89,9 +83,11 @@ module.exports = class Login extends WS {
    * @param {WsMessage<MessageData['login']>} param0
    * @returns
    */
-  async listenLogin({ token }) {
+  async listenLogin({ token, message }) {
     if (!token) {
-      console.warn("Session token wasn't get from server");
+      console.warn("Session token wasn't get from the server");
+      console.warn(message);
+      process.exit(1);
       return;
     }
     /**
@@ -124,7 +120,7 @@ module.exports = class Login extends WS {
    */
   openNewSession(connId) {
     console.info('Trying to create a new session...');
-    /** @type {typeof this.sendMessage<MessageData['login']>} */ (this.sendMessage)(this.conn, {
+    /** @type {typeof this.sendMessage<MessageData['login']>} */ (this.sendMessage)({
       status: 'info',
       type: 'login',
       message: '',

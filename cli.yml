@@ -1,0 +1,4 @@
+services:
+  node:
+    version: 18
+    size: pico
