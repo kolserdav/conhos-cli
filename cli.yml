@@ -1,4 +1,8 @@
 services:
-  node:
+  - name: node
     version: 18
     size: pico
+    commands:
+      install: npm i
+      build: npm run build
+      start: npm run start

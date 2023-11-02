@@ -5,16 +5,17 @@ const { SESSION_FILE_NAME, LANG, LOGIN_PAGE, QUERY_STRING_CONN_ID } = require('.
 const { existsSync, rmSync, writeFileSync } = require('fs');
 const Crypto = require('../utils/crypto');
 const Inquirer = require('../utils/inquirer');
+const { parseMessageCli } = require('../types/interfaces');
 
 /**
  * @typedef {import('../tools/ws').Options} Options
  * @typedef {import('../tools/ws').CommandOptions} CommandOptions
- * @typedef {import('../tools/ws').MessageData} MessageData
+ * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../tools/ws').Session} Session
  */
 /**
  * @template T
- * @typedef {import('../tools/ws').WsMessage<any>} WsMessage<T>
+ * @typedef {import('../tools/ws').WSMessageCli<any>} WsMessage<T>
  */
 
 const inquirer = new Inquirer();
@@ -40,7 +41,7 @@ module.exports = class Login extends WS {
     const connId = v4();
     const ws = this;
     this.conn.on('message', async (d) => {
-      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (ws.parseMessage)(d.toString());
+      const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
       if (rawMessage === null) {
         return;
       }
@@ -80,7 +81,7 @@ module.exports = class Login extends WS {
 
   /**
    *
-   * @param {WsMessage<MessageData['login']>} param0
+   * @param {WsMessage<WSMessageDataCli['login']>} param0
    * @returns
    */
   async listenLogin({ token, message }) {
@@ -120,7 +121,7 @@ module.exports = class Login extends WS {
    */
   openNewSession(connId) {
     console.info('Trying to create a new session...');
-    /** @type {typeof this.sendMessage<MessageData['login']>} */ (this.sendMessage)({
+    /** @type {typeof this.sendMessage<WSMessageDataCli['login']>} */ (this.sendMessage)({
       status: 'info',
       type: 'login',
       message: '',

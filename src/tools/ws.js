@@ -1,20 +1,23 @@
-// @ts-check
 const WebSocket = require('ws');
 const { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } = require('../utils/constants');
 const { getPackagePath, console } = require('../utils/lib');
 const Crypto = require('../utils/crypto');
 const { readFileSync, existsSync } = require('fs');
 const Inquirer = require('../utils/inquirer');
-const { v4 } = require('uuid');
+const { PROTOCOL_CLI } = require('../types/interfaces');
 
 const crypto = new Crypto();
 
 /**
- * @typedef {'login' | 'deploy'} Protocol
+ * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
+ */
+/**
+ * @template T
+ * @typedef {import('../types/interfaces').WSMessageCli<T>} WSMessageCli<T>
  */
 
 /**
- * @typedef {'info' | 'warn' | 'error'} Status
+ * @typedef {'login' | 'deploy'} Protocol
  */
 
 /**
@@ -38,58 +41,6 @@ const crypto = new Crypto();
  *  failedLogin: boolean
  *  sessionExists?: boolean
  * }} CommandOptions
- */
-
-/**
- * @typedef {'node'} ServiceType
- */
-
-/**
- * @template T
- * @typedef {{
- *  status: Status;
- *  type: 'login' | 'setSocket' | 'test' | 'checkToken' |
- *  'upload' | 'deployData' | 'getDeployData';
- *  message: string;
- *  lang: 'en';
- *  data: T;
- *  token: string | null;
- * }} WsMessage
- */
-
-/**
- * @typedef {object} MessageData
- * @property {any} any
- * @property {string} setSocket
- * @property {string} test
- * @property {string} login
- * @property {boolean} checkTocken
- * @property {{
- *  num: number;
- *  project: string;
- *  last: boolean;
- *  chunk: Uint8Array
- *  options: {
- *    serviceType: string;
- *    serviceSize: string
- *  }
- * }} upload
- * @property {null} getDeployData
- * @property {{
- *  services: {
- *    value: string;
- *    name: string;
- *    versions: string[];
- * }[];
- *  sizes: {
- *    name: string;
- *    memory: {
- *     name: string;
- *      value: number;
- *    };
- *    cpus: string;
- *  };
- * }} deployData
  */
 
 const inquirer = new Inquirer();
@@ -126,7 +77,7 @@ module.exports = class WS {
     /**
      * @type {WebSocket | null}
      */
-    this.conn = new WebSocket(WEBSOCKET_ADDRESS, 'cli');
+    this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
     /**
      * @type {Options}
      */
@@ -154,7 +105,7 @@ module.exports = class WS {
 
   /**
    * @template T
-   * @param {WsMessage<T>} data
+   * @param {WSMessageCli<T>} data
    * @returns
    */
   sendMessage(data) {
@@ -164,24 +115,6 @@ module.exports = class WS {
     }
     console.log('Send message', data);
     this.conn.send(JSON.stringify(data));
-  }
-
-  /**
-   * @template T
-   * @param {string} msg
-   * @returns {WsMessage<T> | null}
-   */
-  parseMessage(msg) {
-    let data = null;
-    try {
-      data = JSON.parse(msg);
-    } catch (e) {
-      console.error('Failed parse message', e);
-    }
-    if (data) {
-      console.log('Parse message', data);
-    }
-    return data;
   }
 
   start() {
@@ -195,7 +128,7 @@ module.exports = class WS {
     const ws = this;
     this.conn.on('open', function open() {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
-      /** @type {typeof ws.sendMessage<MessageData['setSocket']>} */ (ws.sendMessage)({
+      /** @type {typeof ws.sendMessage<WSMessageDataCli['setSocket']>} */ (ws.sendMessage)({
         status: 'info',
         type: 'setSocket',
         message: '',
@@ -208,7 +141,7 @@ module.exports = class WS {
 
   /**
    *
-   * @param {WsMessage<MessageData['checkTocken']>} param0
+   * @param {WSMessageCli<WSMessageDataCli['checkTocken']>} param0
    * @param {string} connId
    * @returns
    */
@@ -250,7 +183,7 @@ module.exports = class WS {
           return;
         }
 
-        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<WSMessageDataCli['checkTocken']>} */ (this.sendMessage)({
           token,
           type: 'checkToken',
           data: false,
@@ -260,7 +193,7 @@ module.exports = class WS {
         });
       } else {
         console.info("Now it's using the saved session token");
-        /** @type {typeof this.sendMessage<MessageData['checkTocken']>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<WSMessageDataCli['checkTocken']>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkToken',
           data: false,
@@ -280,16 +213,19 @@ module.exports = class WS {
   /**
    *
    * @param {string} connId
-   * @param {WsMessage<MessageData['any']>} message
+   * @param {WSMessageCli<WSMessageDataCli['any']>} msg
    */
-  async handleCommonMessages(connId, message) {
-    const { type } = message;
+  async handleCommonMessages(connId, msg) {
+    const { type, status, message } = msg;
     switch (type) {
       case 'test':
         await this.listenTest(connId);
         break;
       case 'checkToken':
-        await this.listenCheckToken(message, connId);
+        await this.listenCheckToken(msg, connId);
+        break;
+      case 'message':
+        console[status](message);
         break;
       default:
         console.warn('Default message case of login command', message);

@@ -1,9 +1,9 @@
 const { tmpdir } = require('os');
 const { spawn } = require('child_process');
-const { HOME_DIR, PACKAGE_NAME, DEBUG } = require('./constants');
+const { HOME_DIR, PACKAGE_NAME, DEBUG, CWD } = require('./constants');
 const Console = require('console');
 const path = require('path');
-const open = require('opn');
+const { existsSync } = require('fs');
 
 /**
  * @typedef {number | null} StatusCode
@@ -92,6 +92,7 @@ async function spawnCommand(ex, args, { quiet } = {}) {
  * @returns {Promise<any>}
  */
 async function openBrowser(url) {
+  const open = (await import('open')).default;
   return open(url);
 }
 
@@ -123,6 +124,18 @@ function getTmpArchive() {
   return path.resolve(tmpdir(), `${PACKAGE_NAME}_${getPackage().name}.tgz`);
 }
 
+/**
+ *
+ * @returns {string}
+ */
+function getConfigFilePath() {
+  let fileYml = path.resolve(CWD, `${PACKAGE_NAME}.yaml`);
+  if (!existsSync(fileYml)) {
+    fileYml = fileYml.replace(/yaml$/, 'yml');
+  }
+  return fileYml;
+}
+
 module.exports = {
   openBrowser,
   getPackagePath,
@@ -130,4 +143,5 @@ module.exports = {
   getPackage,
   getTmpArchive,
   stdoutWriteStart,
+  getConfigFilePath,
 };

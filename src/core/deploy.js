@@ -2,13 +2,14 @@ const { v4 } = require('uuid');
 const WS = require('../tools/ws');
 const Tar = require('../utils/tar');
 const { getPackage, getTmpArchive, stdoutWriteStart } = require('../utils/lib');
-const { createReadStream, fstat, fstatSync, statSync } = require('fs');
+const { createReadStream, statSync } = require('fs');
 const { LANG } = require('../utils/constants');
+const { parseMessageCli } = require('../types/interfaces');
 
 /**
  * @typedef {import('../tools/ws').Options} Options
  * @typedef {import('../tools/ws').CommandOptions} CommandOptions
- * @typedef {import('../tools/ws').MessageData} MessageData
+ * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
  */
 
 module.exports = class Login extends WS {
@@ -33,7 +34,7 @@ module.exports = class Login extends WS {
 
     const ws = this;
     this.conn.on('message', async (d) => {
-      const rawMessage = /** @type {typeof ws.parseMessage<any>} */ (ws.parseMessage)(d.toString());
+      const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
       if (rawMessage === null) {
         return;
       }
@@ -72,7 +73,7 @@ module.exports = class Login extends WS {
     const rStream = createReadStream(fileTar);
     let num = 0;
     rStream.on('data', (chunk) => {
-      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (this.sendMessage)(this.conn, {
+      /** @type {typeof this.sendMessage<WSMessageDataCli['upload']>} */ (this.sendMessage)({
         token: this.token,
         message: '',
         type: 'upload',
@@ -81,6 +82,7 @@ module.exports = class Login extends WS {
           project: pack.name,
           last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
+          options: null,
         },
         lang: LANG,
         status: 'info',
@@ -92,7 +94,7 @@ module.exports = class Login extends WS {
       );
     });
     rStream.on('close', () => {
-      /** @type {typeof this.sendMessage<MessageData['upload']>} */ (this.sendMessage)(this.conn, {
+      /** @type {typeof this.sendMessage<WSMessageDataCli['upload']>} */ (this.sendMessage)({
         token: this.token,
         message: '',
         type: 'upload',
@@ -101,6 +103,7 @@ module.exports = class Login extends WS {
           project: pack.name,
           last: true,
           chunk: new Uint8Array(),
+          options: { serviceSize, serviceType },
         },
         lang: LANG,
         status: 'info',
