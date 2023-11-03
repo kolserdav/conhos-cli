@@ -20,10 +20,7 @@
  *  project: string;
  *  last: boolean;
  *  chunk: Uint8Array
- *  options: {
- *    serviceType: string;
- *    serviceSize: string
- *  } | null
+ *  config: ConfigFile | null
  * }} upload
  * @property {null} getDeployData
  * @property {{
@@ -43,6 +40,25 @@
  *  baseValue: number;
  *  baseCost: number;
  * }} deployData
+ */
+
+/**
+ * @typedef {{
+ *  services: {
+ *    name: string;
+ *    size: string;
+ *    version: number;
+ *    commands: {
+ *      install: string;
+ *      start: string;
+ *      build?: string;
+ *    }?;
+ *    environment: {
+ *      PORT: number
+ *    };
+ *  }[]
+ *  exclude: string[]
+ * }} ConfigFile
  */
 
 /**

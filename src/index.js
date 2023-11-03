@@ -44,6 +44,7 @@ program
 program
   .command('init')
   .description('Set up project configuration')
+  .option('-y, --yes', 'default for all')
   .action(async (options) => {
     new Init(options);
   });

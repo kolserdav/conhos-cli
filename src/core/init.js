@@ -1,5 +1,4 @@
 const { v4 } = require('uuid');
-const { parse, stringify } = require('yaml');
 const WS = require('../tools/ws');
 const Inquirer = require('../utils/inquirer');
 const {
@@ -9,36 +8,26 @@ const {
   INSTALL_COMMAND_DEFAULT,
   START_COMMAND_DEFAULT,
   PORT_DEFAULT,
+  CONFIG_EXCLUDE_DEFAULT,
+  SIZE_INDEX_DEFAULT,
 } = require('../utils/constants');
 const { parseMessageCli, computeCostService, NODE_VERSIONS } = require('../types/interfaces');
 const { readFileSync, existsSync, writeFileSync } = require('fs');
 const { getConfigFilePath } = require('../utils/lib');
+const Yaml = require('../utils/yaml');
+
+const yaml = new Yaml();
 
 /**
  * @typedef {import('../tools/ws').Options} Options
  * @typedef {import('../tools/ws').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces').ConfigFile} ConfigFile
  * @typedef {import('../tools/ws').Session} Session
  */
 /**
  * @template T
  * @typedef {import('../tools/ws').WSMessageCli<T>} WSMessageCli<T>
- */
-
-/**
- * @typedef {{
- *  name: string;
- *  size: string;
- *  version: number;
- *  commands: {
- *    install: string;
- *    start: string;
- *    build?: string;
- *  }?;
- *  environment: {
- *    PORT: number
- *  }
- * }[]} ConfigFile
  */
 
 const inquirer = new Inquirer();
@@ -51,7 +40,7 @@ module.exports = class Init extends WS {
   constructor(options) {
     super(options);
     /**
-     * @type {ConfigFile}
+     * @type {ConfigFile['services']}
      */
     this.services = [];
     /**
@@ -119,6 +108,41 @@ module.exports = class Init extends WS {
 
     console.info("It's adding service to the config file...");
 
+    let install = '';
+    /**
+     * @type {string | undefined}
+     */
+    let build;
+    let start = '';
+    let version = '';
+    let PORT = '';
+
+    if (this.options.yes) {
+      writeFileSync(
+        this.configFile,
+        yaml.stringify({
+          services: [
+            {
+              name: 'node',
+              version: NODE_VERSIONS[0],
+              size: sizes[SIZE_INDEX_DEFAULT].name,
+              commands: {
+                install: INSTALL_COMMAND_DEFAULT,
+                build: BUILD_COMMAND_DEFAULT,
+                start: START_COMMAND_DEFAULT,
+              },
+              environment: {
+                PORT: PORT_DEFAULT,
+              },
+            },
+          ],
+          exclude: CONFIG_EXCLUDE_DEFAULT,
+        })
+      );
+      console.info('Project successfully initialized', this.configFile);
+      process.exit(0);
+    }
+
     const service = await inquirer.list(
       'Select service',
       services.map((item) => `${item.value} (${item.name})`),
@@ -127,20 +151,11 @@ module.exports = class Init extends WS {
     const size = await inquirer.list(
       'Select size of service',
       sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue })),
-      3
+      SIZE_INDEX_DEFAULT
     );
 
-    let install = '';
-    /**
-     * @type {string | undefined}
-     */
-    let build;
-    let start = '';
-    let version = 18;
-    let PORT = '';
-
     if (service === 'node') {
-      install = await inquirer.input('Specify NodeJS version', NODE_VERSIONS[0]);
+      version = await inquirer.input('Specify NodeJS version', NODE_VERSIONS[0]);
 
       install = await inquirer.input('Specify "install" command', INSTALL_COMMAND_DEFAULT);
 
@@ -164,7 +179,7 @@ module.exports = class Init extends WS {
     this.services.push({
       name: service,
       size,
-      version,
+      version: parseInt(version, 10),
       commands: {
         install,
         build,
@@ -175,7 +190,10 @@ module.exports = class Init extends WS {
       },
     });
 
-    writeFileSync(this.configFile, stringify({ services: this.services }));
+    writeFileSync(
+      this.configFile,
+      yaml.stringify({ services: this.services, exclude: CONFIG_EXCLUDE_DEFAULT })
+    );
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
     if (addAnother) {
@@ -209,7 +227,7 @@ module.exports = class Init extends WS {
       false
     );
     if (overwriteConf) {
-      console.info('Config file is not found, creating...', this.configFile);
+      console.info('Config file will be overwrite');
       /** @type {typeof this.sendMessage<WSMessageDataCli['getDeployData']>} */ this.sendMessage({
         token: this.token,
         type: 'getDeployData',
@@ -218,7 +236,6 @@ module.exports = class Init extends WS {
         lang: LANG,
         status: 'info',
       });
-      console.info('Config file is overwrited');
       return;
     }
     console.info('This project has already been initialized');

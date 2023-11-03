@@ -31,6 +31,7 @@ const crypto = new Crypto();
  * @typedef {{
  *  crypt: boolean;
  *  remove: boolean;
+ *  yes: boolean;
  *  isLogin?: boolean;
  * }} Options
  */
@@ -226,6 +227,9 @@ module.exports = class WS {
         break;
       case 'message':
         console[status](message);
+        if (status === 'error') {
+          process.exit(1);
+        }
         break;
       default:
         console.warn('Default message case of login command', message);

@@ -40,7 +40,10 @@ const CURRENCY = 'RUB';
 const INSTALL_COMMAND_DEFAULT = 'npm i';
 const BUILD_COMMAND_DEFAULT = 'npm run build';
 const START_COMMAND_DEFAULT = 'npm run start';
-const PORT_DEFAULT = '3000';
+const PORT_DEFAULT = 3000;
+const CONFIG_EXCLUDE_DEFAULT = ['dist'];
+const EXPLICIT_EXCLUDE = ['.git', '.vscode', 'node_modules'];
+const SIZE_INDEX_DEFAULT = 3;
 
 module.exports = {
   LOGIN_PAGE,
@@ -64,4 +67,7 @@ module.exports = {
   BUILD_COMMAND_DEFAULT,
   START_COMMAND_DEFAULT,
   PORT_DEFAULT,
+  CONFIG_EXCLUDE_DEFAULT,
+  EXPLICIT_EXCLUDE,
+  SIZE_INDEX_DEFAULT,
 };

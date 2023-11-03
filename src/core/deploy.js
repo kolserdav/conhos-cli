@@ -1,10 +1,19 @@
 const { v4 } = require('uuid');
 const WS = require('../tools/ws');
 const Tar = require('../utils/tar');
-const { getPackage, getTmpArchive, stdoutWriteStart } = require('../utils/lib');
-const { createReadStream, statSync } = require('fs');
-const { LANG } = require('../utils/constants');
+const { getPackage, getTmpArchive, stdoutWriteStart, getConfigFilePath } = require('../utils/lib');
+const { createReadStream, statSync, existsSync, readFileSync, readdirSync } = require('fs');
+const {
+  LANG,
+  PACKAGE_NAME,
+  CWD,
+  CONFIG_EXCLUDE_DEFAULT,
+  EXPLICIT_EXCLUDE,
+} = require('../utils/constants');
 const { parseMessageCli } = require('../types/interfaces');
+const Yaml = require('../utils/yaml');
+
+const yaml = new Yaml();
 
 /**
  * @typedef {import('../tools/ws').Options} Options
@@ -14,11 +23,14 @@ const { parseMessageCli } = require('../types/interfaces');
 
 module.exports = class Login extends WS {
   /**
-   *
    * @param {Options} options
    */
   constructor(options) {
     super(options);
+    /**
+     * @type {string}
+     */
+    this.configFile = getConfigFilePath();
     this.listener();
   }
 
@@ -61,11 +73,24 @@ module.exports = class Login extends WS {
    * @type {WS['handler']}
    */
   async handler({ connId }) {
+    if (!existsSync(this.configFile)) {
+      console.warn('Config file is not exists run', `"${PACKAGE_NAME} init" first`);
+      process.exit(2);
+    }
+    const data = readFileSync(this.configFile).toString();
+    const config = yaml.parse(data);
+    const { exclude } = config;
+
     const pack = getPackage();
     console.info(`Starting deploy "${pack.name}" project`);
     const fileTar = getTmpArchive();
     const tar = new Tar();
-    await tar.create({ fileList: ['./'], file: fileTar });
+    await tar.create({
+      fileList: readdirSync(CWD)
+        .filter((item) => exclude.indexOf(item) === -1)
+        .filter((item) => EXPLICIT_EXCLUDE.indexOf(item) === -1),
+      file: fileTar,
+    });
     const stats = statSync(fileTar);
     const { size } = stats;
     let curSize = 0;
@@ -82,7 +107,7 @@ module.exports = class Login extends WS {
           project: pack.name,
           last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
-          options: null,
+          config: null,
         },
         lang: LANG,
         status: 'info',
@@ -103,7 +128,7 @@ module.exports = class Login extends WS {
           project: pack.name,
           last: true,
           chunk: new Uint8Array(),
-          options: { serviceSize, serviceType },
+          config,
         },
         lang: LANG,
         status: 'info',

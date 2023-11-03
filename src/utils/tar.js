@@ -1,5 +1,7 @@
 // @ts-check
+const path = require('path');
 const tar = require('tar');
+const { CWD } = require('./constants');
 
 module.exports = class Tar {
   /**
@@ -11,7 +13,10 @@ module.exports = class Tar {
    * @returns
    */
   async create({ file, fileList }) {
-    console.info('Recursive compressing the list of files:', fileList);
+    console.info(
+      'Recursive compressing the list of files and dirs:\n',
+      fileList.map((item) => path.normalize(path.resolve(CWD, item))).join('\n')
+    );
     return new Promise((resolve) => {
       tar
         .c(
