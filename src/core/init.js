@@ -1,4 +1,5 @@
 const { v4 } = require('uuid');
+const { parse, stringify } = require('yaml');
 const WS = require('../tools/ws');
 const Inquirer = require('../utils/inquirer');
 const {
@@ -7,9 +8,10 @@ const {
   BUILD_COMMAND_DEFAULT,
   INSTALL_COMMAND_DEFAULT,
   START_COMMAND_DEFAULT,
+  PORT_DEFAULT,
 } = require('../utils/constants');
 const { parseMessageCli, computeCostService, NODE_VERSIONS } = require('../types/interfaces');
-const { readFileSync, existsSync } = require('fs');
+const { readFileSync, existsSync, writeFileSync } = require('fs');
 const { getConfigFilePath } = require('../utils/lib');
 
 /**
@@ -23,6 +25,22 @@ const { getConfigFilePath } = require('../utils/lib');
  * @typedef {import('../tools/ws').WSMessageCli<T>} WSMessageCli<T>
  */
 
+/**
+ * @typedef {{
+ *  name: string;
+ *  size: string;
+ *  version: number;
+ *  commands: {
+ *    install: string;
+ *    start: string;
+ *    build?: string;
+ *  }?;
+ *  environment: {
+ *    PORT: number
+ *  }
+ * }[]} ConfigFile
+ */
+
 const inquirer = new Inquirer();
 
 module.exports = class Init extends WS {
@@ -33,16 +51,7 @@ module.exports = class Init extends WS {
   constructor(options) {
     super(options);
     /**
-     * @type {{
-     *  name: string;
-     *  size: string;
-     *  version: number;
-     *  commands: {
-     *    install: string;
-     *    start: string;
-     *    build?: string;
-     *  }?
-     * }[]}
+     * @type {ConfigFile}
      */
     this.services = [];
     /**
@@ -128,6 +137,7 @@ module.exports = class Init extends WS {
     let build;
     let start = '';
     let version = 18;
+    let PORT = '';
 
     if (service === 'node') {
       install = await inquirer.input('Specify NodeJS version', NODE_VERSIONS[0]);
@@ -141,6 +151,15 @@ module.exports = class Init extends WS {
       }
 
       start = await inquirer.input('Specify "start" command', START_COMMAND_DEFAULT);
+
+      PORT = await inquirer.input(
+        'Specify required environment variable "PORT"',
+        PORT_DEFAULT,
+        (input) => {
+          const num = parseInt(input, 10);
+          return Number.isNaN(num) ? 'Port must be a number' : true;
+        }
+      );
     }
     this.services.push({
       name: service,
@@ -151,18 +170,26 @@ module.exports = class Init extends WS {
         build,
         start,
       },
+      environment: {
+        PORT: parseInt(PORT, 10),
+      },
     });
+
+    writeFileSync(this.configFile, stringify({ services: this.services }));
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
     if (addAnother) {
       await this.handleDeployData(param0);
+    } else {
+      console.info('Project successfully initialized', this.configFile);
+      process.exit(0);
     }
   }
 
   /**
    * @type {WS['handler']}
    */
-  handler({ connId }) {
+  async handler({ connId }) {
     console.info('Starting init service script...');
     if (!existsSync(this.configFile)) {
       console.info('Config file is not found, creating...', this.configFile);
@@ -174,6 +201,27 @@ module.exports = class Init extends WS {
         lang: LANG,
         status: 'info',
       });
+      return;
     }
+    console.info('Config file is exists', this.configFile);
+    const overwriteConf = await inquirer.confirm(
+      'Do you want to overwrite the config file?',
+      false
+    );
+    if (overwriteConf) {
+      console.info('Config file is not found, creating...', this.configFile);
+      /** @type {typeof this.sendMessage<WSMessageDataCli['getDeployData']>} */ this.sendMessage({
+        token: this.token,
+        type: 'getDeployData',
+        message: '',
+        data: null,
+        lang: LANG,
+        status: 'info',
+      });
+      console.info('Config file is overwrited');
+      return;
+    }
+    console.info('This project has already been initialized');
+    process.exit(0);
   }
 };

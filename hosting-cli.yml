@@ -1,0 +1,10 @@
+services:
+  - name: node
+    size: mili
+    version: 18
+    commands:
+      install: npm i
+      build: npm run build
+      start: npm run start
+    environment:
+      PORT: 3000

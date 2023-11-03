@@ -53,12 +53,13 @@ module.exports = class Inquirer {
   /**
    * @param {string} name
    * @param {string | number} def
+   * @param {(d: any) => boolean | string} validate
    * @returns {Promise<string>}
    */
-  async input(name, def) {
+  async input(name, def, validate = () => true) {
     const prompt = (await inquirer).createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'input', name, default: def }).then((d) => {
+      prompt({ type: 'input', name, default: def, validate }).then((d) => {
         resolve(d[name]);
       });
     });
