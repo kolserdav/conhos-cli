@@ -91,7 +91,6 @@ module.exports = class Init extends WS {
     if (!cost) {
       console.error(`"${item.name}" is not allowed here`);
       process.exit(1);
-      return '';
     }
     const { month, hour } = cost;
     return `${item.name} (${item.memory.name} RAM): ${month} ${CURRENCY}/month, ${hour} ${CURRENCY}/hour`;

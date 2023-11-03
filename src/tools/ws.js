@@ -142,7 +142,7 @@ module.exports = class WS {
 
   /**
    *
-   * @param {WSMessageCli<WSMessageDataCli['checkTocken']>} param0
+   * @param {WSMessageCli<WSMessageDataCli['checkToken']>} param0
    * @param {string} connId
    * @returns
    */
@@ -184,7 +184,7 @@ module.exports = class WS {
           return;
         }
 
-        /** @type {typeof this.sendMessage<WSMessageDataCli['checkTocken']>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<WSMessageDataCli['checkToken']>} */ (this.sendMessage)({
           token,
           type: 'checkToken',
           data: false,
@@ -194,7 +194,7 @@ module.exports = class WS {
         });
       } else {
         console.info("Now it's using the saved session token");
-        /** @type {typeof this.sendMessage<WSMessageDataCli['checkTocken']>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<WSMessageDataCli['checkToken']>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkToken',
           data: false,

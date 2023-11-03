@@ -59,7 +59,7 @@ module.exports = class Login extends WS {
   /**
    * @type {WS['handler']}
    */
-  handler({ failedLogin, sessionExists, connId }) {
+  async handler({ failedLogin, sessionExists, connId }) {
     const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
       if (failedLogin || !sessionExists) {

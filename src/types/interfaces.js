@@ -13,7 +13,7 @@
  * @property {string} setSocket
  * @property {string} test
  * @property {string} login
- * @property {boolean} checkTocken
+ * @property {boolean} checkToken
  * @property {null} message
  * @property {{
  *  num: number;
