@@ -8,6 +8,24 @@
  */
 
 /**
+ * @typedef {{
+ *  services: {
+ *    name: string;
+ *    size: string;
+ *    version: number;
+ *    commands: {
+ *      install: string;
+ *      start: string;
+ *      build?: string;
+ *    }?;
+ *    ports: number[];
+ *    environment: Record<string, string>;
+ *  }[]
+ *  exclude: string[]
+ * }} ConfigFile
+ */
+
+/**
  * @typedef {object} WSMessageDataCli
  * @property {any} any
  * @property {string} setSocket
@@ -40,25 +58,6 @@
  *  baseValue: number;
  *  baseCost: number;
  * }} deployData
- */
-
-/**
- * @typedef {{
- *  services: {
- *    name: string;
- *    size: string;
- *    version: number;
- *    commands: {
- *      install: string;
- *      start: string;
- *      build?: string;
- *    }?;
- *    environment: {
- *      PORT: number
- *    };
- *  }[]
- *  exclude: string[]
- * }} ConfigFile
  */
 
 /**
@@ -113,7 +112,16 @@ function parseMessageCli(msg) {
   return data;
 }
 
+const PORT_DEFAULT = 3000;
 const PROTOCOL_CLI = 'cli';
 const NODE_VERSIONS = [18, 20, 21];
+const PORT_MAX = 65535;
 
-module.exports = { computeCostService, parseMessageCli, PROTOCOL_CLI, NODE_VERSIONS };
+module.exports = {
+  computeCostService,
+  parseMessageCli,
+  PROTOCOL_CLI,
+  NODE_VERSIONS,
+  PORT_MAX,
+  PORT_DEFAULT,
+};

@@ -7,12 +7,17 @@ const {
   BUILD_COMMAND_DEFAULT,
   INSTALL_COMMAND_DEFAULT,
   START_COMMAND_DEFAULT,
-  PORT_DEFAULT,
   CONFIG_EXCLUDE_DEFAULT,
   SIZE_INDEX_DEFAULT,
 } = require('../utils/constants');
-const { parseMessageCli, computeCostService, NODE_VERSIONS } = require('../types/interfaces');
-const { readFileSync, existsSync, writeFileSync } = require('fs');
+const {
+  parseMessageCli,
+  computeCostService,
+  NODE_VERSIONS,
+  PORT_MAX,
+  PORT_DEFAULT,
+} = require('../types/interfaces');
+const { existsSync, writeFileSync } = require('fs');
 const { getConfigFilePath } = require('../utils/lib');
 const Yaml = require('../utils/yaml');
 
@@ -114,7 +119,10 @@ module.exports = class Init extends WS {
     let build;
     let start = '';
     let version = '';
-    let PORT = '';
+    /**
+     * @type {number[]}
+     */
+    let ports = [];
 
     if (this.options.yes) {
       writeFileSync(
@@ -130,8 +138,9 @@ module.exports = class Init extends WS {
                 build: BUILD_COMMAND_DEFAULT,
                 start: START_COMMAND_DEFAULT,
               },
+              ports: [PORT_DEFAULT],
               environment: {
-                PORT: PORT_DEFAULT,
+                PORT: PORT_DEFAULT.toString(),
               },
             },
           ],
@@ -154,7 +163,11 @@ module.exports = class Init extends WS {
     );
 
     if (service === 'node') {
-      version = await inquirer.input('Specify NodeJS version', NODE_VERSIONS[0]);
+      version = await inquirer.list(
+        'Select NodeJS version',
+        NODE_VERSIONS.map((item) => item.toString()),
+        0
+      );
 
       install = await inquirer.input('Specify "install" command', INSTALL_COMMAND_DEFAULT);
 
@@ -166,14 +179,7 @@ module.exports = class Init extends WS {
 
       start = await inquirer.input('Specify "start" command', START_COMMAND_DEFAULT);
 
-      PORT = await inquirer.input(
-        'Specify required environment variable "PORT"',
-        PORT_DEFAULT,
-        (input) => {
-          const num = parseInt(input, 10);
-          return Number.isNaN(num) ? 'Port must be a number' : true;
-        }
-      );
+      ports = await this.getPorts();
     }
     this.services.push({
       name: service,
@@ -184,8 +190,9 @@ module.exports = class Init extends WS {
         build,
         start,
       },
+      ports,
       environment: {
-        PORT: parseInt(PORT, 10),
+        PORT: ports[0].toString(),
       },
     });
 
@@ -201,6 +208,39 @@ module.exports = class Init extends WS {
       console.info('Project successfully initialized', this.configFile);
       process.exit(0);
     }
+  }
+
+  /**
+   *
+   * @param {number[]} ports
+   * @returns {Promise<number[]>}
+   */
+  async getPorts(ports = []) {
+    const _ports = ports.slice();
+    const port = await inquirer.input(
+      ports.length === 0 ? 'Setting up a listening port' : 'Setting up another listening port',
+      PORT_DEFAULT,
+      (input) => {
+        const num = parseInt(input, 10);
+        if (Number.isNaN(num) || !/^\d+$/.test(input)) {
+          return 'Port must be a decimal number';
+        }
+        if (num < PORT_DEFAULT) {
+          return `Port must be more than ${PORT_DEFAULT}`;
+        }
+        if (num > PORT_MAX) {
+          return `Port can't be more than ${PORT_MAX}`;
+        }
+        return true;
+      }
+    );
+    _ports.push(parseInt(port, 10));
+
+    const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);
+    if (anotherPort) {
+      return this.getPorts(_ports);
+    }
+    return _ports;
   }
 
   /**

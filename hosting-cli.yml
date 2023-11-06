@@ -1,12 +1,14 @@
 services:
   - name: node
-    version: 18
     size: mili
+    version: 18
     commands:
       install: npm i
       build: npm run build
       start: npm run start
+    ports:
+      - 3000
     environment:
-      PORT: 3000
+      PORT: "3000"
 exclude:
   - dist

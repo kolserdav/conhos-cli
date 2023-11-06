@@ -123,8 +123,8 @@ module.exports = class WS {
       console.warn('WebSocket is missing');
       return;
     }
-    this.conn.on('error', (e) => {
-      console.error('Failed WS connection', e);
+    this.conn.on('error', (error) => {
+      console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
     });
     const ws = this;
     this.conn.on('open', function open() {
