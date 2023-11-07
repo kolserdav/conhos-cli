@@ -39,7 +39,7 @@
  *  last: boolean;
  *  chunk: Uint8Array
  *  config: ConfigFile | null
- * }} upload
+ * }} deploy
  * @property {null} getDeployData
  * @property {{
  *  services: {
@@ -69,7 +69,7 @@
  * @typedef {{
  *  status: Status;
  *  type: 'login' | 'setSocket' | 'test' | 'checkToken' |
- *  'upload' | 'deployData' | 'getDeployData' | 'message';
+ *  'deploy' | 'deployData' | 'getDeployData' | 'message';
  *  message: string;
  *  lang: 'en';
  *  data: T;

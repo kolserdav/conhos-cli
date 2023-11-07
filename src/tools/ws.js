@@ -226,7 +226,7 @@ module.exports = class WS {
         await this.listenCheckToken(msg, connId);
         break;
       case 'message':
-        console[status](message);
+        console[status](`<cloud> ${message}`);
         if (status === 'error') {
           process.exit(1);
         }

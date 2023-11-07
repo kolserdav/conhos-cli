@@ -98,10 +98,10 @@ module.exports = class Login extends WS {
     const rStream = createReadStream(fileTar);
     let num = 0;
     rStream.on('data', (chunk) => {
-      /** @type {typeof this.sendMessage<WSMessageDataCli['upload']>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<WSMessageDataCli['deploy']>} */ (this.sendMessage)({
         token: this.token,
         message: '',
-        type: 'upload',
+        type: 'deploy',
         data: {
           num,
           project: pack.name,
@@ -119,10 +119,10 @@ module.exports = class Login extends WS {
       );
     });
     rStream.on('close', () => {
-      /** @type {typeof this.sendMessage<WSMessageDataCli['upload']>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<WSMessageDataCli['deploy']>} */ (this.sendMessage)({
         token: this.token,
         message: '',
-        type: 'upload',
+        type: 'deploy',
         data: {
           num,
           project: pack.name,
