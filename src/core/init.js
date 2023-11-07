@@ -17,7 +17,7 @@ const {
   PORT_MAX,
   PORT_DEFAULT,
 } = require('../types/interfaces');
-const { existsSync, writeFileSync } = require('fs');
+const { existsSync, writeFileSync, readFileSync } = require('fs');
 const { getConfigFilePath } = require('../utils/lib');
 const Yaml = require('../utils/yaml');
 
@@ -98,7 +98,7 @@ module.exports = class Init extends WS {
       process.exit(1);
     }
     const { month, hour } = cost;
-    return `${item.name} (${item.memory.name} RAM): ${month} ${CURRENCY}/month, ${hour} ${CURRENCY}/hour`;
+    return `${item.name} (${item.memory.name} RAM, ${item.storage} SSD): ${month} ${CURRENCY}/month, ${hour} ${CURRENCY}/hour`;
   }
 
   /**
@@ -123,7 +123,7 @@ module.exports = class Init extends WS {
      * @type {number[]}
      */
     let ports = [];
-
+    let index = 1;
     if (this.options.yes) {
       writeFileSync(
         this.configFile,
@@ -131,6 +131,8 @@ module.exports = class Init extends WS {
           services: [
             {
               name: 'node',
+              indexComment: 'Do not change index manually',
+              index,
               version: NODE_VERSIONS[0],
               size: sizes[SIZE_INDEX_DEFAULT].name,
               commands: {
@@ -147,6 +149,7 @@ module.exports = class Init extends WS {
           exclude: CONFIG_EXCLUDE_DEFAULT,
         })
       );
+
       console.info('Project successfully initialized', this.configFile);
       process.exit(0);
     }
@@ -184,6 +187,7 @@ module.exports = class Init extends WS {
     this.services.push({
       name: service,
       size,
+      index: '1 #ds',
       version: parseInt(version, 10),
       commands: {
         install,

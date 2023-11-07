@@ -11,6 +11,8 @@
  * @typedef {{
  *  services: {
  *    name: string;
+ *    indexComment?: string;
+ *    index: number;
  *    size: string;
  *    version: number;
  *    commands: {
@@ -54,6 +56,7 @@
  *     value: number;
  *    };
  *    cpus: number;
+ *    storage: string;
  *  }[];
  *  baseValue: number;
  *  baseCost: number;

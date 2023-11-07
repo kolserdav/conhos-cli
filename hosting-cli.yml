@@ -1,7 +1,9 @@
 services:
   - name: node
-    size: mili
+    # Do not change index manually
+    index: 1
     version: 18
+    size: mili
     commands:
       install: npm i
       build: npm run build
