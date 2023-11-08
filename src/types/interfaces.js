@@ -9,11 +9,10 @@
 
 /**
  * @typedef {{
- *  services: {
- *    name: string;
- *    index: number;
+ *  services: Record<string, {
+ *    type: string;
  *    size: string;
- *    version: number;
+ *    version: string;
  *    commands: {
  *      install: string;
  *      start: string;
@@ -21,7 +20,7 @@
  *    }?;
  *    ports: number[];
  *    environment: Record<string, string>;
- *  }[]
+ *  }>
  *  exclude: string[]
  * }} ConfigFile
  */
@@ -116,14 +115,12 @@ function parseMessageCli(msg) {
 
 const PORT_DEFAULT = 3000;
 const PROTOCOL_CLI = 'cli';
-const NODE_VERSIONS = [18, 20, 21];
 const PORT_MAX = 65535;
 
 module.exports = {
   computeCostService,
   parseMessageCli,
   PROTOCOL_CLI,
-  NODE_VERSIONS,
   PORT_MAX,
   PORT_DEFAULT,
 };

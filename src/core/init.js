@@ -13,11 +13,10 @@ const {
 const {
   parseMessageCli,
   computeCostService,
-  NODE_VERSIONS,
   PORT_MAX,
   PORT_DEFAULT,
 } = require('../types/interfaces');
-const { existsSync, writeFileSync, readFileSync } = require('fs');
+const { existsSync, writeFileSync } = require('fs');
 const { getConfigFilePath } = require('../utils/lib');
 const Yaml = require('../utils/yaml');
 
@@ -29,6 +28,7 @@ const yaml = new Yaml();
  * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../types/interfaces').ConfigFile} ConfigFile
  * @typedef {import('../tools/ws').Session} Session
+ * @typedef {import('../types/interfaces').ServiceType} ServiceType
  */
 /**
  * @template T
@@ -47,7 +47,7 @@ module.exports = class Init extends WS {
     /**
      * @type {ConfigFile['services']}
      */
-    this.services = [];
+    this.services = {};
     /**
      * @type {string}
      */
@@ -56,6 +56,10 @@ module.exports = class Init extends WS {
      * @type {Options}
      */
     this.options = options;
+    /**
+     * @type {number}
+     */
+    this.index = 0;
     this.listener();
   }
 
@@ -102,6 +106,14 @@ module.exports = class Init extends WS {
   }
 
   /**
+   * @param {ServiceType} service
+   * @param {WSMessageDataCli['deployData']['services']} services
+   */
+  getService(service, services) {
+    return services.find((item) => item.value === service);
+  }
+
+  /**
    *
    * @param {WSMessageCli<WSMessageDataCli['deployData']>} param0
    */
@@ -124,15 +136,20 @@ module.exports = class Init extends WS {
      */
     let ports = [];
 
+    const node = this.getService('node', services);
+    if (!node) {
+      console.error('Unexpected error. Service is temporarily unavailable.');
+      return;
+    }
+
     if (this.options.yes) {
       writeFileSync(
         this.configFile,
         yaml.stringify({
-          services: [
-            {
-              name: 'node',
-              index: 1,
-              version: NODE_VERSIONS[0],
+          services: {
+            node1: {
+              type: 'node',
+              version: node.versions[0],
               size: sizes[SIZE_INDEX_DEFAULT].name,
               commands: {
                 install: INSTALL_COMMAND_DEFAULT,
@@ -144,7 +161,7 @@ module.exports = class Init extends WS {
                 PORT: PORT_DEFAULT.toString(),
               },
             },
-          ],
+          },
           exclude: CONFIG_EXCLUDE_DEFAULT,
         })
       );
@@ -167,7 +184,7 @@ module.exports = class Init extends WS {
     if (service === 'node') {
       version = await inquirer.list(
         'Select NodeJS version',
-        NODE_VERSIONS.map((item) => item.toString()),
+        node.versions.map((item) => item.toString()),
         0
       );
 
@@ -183,11 +200,10 @@ module.exports = class Init extends WS {
 
       ports = await this.getPorts();
     }
-    this.services.push({
-      name: service,
+    this.services[`${service}${this.index}`] = {
+      type: service,
       size,
-      index: this.services.length + 1,
-      version: parseInt(version, 10),
+      version,
       commands: {
         install,
         build,
@@ -197,7 +213,7 @@ module.exports = class Init extends WS {
       environment: {
         PORT: ports[0].toString(),
       },
-    });
+    };
 
     writeFileSync(
       this.configFile,

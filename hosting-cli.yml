@@ -1,7 +1,7 @@
 services:
-  - name: node
-    index: 4
-    version: 18
+  node1:
+    type: node
+    version: "18"
     size: mili
     commands:
       install: npm i
@@ -10,6 +10,6 @@ services:
     ports:
       - 3000
     environment:
-      PORT: '3000'
+      PORT: "3000"
 exclude:
   - dist
