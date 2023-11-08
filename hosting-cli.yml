@@ -1,6 +1,6 @@
 services:
   - name: node
-    index: 1
+    index: 4
     version: 18
     size: mili
     commands:
