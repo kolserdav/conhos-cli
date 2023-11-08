@@ -1,6 +1,5 @@
 services:
   - name: node
-    # Do not change index manually
     index: 1
     version: 18
     size: mili
@@ -11,6 +10,6 @@ services:
     ports:
       - 3000
     environment:
-      PORT: "3000"
+      PORT: '3000'
 exclude:
   - dist

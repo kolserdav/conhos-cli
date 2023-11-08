@@ -1,5 +1,4 @@
 const { tmpdir } = require('os');
-const { spawn } = require('child_process');
 const { HOME_DIR, PACKAGE_NAME, DEBUG, CWD } = require('./constants');
 const Console = require('console');
 const path = require('path');
@@ -51,41 +50,6 @@ const console = {
     Console.error(...args);
   },
 };
-
-/**
- * @param {string} ex
- * @param {string[]} args
- * @param {{
- *  quiet?: boolean
- * }} options
- * @returns {Promise<StatusCode>}
- */
-async function spawnCommand(ex, args, { quiet } = {}) {
-  return new Promise((resolve) => {
-    const command = spawn(ex, args);
-    command.on('error', (e) => {
-      console.error('Command failed', e);
-    });
-    command.stdout.on('data', (data) => {
-      if (!quiet) {
-        console.log(`stdout: ${data}`);
-      }
-    });
-
-    command.stderr.on('data', (data) => {
-      if (!quiet) {
-        console.log(`stderr: ${data}`);
-      }
-    });
-
-    command.on('close', (code) => {
-      if (!quiet) {
-        console.log(`command "${ex} ${args.join(' ')}" exited with code ${code}`);
-      }
-      resolve(code);
-    });
-  });
-}
 
 /**
  * @param {string} url

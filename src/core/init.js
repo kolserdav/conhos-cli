@@ -123,7 +123,7 @@ module.exports = class Init extends WS {
      * @type {number[]}
      */
     let ports = [];
-    let index = 1;
+
     if (this.options.yes) {
       writeFileSync(
         this.configFile,
@@ -131,8 +131,7 @@ module.exports = class Init extends WS {
           services: [
             {
               name: 'node',
-              indexComment: 'Do not change index manually',
-              index,
+              index: 1,
               version: NODE_VERSIONS[0],
               size: sizes[SIZE_INDEX_DEFAULT].name,
               commands: {
@@ -187,7 +186,7 @@ module.exports = class Init extends WS {
     this.services.push({
       name: service,
       size,
-      index: '1 #ds',
+      index: this.services.length + 1,
       version: parseInt(version, 10),
       commands: {
         install,

@@ -18,6 +18,6 @@ module.exports = class Yaml {
    * @return {string}
    */
   stringify(data) {
-    return stringify(data).replace('indexComment:', '#');
+    return stringify(data);
   }
 };

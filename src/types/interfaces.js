@@ -11,7 +11,6 @@
  * @typedef {{
  *  services: {
  *    name: string;
- *    indexComment?: string;
  *    index: number;
  *    size: string;
  *    version: number;
