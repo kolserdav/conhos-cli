@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p ./jsconfig.json"
+    "build": "tsc -p ./jsconfig.json",
+    "start": "node ./examples/hello-service.js"
   },
   "keywords": [],
   "author": "kolserdav",

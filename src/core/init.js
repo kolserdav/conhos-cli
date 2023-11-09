@@ -110,7 +110,14 @@ module.exports = class Init extends WS {
    * @param {WSMessageDataCli['deployData']['services']} services
    */
   getService(service, services) {
-    return services.find((item) => item.value === service);
+    const res = services.find((item) => item.type === service);
+    if (!res) {
+      console.error('Failed to find service from the list', {
+        search: service,
+        allowed: services.map((item) => item.type),
+      });
+    }
+    return res;
   }
 
   /**
@@ -130,16 +137,28 @@ module.exports = class Init extends WS {
      */
     let build;
     let start = '';
-    let version = '';
     /**
      * @type {number[]}
      */
     let ports = [];
 
-    const node = this.getService('node', services);
-    if (!node) {
+    /**
+     * @type {any}
+     */
+    const _service = await inquirer.list(
+      'Select service',
+      services.map((item) => `${item.type} (${item.name})`),
+      0
+    );
+    /**
+     * @type {ServiceType}
+     */
+    const service = _service;
+
+    const serv = this.getService(service, services);
+    if (!serv) {
       console.error('Unexpected error. Service is temporarily unavailable.');
-      return;
+      process.exit(1);
     }
 
     if (this.options.yes) {
@@ -149,7 +168,7 @@ module.exports = class Init extends WS {
           services: {
             node1: {
               type: 'node',
-              version: node.versions[0],
+              version: serv.versions[0],
               size: sizes[SIZE_INDEX_DEFAULT].name,
               commands: {
                 install: INSTALL_COMMAND_DEFAULT,
@@ -170,27 +189,23 @@ module.exports = class Init extends WS {
       process.exit(0);
     }
 
-    const service = await inquirer.list(
-      'Select service',
-      services.map((item) => `${item.value} (${item.name})`),
-      0
-    );
     const size = await inquirer.list(
       'Select size of service',
       sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue })),
       SIZE_INDEX_DEFAULT
     );
 
-    if (service === 'node') {
-      version = await inquirer.list(
-        'Select NodeJS version',
-        node.versions.map((item) => item.toString()),
-        0
-      );
+    const version = await inquirer.list(
+      `Select ${serv.name} version`,
+      serv.versions.map((item) => item.toString()),
+      0
+    );
 
+    // Switch services
+    if (service === 'node') {
       install = await inquirer.input('Specify "install" command', INSTALL_COMMAND_DEFAULT);
 
-      const useBuild = await inquirer.confirm('Is needed to use "build" command?', true);
+      const useBuild = await inquirer.confirm('Is needed to use "build" command?', false);
 
       if (useBuild) {
         build = await inquirer.input('Specify "build" command', BUILD_COMMAND_DEFAULT);
@@ -200,6 +215,7 @@ module.exports = class Init extends WS {
 
       ports = await this.getPorts();
     }
+
     this.services[`${service}${this.index}`] = {
       type: service,
       size,
@@ -211,9 +227,10 @@ module.exports = class Init extends WS {
       },
       ports,
       environment: {
-        PORT: ports[0].toString(),
+        PORT: ports[0] ? ports[0].toString() : undefined,
       },
     };
+    this.increaseIndex();
 
     writeFileSync(
       this.configFile,
@@ -298,5 +315,9 @@ module.exports = class Init extends WS {
     }
     console.info('This project has already been initialized');
     process.exit(0);
+  }
+
+  increaseIndex() {
+    this.index++;
   }
 };

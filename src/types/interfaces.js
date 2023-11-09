@@ -1,5 +1,5 @@
 /**
- * @typedef {'node'} ServiceType
+ * @typedef {'node' | 'redis'} ServiceType
  */
 
 /**
@@ -10,7 +10,7 @@
 /**
  * @typedef {{
  *  services: Record<string, {
- *    type: string;
+ *    type: ServiceType;
  *    size: string;
  *    version: string;
  *    commands: {
@@ -19,7 +19,7 @@
  *      build?: string;
  *    }?;
  *    ports: number[];
- *    environment: Record<string, string>;
+ *    environment: Record<string, string | undefined>;
  *  }>
  *  exclude: string[]
  * }} ConfigFile
@@ -43,7 +43,7 @@
  * @property {null} getDeployData
  * @property {{
  *  services: {
- *    value: string;
+ *    type: ServiceType;
  *    name: string;
  *    versions: string[];
  * }[];

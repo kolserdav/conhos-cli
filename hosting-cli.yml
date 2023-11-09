@@ -1,15 +1,23 @@
 services:
-  node2:
+  node0:
     type: node
-    version: 18.18.1
     size: mili
+    version: "18"
     commands:
       install: npm i
-      build: npm run build
       start: npm run start
     ports:
-      - 3000
+      - 8000
     environment:
-      PORT: '3000'
+      PORT: "8000"
+  redis0:
+    type: redis
+    size: micro
+    version: "7"
+    commands:
+      install: ""
+      start: ""
+    ports: []
+    environment: {}
 exclude:
   - dist
