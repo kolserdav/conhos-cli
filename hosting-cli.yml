@@ -2,13 +2,13 @@ services:
   node0:
     type: node
     size: mili
-    image: 21.1-alpine3.17
+    image: 20.9.0-alpine
     commands:
       install: npm i
       start: npm run start
     ports:
       - 3000
     environment:
-      PORT: "3000"
+      PORT: '3000'
 exclude:
   - dist
