@@ -7,7 +7,7 @@ services:
     ports:
       - 3000
     environment:
-      PORT: "3000"
+      PORT: '3000'
   redis1:
     type: redis
     size: mili
@@ -16,3 +16,4 @@ services:
     environment: {}
 exclude:
   - dist
+  - dist-workers
