@@ -4,11 +4,9 @@ const Inquirer = require('../utils/inquirer');
 const {
   LANG,
   CURRENCY,
-  BUILD_COMMAND_DEFAULT,
-  INSTALL_COMMAND_DEFAULT,
-  START_COMMAND_DEFAULT,
   CONFIG_EXCLUDE_DEFAULT,
   SIZE_INDEX_DEFAULT,
+  COMMAND_DEFAULT,
 } = require('../utils/constants');
 const {
   parseMessageCli,
@@ -131,12 +129,10 @@ module.exports = class Init extends WS {
 
     console.info("It's adding service to the config file...");
 
-    let install = '';
     /**
      * @type {string | undefined}
      */
-    let build;
-    let start = '';
+    let command;
     /**
      * @type {number[]}
      */
@@ -170,11 +166,7 @@ module.exports = class Init extends WS {
               type: 'node',
               image: serv.tags[0],
               size: sizes[SIZE_INDEX_DEFAULT].name,
-              commands: {
-                install: INSTALL_COMMAND_DEFAULT,
-                build: BUILD_COMMAND_DEFAULT,
-                start: START_COMMAND_DEFAULT,
-              },
+              command,
               ports: [PORT_DEFAULT],
               environment: {
                 PORT: PORT_DEFAULT.toString(),
@@ -204,15 +196,7 @@ module.exports = class Init extends WS {
 
     // Switch services
     if (service === 'node') {
-      install = await inquirer.input('Specify "install" command', INSTALL_COMMAND_DEFAULT);
-
-      const useBuild = await inquirer.confirm('Is needed to use "build" command?', false);
-
-      if (useBuild) {
-        build = await inquirer.input('Specify "build" command', BUILD_COMMAND_DEFAULT);
-      }
-
-      start = await inquirer.input('Specify "start" command', START_COMMAND_DEFAULT);
+      command = await inquirer.input('Specify service start command', COMMAND_DEFAULT);
 
       ports = await this.getPorts();
     }
@@ -221,11 +205,7 @@ module.exports = class Init extends WS {
       type: service,
       size,
       image,
-      commands: {
-        install,
-        build,
-        start,
-      },
+      command,
       ports,
       environment: {
         PORT: ports[0] ? ports[0].toString() : undefined,
@@ -267,6 +247,9 @@ module.exports = class Init extends WS {
         }
         if (num > PORT_MAX) {
           return `Port can't be more than ${PORT_MAX}`;
+        }
+        if (_ports.indexOf(num) !== -1) {
+          return 'The same port is already exists';
         }
         return true;
       }
