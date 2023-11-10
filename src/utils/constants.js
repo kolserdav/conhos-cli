@@ -37,9 +37,7 @@ const PACKAGES_DIR_NAME = 'packages';
 const SERVICE_SIZE_DEFAULT = 'micro';
 
 const CURRENCY = 'RUB';
-const INSTALL_COMMAND_DEFAULT = 'npm i';
-const BUILD_COMMAND_DEFAULT = 'npm run build';
-const START_COMMAND_DEFAULT = 'npm run start';
+const COMMAND_DEFAULT = 'sh -c "npm install && npm run start"';
 const CONFIG_EXCLUDE_DEFAULT = ['dist'];
 const EXPLICIT_EXCLUDE = ['.git', '.vscode', 'node_modules'];
 const SIZE_INDEX_DEFAULT = 3;
@@ -62,9 +60,7 @@ module.exports = {
   CWD,
   SERVICE_SIZE_DEFAULT,
   CURRENCY,
-  INSTALL_COMMAND_DEFAULT,
-  BUILD_COMMAND_DEFAULT,
-  START_COMMAND_DEFAULT,
+  COMMAND_DEFAULT,
   CONFIG_EXCLUDE_DEFAULT,
   EXPLICIT_EXCLUDE,
   SIZE_INDEX_DEFAULT,

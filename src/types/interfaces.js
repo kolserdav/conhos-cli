@@ -13,11 +13,7 @@
  *    type: ServiceType;
  *    size: string;
  *    image: string;
- *    commands: {
- *      install: string;
- *      start: string;
- *      build?: string;
- *    }?;
+ *    command?: string;
  *    ports: number[];
  *    environment: Record<string, string | undefined>;
  *  }>

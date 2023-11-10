@@ -1,4 +1,5 @@
 const http = require('node:http');
+const { PORT_DEFAULT } = require('../src/types/interfaces');
 
 // Create a local server to receive data from
 const server = http.createServer((req, res) => {
@@ -10,4 +11,7 @@ const server = http.createServer((req, res) => {
   );
 });
 
-server.listen(8000);
+const port = process.env.PORT || PORT_DEFAULT;
+server.listen(port, () => {
+  console.log('Server is listenning at port', port);
+});
