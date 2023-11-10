@@ -2,22 +2,13 @@ services:
   node0:
     type: node
     size: mili
-    version: "18"
+    image: 21.1-alpine3.17
     commands:
       install: npm i
       start: npm run start
     ports:
-      - 8000
+      - 3000
     environment:
-      PORT: "8000"
-  redis0:
-    type: redis
-    size: micro
-    version: "7"
-    commands:
-      install: ""
-      start: ""
-    ports: []
-    environment: {}
+      PORT: "3000"
 exclude:
   - dist

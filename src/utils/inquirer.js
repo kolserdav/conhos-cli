@@ -26,12 +26,16 @@ module.exports = class Inquirer {
    * @param {number} def
    * @returns {Promise<string>}
    */
-  async list(name, choices, def) {
+  async list(name, choices, def, all = false) {
     const prompt = (await inquirer).createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'list', name, choices, default: def }).then((d) => {
-        const value = d[name].match(/\w+/);
-        resolve(value[0]);
+        let result = d[name];
+        if (!all) {
+          const value = d[name].match(/\w+/);
+          result = value[0];
+        }
+        resolve(result);
       });
     });
   }

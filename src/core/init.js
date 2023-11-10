@@ -168,7 +168,7 @@ module.exports = class Init extends WS {
           services: {
             node1: {
               type: 'node',
-              version: serv.versions[0],
+              image: serv.tags[0],
               size: sizes[SIZE_INDEX_DEFAULT].name,
               commands: {
                 install: INSTALL_COMMAND_DEFAULT,
@@ -195,10 +195,11 @@ module.exports = class Init extends WS {
       SIZE_INDEX_DEFAULT
     );
 
-    const version = await inquirer.list(
-      `Select ${serv.name} version`,
-      serv.versions.map((item) => item.toString()),
-      0
+    const image = await inquirer.list(
+      `Select ${serv.name} image`,
+      serv.tags.map((item) => item.toString()),
+      serv.tags.length,
+      true
     );
 
     // Switch services
@@ -219,7 +220,7 @@ module.exports = class Init extends WS {
     this.services[`${service}${this.index}`] = {
       type: service,
       size,
-      version,
+      image,
       commands: {
         install,
         build,

@@ -12,7 +12,7 @@
  *  services: Record<string, {
  *    type: ServiceType;
  *    size: string;
- *    version: string;
+ *    image: string;
  *    commands: {
  *      install: string;
  *      start: string;
@@ -45,7 +45,8 @@
  *  services: {
  *    type: ServiceType;
  *    name: string;
- *    versions: string[];
+ *    images: string;
+ *    tags: string[]
  * }[];
  *  sizes: {
  *    name: string;
