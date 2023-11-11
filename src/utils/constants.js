@@ -1,10 +1,18 @@
 import dotenv from 'dotenv';
+import { readFileSync } from 'fs';
 import os from 'os';
-import pack from '../../package.json' assert { type: 'json' };
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
  */
+
+const packStr = readFileSync(path.resolve(__dirname, '../../package.json')).toString();
+const pack = JSON.parse(packStr);
 
 dotenv.config();
 export const LOGIN_PAGE = process.env.LOGIN_PAGE || 'http://localhost:3000/account/sign-in';

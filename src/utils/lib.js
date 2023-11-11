@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';
 import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD } from './constants.js';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 /**
  * @typedef {number | null} StatusCode
@@ -82,11 +82,12 @@ export function stdoutWriteStart(title) {
 
 /**
  *
- * @returns {Promise<any>}
+ * @returns {any}
  */
-export async function getPackage() {
+export function getPackage() {
   const cwd = process.cwd();
-  return (await import(path.resolve(cwd, 'package.json'), { assert: { type: 'json' } })).default;
+  const data = readFileSync(path.resolve(cwd, 'package.json')).toString();
+  return JSON.parse(data);
 }
 
 /**

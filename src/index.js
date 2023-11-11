@@ -2,7 +2,6 @@
 import { Command } from 'commander';
 import fs from 'fs';
 import { PACKAGE_VERSION, PACKAGE_NAME } from './utils/constants.js';
-
 import Login from './core/login.js';
 import Deploy from './core/deploy.js';
 import { getPackagePath, console } from './utils/lib.js';
