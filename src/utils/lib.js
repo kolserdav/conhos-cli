@@ -1,8 +1,9 @@
-const { tmpdir } = require('os');
-const { HOME_DIR, PACKAGE_NAME, DEBUG, CWD } = require('./constants');
-const Console = require('console');
-const path = require('path');
-const { existsSync } = require('fs');
+import { tmpdir } from 'os';
+import chalk from 'chalk';
+import Console from 'console';
+import path from 'path';
+import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD } from './constants.js';
+import { existsSync } from 'fs';
 
 /**
  * @typedef {number | null} StatusCode
@@ -14,7 +15,7 @@ const { existsSync } = require('fs');
  * }} Options
  */
 
-const console = {
+export const console = {
   /**
    *
    * @param  {...any} args
@@ -55,7 +56,7 @@ const console = {
  * @param {string} url
  * @returns {Promise<any>}
  */
-async function openBrowser(url) {
+export async function openBrowser(url) {
   const open = (await import('open')).default;
   return open(url);
 }
@@ -65,7 +66,7 @@ async function openBrowser(url) {
  * @param {string} postfix
  * @returns
  */
-function getPackagePath(postfix = '') {
+export function getPackagePath(postfix = '') {
   return path.normalize(`${HOME_DIR}/.${PACKAGE_NAME}/${postfix}`);
 }
 
@@ -73,39 +74,38 @@ function getPackagePath(postfix = '') {
  *
  * @param {string} title
  */
-function stdoutWriteStart(title) {
+export function stdoutWriteStart(title) {
   process.stdout.clearLine(0);
   process.stdout.cursorTo(0);
   process.stdout.write(title);
 }
 
-function getPackage() {
+/**
+ *
+ * @returns {Promise<any>}
+ */
+export async function getPackage() {
   const cwd = process.cwd();
-  return require(path.resolve(cwd, 'package.json'));
+  return (await import(path.resolve(cwd, 'package.json'), { assert: { type: 'json' } })).default;
 }
 
-function getTmpArchive() {
-  return path.resolve(tmpdir(), `${PACKAGE_NAME}_${getPackage().name}.tgz`);
+/**
+ *
+ * @param {string} packageName
+ * @returns {string}
+ */
+export function getTmpArchive(packageName) {
+  return path.resolve(tmpdir(), `${PACKAGE_NAME}_${packageName}.tgz`);
 }
 
 /**
  *
  * @returns {string}
  */
-function getConfigFilePath() {
+export function getConfigFilePath() {
   let fileYml = path.resolve(CWD, `${PACKAGE_NAME}.yaml`);
   if (!existsSync(fileYml)) {
     fileYml = fileYml.replace(/yaml$/, 'yml');
   }
   return fileYml;
 }
-
-module.exports = {
-  openBrowser,
-  getPackagePath,
-  console,
-  getPackage,
-  getTmpArchive,
-  stdoutWriteStart,
-  getConfigFilePath,
-};

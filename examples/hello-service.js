@@ -1,5 +1,5 @@
-const http = require('node:http');
-const { PORT_DEFAULT } = require('../src/types/interfaces');
+import http from 'node:http';
+import { PORT_DEFAULT } from '../src/types/interfaces.js';
 
 // Create a local server to receive data from
 const server = http.createServer((req, res) => {

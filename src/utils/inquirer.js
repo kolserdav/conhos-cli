@@ -1,12 +1,10 @@
-const { SERVICE_SIZE_DEFAULT } = require('./constants');
-
-const inquirer = import('inquirer');
+import inquirer from 'inquirer';
 
 /**
- * @typedef {import('../types/interfaces').ServiceSize} ServiceSize
+ * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
  */
 
-module.exports = class Inquirer {
+export default class Inquirer {
   /**
    * @param {string} name
    * @returns {Promise<string>}
@@ -82,4 +80,4 @@ module.exports = class Inquirer {
       });
     });
   }
-};
+}

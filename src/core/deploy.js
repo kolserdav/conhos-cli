@@ -1,27 +1,21 @@
-const { v4 } = require('uuid');
-const WS = require('../tools/ws');
-const Tar = require('../utils/tar');
-const { getPackage, getTmpArchive, stdoutWriteStart, getConfigFilePath } = require('../utils/lib');
-const { createReadStream, statSync, existsSync, readFileSync, readdirSync } = require('fs');
-const {
-  LANG,
-  PACKAGE_NAME,
-  CWD,
-  CONFIG_EXCLUDE_DEFAULT,
-  EXPLICIT_EXCLUDE,
-} = require('../utils/constants');
-const { parseMessageCli } = require('../types/interfaces');
-const Yaml = require('../utils/yaml');
+import { v4 } from 'uuid';
+import WS from '../tools/ws.js';
+import Tar from '../utils/tar.js';
+import { getPackage, getTmpArchive, stdoutWriteStart, getConfigFilePath } from '../utils/lib.js';
+import { createReadStream, statSync, existsSync, readFileSync, readdirSync } from 'fs';
+import { LANG, PACKAGE_NAME, CWD, EXPLICIT_EXCLUDE } from '../utils/constants.js';
+import { parseMessageCli } from '../types/interfaces.js';
+import Yaml from '../utils/yaml.js';
 
 const yaml = new Yaml();
 
 /**
- * @typedef {import('../tools/ws').Options} Options
- * @typedef {import('../tools/ws').CommandOptions} CommandOptions
- * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../tools/ws.js').Options} Options
+ * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 
-module.exports = class Login extends WS {
+export default class Login extends WS {
   /**
    * @param {Options} options
    */
@@ -81,9 +75,9 @@ module.exports = class Login extends WS {
     const config = yaml.parse(data);
     const { exclude } = config;
 
-    const pack = getPackage();
+    const pack = await getPackage();
     console.info(`Starting deploy "${pack.name}" project`);
-    const fileTar = getTmpArchive();
+    const fileTar = getTmpArchive(pack.name);
     const tar = new Tar();
     await tar.create({
       fileList: readdirSync(CWD)
@@ -138,4 +132,4 @@ module.exports = class Login extends WS {
       console.info(`Project files uploaded to the cloud: ${percent}%`);
     });
   }
-};
+}

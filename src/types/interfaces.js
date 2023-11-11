@@ -80,7 +80,7 @@
  * @param {string} serviceSize
  * @param {Omit<WSMessageDataCli['deployData'], 'services'>} options
  */
-function computeCostService(serviceSize, { sizes, baseCost, baseValue }) {
+export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) {
   const currValueItem = sizes.find((item) => item.name === serviceSize);
   if (!currValueItem) {
     console.error('Failed to get cost of service for', serviceSize);
@@ -100,7 +100,7 @@ function computeCostService(serviceSize, { sizes, baseCost, baseValue }) {
  * @param {string} msg
  * @returns {WSMessageCli<T> | null}
  */
-function parseMessageCli(msg) {
+export function parseMessageCli(msg) {
   let data = null;
   try {
     data = JSON.parse(msg);
@@ -110,14 +110,6 @@ function parseMessageCli(msg) {
   return data;
 }
 
-const PORT_DEFAULT = 3000;
-const PROTOCOL_CLI = 'cli';
-const PORT_MAX = 65535;
-
-module.exports = {
-  computeCostService,
-  parseMessageCli,
-  PROTOCOL_CLI,
-  PORT_MAX,
-  PORT_DEFAULT,
-};
+export const PORT_DEFAULT = 3000;
+export const PROTOCOL_CLI = 'cli';
+export const PORT_MAX = 65535;

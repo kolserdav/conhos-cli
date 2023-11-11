@@ -1,8 +1,8 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 const ALGORITHM = 'aes-256-cbc';
 
-module.exports = class Crypto {
+export default class Crypto {
   /**
    *
    * @param {string} text
@@ -58,4 +58,4 @@ module.exports = class Crypto {
   createHash(secret) {
     return crypto.scryptSync(secret, 'salt', 32);
   }
-};
+}

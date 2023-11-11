@@ -1,12 +1,12 @@
 // @ts-check
-const { Command } = require('commander');
-const fs = require('fs');
-const { PACKAGE_VERSION, PACKAGE_NAME } = require('./utils/constants');
+import { Command } from 'commander';
+import fs from 'fs';
+import { PACKAGE_VERSION, PACKAGE_NAME } from './utils/constants.js';
 
-const Login = require('./core/login');
-const Deploy = require('./core/deploy');
-const { getPackagePath, console } = require('./utils/lib');
-const Init = require('./core/init');
+import Login from './core/login.js';
+import Deploy from './core/deploy.js';
+import { getPackagePath, console } from './utils/lib.js';
+import Init from './core/init.js';
 
 const packageHomeDir = getPackagePath();
 if (!fs.existsSync(packageHomeDir)) {

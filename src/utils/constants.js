@@ -1,67 +1,43 @@
-const dotenv = require('dotenv');
-const os = require('os');
-const pack = require('../../package.json');
+import dotenv from 'dotenv';
+import os from 'os';
+import pack from '../../package.json' assert { type: 'json' };
 
 /**
- * @typedef {import('../types/interfaces').ServiceSize} ServiceSize
+ * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
  */
 
 dotenv.config();
-const LOGIN_PAGE = process.env.LOGIN_PAGE || 'http://localhost:3000/account/sign-in';
+export const LOGIN_PAGE = process.env.LOGIN_PAGE || 'http://localhost:3000/account/sign-in';
 
-const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'http://localhost:3001';
+export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'http://localhost:3001';
 
-const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'http://localhost:3002';
+export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'http://localhost:3002';
 
-const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || 'strong-string';
+export const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || 'strong-string';
 
-const CRYPTO_SALT = process.env.CRYPTO_SALT || 'strong-string';
+export const CRYPTO_SALT = process.env.CRYPTO_SALT || 'strong-string';
 
-const DEBUG = process.env.DEBUG === '1';
+export const DEBUG = process.env.DEBUG === '1';
 
-const CRYPTO_IV = process.env.CRYPTO_IV || 'string';
+export const CRYPTO_IV = process.env.CRYPTO_IV || 'string';
 
-const LANG = 'en';
+export const LANG = 'en';
 // deps app
-const QUERY_STRING_CONN_ID = 'conn';
+export const QUERY_STRING_CONN_ID = 'conn';
 
-const HOME_DIR = os.homedir();
-const CWD = process.cwd();
-const PACKAGE_VERSION = pack.version;
-const PACKAGE_NAME = pack.name;
-const SESSION_FILE_NAME = 'auth';
-const PACKAGES_DIR_NAME = 'packages';
+export const HOME_DIR = os.homedir();
+export const CWD = process.cwd();
+export const PACKAGE_VERSION = pack.version;
+export const PACKAGE_NAME = pack.name;
+export const SESSION_FILE_NAME = 'auth';
+export const PACKAGES_DIR_NAME = 'packages';
 /**
  * @type {ServiceSize}
  */
-const SERVICE_SIZE_DEFAULT = 'micro';
+export const SERVICE_SIZE_DEFAULT = 'micro';
 
-const CURRENCY = 'RUB';
-const COMMAND_DEFAULT = 'sh -c "npm install && npm run start"';
-const CONFIG_EXCLUDE_DEFAULT = ['dist'];
-const EXPLICIT_EXCLUDE = ['.git', '.vscode', 'node_modules'];
-const SIZE_INDEX_DEFAULT = 3;
-
-module.exports = {
-  LOGIN_PAGE,
-  WEBSOCKET_ADDRESS,
-  LANG,
-  QUERY_STRING_CONN_ID,
-  CRYPTO_IV,
-  CRYPTO_PASSWORD,
-  CRYPTO_SALT,
-  HOME_DIR,
-  PACKAGE_NAME,
-  PACKAGE_VERSION,
-  SESSION_FILE_NAME,
-  DEBUG,
-  PACKAGES_DIR_NAME,
-  SERVER_ADDRESS,
-  CWD,
-  SERVICE_SIZE_DEFAULT,
-  CURRENCY,
-  COMMAND_DEFAULT,
-  CONFIG_EXCLUDE_DEFAULT,
-  EXPLICIT_EXCLUDE,
-  SIZE_INDEX_DEFAULT,
-};
+export const CURRENCY = 'RUB';
+export const COMMAND_DEFAULT = 'sh -c "npm install && npm run start"';
+export const CONFIG_EXCLUDE_DEFAULT = ['dist'];
+export const EXPLICIT_EXCLUDE = ['.git', '.vscode', 'node_modules'];
+export const SIZE_INDEX_DEFAULT = 3;

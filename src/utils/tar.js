@@ -1,9 +1,9 @@
 // @ts-check
-const path = require('path');
-const tar = require('tar');
-const { CWD } = require('./constants');
+import path from 'path';
+import tar from 'tar';
+import { CWD } from './constants.js';
 
-module.exports = class Tar {
+export default class Tar {
   /**
    *
    * @param {{
@@ -36,4 +36,4 @@ module.exports = class Tar {
         });
     });
   }
-};
+}

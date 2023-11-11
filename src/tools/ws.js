@@ -1,19 +1,19 @@
-const WebSocket = require('ws');
-const { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } = require('../utils/constants');
-const { getPackagePath, console } = require('../utils/lib');
-const Crypto = require('../utils/crypto');
-const { readFileSync, existsSync } = require('fs');
-const Inquirer = require('../utils/inquirer');
-const { PROTOCOL_CLI } = require('../types/interfaces');
+import WebSocket from 'ws';
+import { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } from '../utils/constants.js';
+import { getPackagePath, console } from '../utils/lib.js';
+import Crypto from '../utils/crypto.js';
+import { readFileSync, existsSync } from 'fs';
+import Inquirer from '../utils/inquirer.js';
+import { PROTOCOL_CLI } from '../types/interfaces.js';
 
 const crypto = new Crypto();
 
 /**
- * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 /**
  * @template T
- * @typedef {import('../types/interfaces').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 /**
@@ -70,7 +70,7 @@ class WSInterface {
  * @class
  * @implements WSInterface
  */
-module.exports = class WS {
+export default class WS {
   /**
    * @param {Options} options
    */
@@ -235,4 +235,4 @@ module.exports = class WS {
         console.warn('Default message case of login command', message);
     }
   }
-};
+}

@@ -1,10 +1,10 @@
-const { parse, stringify } = require('yaml');
+import { parse, stringify } from 'yaml';
 
 /**
- * @typedef {import('../types/interfaces').ConfigFile} ConfigFile
+ * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  */
 
-module.exports = class Yaml {
+export default class Yaml {
   /**
    * @param {string} data
    * @returns {ConfigFile}
@@ -20,4 +20,4 @@ module.exports = class Yaml {
   stringify(data) {
     return stringify(data);
   }
-};
+}

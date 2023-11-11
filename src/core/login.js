@@ -1,27 +1,27 @@
-const { v4 } = require('uuid');
-const WS = require('../tools/ws');
-const { getPackagePath, openBrowser } = require('../utils/lib');
-const { SESSION_FILE_NAME, LANG, LOGIN_PAGE, QUERY_STRING_CONN_ID } = require('../utils/constants');
-const { existsSync, rmSync, writeFileSync } = require('fs');
-const Crypto = require('../utils/crypto');
-const Inquirer = require('../utils/inquirer');
-const { parseMessageCli } = require('../types/interfaces');
+import { v4 } from 'uuid';
+import WS from '../tools/ws.js';
+import { getPackagePath, openBrowser } from '../utils/lib.js';
+import { SESSION_FILE_NAME, LANG, LOGIN_PAGE, QUERY_STRING_CONN_ID } from '../utils/constants.js';
+import { existsSync, rmSync, writeFileSync } from 'fs';
+import Crypto from '../utils/crypto.js';
+import Inquirer from '../utils/inquirer.js';
+import { parseMessageCli } from '../types/interfaces.js';
 
 /**
- * @typedef {import('../tools/ws').Options} Options
- * @typedef {import('../tools/ws').CommandOptions} CommandOptions
- * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
- * @typedef {import('../tools/ws').Session} Session
+ * @typedef {import('../tools/ws.js').Options} Options
+ * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../tools/ws.js').Session} Session
  */
 /**
  * @template T
- * @typedef {import('../tools/ws').WSMessageCli<any>} WsMessage<T>
+ * @typedef {import('../tools/ws.js').WSMessageCli<any>} WsMessage<T>
  */
 
 const inquirer = new Inquirer();
 const crypto = new Crypto();
 
-module.exports = class Login extends WS {
+export default class Login extends WS {
   /**
    *
    * @param {Options} options
@@ -131,4 +131,4 @@ module.exports = class Login extends WS {
     });
     openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${connId}`);
   }
-};
+}

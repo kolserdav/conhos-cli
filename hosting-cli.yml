@@ -1,18 +1,12 @@
 services:
-  node2:
+  node0:
     type: node
     size: mili
-    image: alpine3.17
+    image: 21-alpine3.17
     command: sh -c "npm install && npm run start"
     ports:
       - 3000
     environment:
-      PORT: '3000'
-  redis1:
-    type: redis
-    size: mili
-    image: 7.2.3
-    ports: []
-    environment: {}
+      PORT: "3000"
 exclude:
   - dist

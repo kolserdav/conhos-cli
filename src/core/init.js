@@ -1,41 +1,41 @@
-const { v4 } = require('uuid');
-const WS = require('../tools/ws');
-const Inquirer = require('../utils/inquirer');
-const {
+import { v4 } from 'uuid';
+import WS from '../tools/ws.js';
+import Inquirer from '../utils/inquirer.js';
+import {
   LANG,
   CURRENCY,
   CONFIG_EXCLUDE_DEFAULT,
   SIZE_INDEX_DEFAULT,
   COMMAND_DEFAULT,
-} = require('../utils/constants');
-const {
+} from '../utils/constants.js';
+import {
   parseMessageCli,
   computeCostService,
   PORT_MAX,
   PORT_DEFAULT,
-} = require('../types/interfaces');
-const { existsSync, writeFileSync } = require('fs');
-const { getConfigFilePath } = require('../utils/lib');
-const Yaml = require('../utils/yaml');
+} from '../types/interfaces.js';
+import { existsSync, writeFileSync } from 'fs';
+import { getConfigFilePath } from '../utils/lib.js';
+import Yaml from '../utils/yaml.js';
 
 const yaml = new Yaml();
 
 /**
- * @typedef {import('../tools/ws').Options} Options
- * @typedef {import('../tools/ws').CommandOptions} CommandOptions
- * @typedef {import('../types/interfaces').WSMessageDataCli} WSMessageDataCli
- * @typedef {import('../types/interfaces').ConfigFile} ConfigFile
- * @typedef {import('../tools/ws').Session} Session
- * @typedef {import('../types/interfaces').ServiceType} ServiceType
+ * @typedef {import('../tools/ws.js').Options} Options
+ * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
+ * @typedef {import('../tools/ws.js').Session} Session
+ * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
  */
 /**
  * @template T
- * @typedef {import('../tools/ws').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../tools/ws.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();
 
-module.exports = class Init extends WS {
+export default class Init extends WS {
   /**
    *
    * @param {Options} options
@@ -304,4 +304,4 @@ module.exports = class Init extends WS {
   increaseIndex() {
     this.index++;
   }
-};
+}
