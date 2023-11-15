@@ -1,2 +1,3 @@
-#! /usr/bin/env node --no-warnings=ExperimentalWarning
+#! /usr/bin/env node
+
 import '../src/index.js';
