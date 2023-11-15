@@ -66,7 +66,6 @@ export default class Init extends WS {
       return;
     }
 
-    const connId = v4();
     const ws = this;
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
@@ -79,7 +78,7 @@ export default class Init extends WS {
           await this.handleDeployData(rawMessage);
           break;
         default:
-          await this.handleCommonMessages(connId, rawMessage);
+          await this.handleCommonMessages(rawMessage);
       }
     });
   }
@@ -266,7 +265,7 @@ export default class Init extends WS {
   /**
    * @type {WS['handler']}
    */
-  async handler({ connId }) {
+  async handler() {
     console.info('Starting init service script...');
     if (!existsSync(this.configFile)) {
       console.info('Config file is not found, creating...', this.configFile);
@@ -277,6 +276,7 @@ export default class Init extends WS {
         data: null,
         lang: LANG,
         status: 'info',
+        userId: this.userId,
       });
       return;
     }
@@ -294,6 +294,7 @@ export default class Init extends WS {
         data: null,
         lang: LANG,
         status: 'info',
+        userId: this.userId,
       });
       return;
     }

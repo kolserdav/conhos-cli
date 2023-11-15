@@ -22,19 +22,23 @@
  */
 
 /**
+ * @typedef {{userId: string;}} Identity
+ */
+
+/**
  * @typedef {object} WSMessageDataCli
  * @property {any} any
  * @property {string} setSocket
  * @property {string} test
  * @property {string} login
  * @property {boolean} checkToken
- * @property {null} message
+ * @property {null | true} message
  * @property {{
  *  num: number;
  *  project: string;
  *  last: boolean;
- *  chunk: Uint8Array
- *  config: ConfigFile | null
+ *  chunk: Uint8Array;
+ *  config: ConfigFile | null;
  * }} deploy
  * @property {null} getDeployData
  * @property {{
@@ -69,6 +73,7 @@
  *  type: 'login' | 'setSocket' | 'test' | 'checkToken' |
  *  'deploy' | 'deployData' | 'getDeployData' | 'message';
  *  message: string;
+ *  userId: string;
  *  lang: 'en';
  *  data: T;
  *  token: string | null;

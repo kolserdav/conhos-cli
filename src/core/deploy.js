@@ -15,7 +15,7 @@ const yaml = new Yaml();
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 
-export default class Login extends WS {
+export default class Deploy extends WS {
   /**
    * @param {Options} options
    */
@@ -36,8 +36,6 @@ export default class Login extends WS {
       return;
     }
 
-    const connId = v4();
-
     const ws = this;
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
@@ -47,7 +45,7 @@ export default class Login extends WS {
       const { type } = rawMessage;
       switch (type) {
         default:
-          await this.handleCommonMessages(connId, rawMessage);
+          await this.handleCommonMessages(rawMessage);
       }
     });
   }
@@ -66,7 +64,7 @@ export default class Login extends WS {
   /**
    * @type {WS['handler']}
    */
-  async handler({ connId }) {
+  async handler() {
     if (!existsSync(this.configFile)) {
       console.warn('Config file is not exists run', `"${PACKAGE_NAME} init" first`);
       process.exit(2);
@@ -96,6 +94,7 @@ export default class Login extends WS {
         token: this.token,
         message: '',
         type: 'deploy',
+        userId: this.userId,
         data: {
           num,
           project: pack.name,
@@ -117,6 +116,7 @@ export default class Login extends WS {
         token: this.token,
         message: '',
         type: 'deploy',
+        userId: this.userId,
         data: {
           num,
           project: pack.name,

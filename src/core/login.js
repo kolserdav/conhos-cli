@@ -12,6 +12,7 @@ import { parseMessageCli } from '../types/interfaces.js';
  * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../tools/ws.js').Session} Session
+ * @typedef {import('../types/interfaces.js').Identity} Identity
  */
 /**
  * @template T
@@ -38,8 +39,6 @@ export default class Login extends WS {
       return;
     }
 
-    const connId = v4();
-    const ws = this;
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
       if (rawMessage === null) {
@@ -51,7 +50,7 @@ export default class Login extends WS {
           await this.listenLogin(rawMessage);
           break;
         default:
-          await this.handleCommonMessages(connId, rawMessage);
+          await this.handleCommonMessages(rawMessage);
       }
     });
   }
@@ -59,11 +58,11 @@ export default class Login extends WS {
   /**
    * @type {WS['handler']}
    */
-  async handler({ failedLogin, sessionExists, connId }) {
+  async handler({ failedLogin, sessionExists }) {
     const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
       if (failedLogin || !sessionExists) {
-        this.openNewSession(connId);
+        this.openNewSession();
       } else {
         console.info('You have already signed in');
         process.exit(0);
@@ -115,20 +114,17 @@ export default class Login extends WS {
     process.exit(0);
   }
 
-  /**
-   *
-   * @param {string} connId
-   */
-  openNewSession(connId) {
+  openNewSession() {
     console.info('Trying to create a new session...');
     /** @type {typeof this.sendMessage<WSMessageDataCli['login']>} */ (this.sendMessage)({
       status: 'info',
       type: 'login',
       message: '',
       lang: LANG,
-      data: connId,
+      data: this.connId,
       token: null,
+      userId: this.userId,
     });
-    openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${connId}`);
+    openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${this.connId}`);
   }
 }

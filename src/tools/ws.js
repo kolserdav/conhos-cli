@@ -5,6 +5,7 @@ import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import { PROTOCOL_CLI } from '../types/interfaces.js';
+import { v4 } from 'uuid';
 
 const crypto = new Crypto();
 
@@ -38,7 +39,6 @@ const crypto = new Crypto();
 
 /**
  * @typedef {{
- *  connId: string;
  *  failedLogin: boolean
  *  sessionExists?: boolean
  * }} CommandOptions
@@ -75,6 +75,14 @@ export default class WS {
    * @param {Options} options
    */
   constructor(options) {
+    /**
+     * @type {string}
+     */
+    this.userId = '';
+    /**
+     * @type {string}
+     */
+    this.connId = v4();
     /**
      * @type {WebSocket | null}
      */
@@ -136,6 +144,7 @@ export default class WS {
         lang: LANG,
         data: '',
         token: null,
+        userId: ws.userId,
       });
     });
   }
@@ -143,12 +152,21 @@ export default class WS {
   /**
    *
    * @param {WSMessageCli<WSMessageDataCli['checkToken']>} param0
-   * @param {string} connId
    * @returns
    */
-  async listenCheckToken({ data, token }, connId) {
-    this.token = token;
-    this.handler({ failedLogin: !data, sessionExists: true, connId });
+  async listenCheckToken({ data, token, type, userId }) {
+    if ((!data && type !== 'login') || !token) {
+      console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
+      process.exit(2);
+    }
+
+    this.setToken(token);
+    this.setUserId(userId);
+
+    this.handler({
+      failedLogin: !data,
+      sessionExists: true,
+    });
   }
 
   /**
@@ -166,9 +184,8 @@ export default class WS {
 
   /**
    *
-   * @param {string} connId
    */
-  async listenTest(connId) {
+  async listenTest() {
     const authData = this.readSessionFile();
     if (authData) {
       if (authData.iv !== '') {
@@ -180,7 +197,7 @@ export default class WS {
 
         if (token === null) {
           console.warn("Password is wrong, current session can't be use");
-          this.handler({ failedLogin: true, connId });
+          this.handler({ failedLogin: true });
           return;
         }
 
@@ -191,6 +208,7 @@ export default class WS {
           lang: LANG,
           message: '',
           status: 'info',
+          userId: this.userId,
         });
       } else {
         console.info("Now it's using the saved session token");
@@ -201,38 +219,52 @@ export default class WS {
           lang: LANG,
           message: '',
           status: 'info',
+          userId: this.userId,
         });
       }
     } else if (!this.options.isLogin) {
       console.warn(`You are not authenticated, run "${PACKAGE_NAME} login" first`);
       process.exit(1);
     } else {
-      this.handler({ failedLogin: false, sessionExists: false, connId });
+      this.handler({ failedLogin: false, sessionExists: false });
     }
   }
 
   /**
    *
-   * @param {string} connId
    * @param {WSMessageCli<WSMessageDataCli['any']>} msg
    */
-  async handleCommonMessages(connId, msg) {
-    const { type, status, message } = msg;
+  async handleCommonMessages(msg) {
+    const { type, status, message, data } = msg;
     switch (type) {
       case 'test':
-        await this.listenTest(connId);
+        await this.listenTest();
         break;
       case 'checkToken':
-        await this.listenCheckToken(msg, connId);
+        await this.listenCheckToken(msg);
         break;
       case 'message':
         console[status](`<cloud> ${message}`);
-        if (status === 'error') {
-          process.exit(1);
+        if (status === 'error' || data) {
+          process.exit(!data ? 1 : 0);
         }
         break;
       default:
         console.warn('Default message case of login command', message);
     }
+  }
+
+  /**
+   * @param {string} userId
+   */
+  setUserId(userId) {
+    this.userId = userId;
+  }
+
+  /**
+   * @param {string} token
+   */
+  setToken(token) {
+    this.token = token;
   }
 }
