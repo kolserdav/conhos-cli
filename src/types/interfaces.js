@@ -64,8 +64,15 @@
  *  baseValue: number;
  *  baseCost: number;
  * }} deployData
- * @property {null} getLogs
- * @property {string} logs
+ * @property {{
+ *  watch: boolean;
+ *  project: string;
+ *  serviceName: string;
+ * }} getLogs
+ * @property {{
+ *  last: boolean;
+ *  text: string;
+ * }} logs
  */
 
 /**
