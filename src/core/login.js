@@ -31,7 +31,6 @@ export default class Login extends WS {
     const _options = { ...options };
     _options.isLogin = true;
     super(_options);
-    this.listener();
   }
 
   listener() {
@@ -116,7 +115,7 @@ export default class Login extends WS {
 
   openNewSession() {
     console.info('Trying to create a new session...');
-    /** @type {typeof this.sendMessage<WSMessageDataCli['login']>} */ (this.sendMessage)({
+    /** @type {typeof this.sendMessage<'login'>} */ (this.sendMessage)({
       status: 'info',
       type: 'login',
       message: '',

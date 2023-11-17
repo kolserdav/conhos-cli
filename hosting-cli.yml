@@ -7,6 +7,12 @@ services:
     ports:
       - 3000
     environment:
-      PORT: "3000"
+      PORT: '3000'
+  redis1:
+    type: redis
+    size: mili
+    image: 7.2.3
+    ports: []
+    environment: {}
 exclude:
   - dist

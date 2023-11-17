@@ -1,4 +1,3 @@
-import { v4 } from 'uuid';
 import WS from '../tools/ws.js';
 import Tar from '../utils/tar.js';
 import { getPackage, getTmpArchive, stdoutWriteStart, getConfigFilePath } from '../utils/lib.js';
@@ -25,7 +24,6 @@ export default class Deploy extends WS {
      * @type {string}
      */
     this.configFile = getConfigFilePath();
-    this.listener();
   }
 
   /**
@@ -90,7 +88,7 @@ export default class Deploy extends WS {
     const rStream = createReadStream(fileTar);
     let num = 0;
     rStream.on('data', (chunk) => {
-      /** @type {typeof this.sendMessage<WSMessageDataCli['deploy']>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<'deploy'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
         type: 'deploy',
@@ -112,7 +110,7 @@ export default class Deploy extends WS {
       );
     });
     rStream.on('close', () => {
-      /** @type {typeof this.sendMessage<WSMessageDataCli['deploy']>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<'deploy'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
         type: 'deploy',

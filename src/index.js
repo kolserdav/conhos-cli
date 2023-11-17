@@ -6,6 +6,7 @@ import Login from './core/login.js';
 import Deploy from './core/deploy.js';
 import { getPackagePath, console } from './utils/lib.js';
 import Init from './core/init.js';
+import Logs from './core/logs.js';
 
 const packageHomeDir = getPackagePath();
 if (!fs.existsSync(packageHomeDir)) {
@@ -19,18 +20,19 @@ const program = new Command();
 
 program
   .enablePositionalOptions()
-  .usage(`[options] <command>`)
+  .usage(`[options] <command> [options]`)
   .name(PACKAGE_NAME)
   .version(PACKAGE_VERSION, '-v, --version')
   .description('Hosting client');
 
 program
   .command('login')
+  .usage(`[options] <command> [options]`)
   .description('Login via browser')
   .option('-c, --crypt', 'encrypt session token with password')
   .option('-r, --remove', 'remove session token from this device')
   .action(async (options) => {
-    new Login(options);
+    new Login({ ...options, isLogin: true });
   });
 
 program
@@ -41,7 +43,18 @@ program
   });
 
 program
+  .command('logs')
+  .usage(`[options] <service_name> [options]`)
+  .description('Show logs of the service')
+  .option('-w, --watch', 'Looking forward to the next logs')
+  .argument('<service_name>', 'The name of target service')
+  .action(async (arg, options) => {
+    new Logs(options, arg);
+  });
+
+program
   .command('init')
+  .usage(`[options] <command> [options]`)
   .description('Set up project configuration')
   .option('-y, --yes', 'default for all')
   .action(async (options) => {

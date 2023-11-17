@@ -13,7 +13,7 @@ const crypto = new Crypto();
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 /**
- * @template T
+ * @template {keyof WSMessageDataCli} T
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
@@ -30,9 +30,10 @@ const crypto = new Crypto();
 
 /**
  * @typedef {{
- *  crypt: boolean;
- *  remove: boolean;
- *  yes: boolean;
+ *  crypt?: boolean;
+ *  remove?: boolean;
+ *  yes?: boolean;
+ *  watch?: boolean;
  *  isLogin?: boolean;
  * }} Options
  */
@@ -50,7 +51,7 @@ const inquirer = new Inquirer();
  * @abstract
  * @constructor
  */
-class WSInterface {
+export class WSInterface {
   /**
    * @abstract
    */
@@ -72,30 +73,42 @@ class WSInterface {
  */
 export default class WS {
   /**
+   * @type {string}
+   */
+  userId;
+
+  /**
+   * @type {string}
+   */
+  connId;
+
+  /**
+   * @type {WebSocket | null}
+   */
+  conn;
+
+  /**
+   * @type {Options}
+   */
+  options;
+
+  /**
+   * @type {string | null}
+   */
+  token;
+
+  /**
    * @param {Options} options
    */
+
   constructor(options) {
-    /**
-     * @type {string}
-     */
-    this.userId = '';
-    /**
-     * @type {string}
-     */
-    this.connId = v4();
-    /**
-     * @type {WebSocket | null}
-     */
-    this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
-    /**
-     * @type {Options}
-     */
     this.options = options;
-    /**
-     * @type {string | null}
-     */
+    this.userId = '';
+    this.connId = v4();
+    this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
     this.token = null;
     this.start();
+    this.listener();
   }
 
   /**
@@ -113,7 +126,7 @@ export default class WS {
   }
 
   /**
-   * @template T
+   * @template {keyof WSMessageDataCli} T
    * @param {WSMessageCli<T>} data
    * @returns
    */
@@ -137,7 +150,7 @@ export default class WS {
     const ws = this;
     this.conn.on('open', function open() {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
-      /** @type {typeof ws.sendMessage<WSMessageDataCli['setSocket']>} */ (ws.sendMessage)({
+      /** @type {typeof ws.sendMessage<'setSocket'>} */ (ws.sendMessage)({
         status: 'info',
         type: 'setSocket',
         message: '',
@@ -151,11 +164,11 @@ export default class WS {
 
   /**
    *
-   * @param {WSMessageCli<WSMessageDataCli['checkToken']>} param0
+   * @param {WSMessageCli<'checkToken'>} param0
    * @returns
    */
-  async listenCheckToken({ data, token, type, userId }) {
-    if ((!data && type !== 'login') || !token) {
+  async listenCheckToken({ data, token, userId }) {
+    if ((!data && !this.options.isLogin) || !token) {
       console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
       process.exit(2);
     }
@@ -201,7 +214,7 @@ export default class WS {
           return;
         }
 
-        /** @type {typeof this.sendMessage<WSMessageDataCli['checkToken']>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
           token,
           type: 'checkToken',
           data: false,
@@ -212,7 +225,7 @@ export default class WS {
         });
       } else {
         console.info("Now it's using the saved session token");
-        /** @type {typeof this.sendMessage<WSMessageDataCli['checkToken']>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkToken',
           data: false,
@@ -250,7 +263,7 @@ export default class WS {
         }
         break;
       default:
-        console.warn('Default message case of login command', message);
+        console.warn('Default message case of command:', type);
     }
   }
 

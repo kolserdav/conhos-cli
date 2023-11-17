@@ -29,7 +29,7 @@ const yaml = new Yaml();
  * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
  */
 /**
- * @template T
+ * @template {keyof WSMessageDataCli} T
  * @typedef {import('../tools/ws.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
@@ -58,7 +58,6 @@ export default class Init extends WS {
      * @type {number}
      */
     this.index = 0;
-    this.listener();
   }
 
   listener() {
@@ -119,7 +118,7 @@ export default class Init extends WS {
 
   /**
    *
-   * @param {WSMessageCli<WSMessageDataCli['deployData']>} param0
+   * @param {WSMessageCli<'deployData'>} param0
    */
   async handleDeployData(param0) {
     const {
@@ -269,7 +268,7 @@ export default class Init extends WS {
     console.info('Starting init service script...');
     if (!existsSync(this.configFile)) {
       console.info('Config file is not found, creating...', this.configFile);
-      /** @type {typeof this.sendMessage<WSMessageDataCli['getDeployData']>} */ this.sendMessage({
+      /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
         token: this.token,
         type: 'getDeployData',
         message: '',
@@ -287,7 +286,7 @@ export default class Init extends WS {
     );
     if (overwriteConf) {
       console.info('Config file will be overwrite');
-      /** @type {typeof this.sendMessage<WSMessageDataCli['getDeployData']>} */ this.sendMessage({
+      /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
         token: this.token,
         type: 'getDeployData',
         message: '',

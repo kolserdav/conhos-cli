@@ -26,6 +26,10 @@
  */
 
 /**
+ * @typedef {'info' | 'warn' | 'error'} Status
+ */
+
+/**
  * @typedef {object} WSMessageDataCli
  * @property {any} any
  * @property {string} setSocket
@@ -60,22 +64,19 @@
  *  baseValue: number;
  *  baseCost: number;
  * }} deployData
+ * @property {null} getLogs
+ * @property {string} logs
  */
 
 /**
- * @typedef {'info' | 'warn' | 'error'} Status
- */
-
-/**
- * @template T
+ * @template {keyof WSMessageDataCli} T
  * @typedef {{
  *  status: Status;
- *  type: 'login' | 'setSocket' | 'test' | 'checkToken' |
- *  'deploy' | 'deployData' | 'getDeployData' | 'message';
+ *  type: T;
  *  message: string;
  *  userId: string;
  *  lang: 'en';
- *  data: T;
+ *  data: WSMessageDataCli[T];
  *  token: string | null;
  * }} WSMessageCli
  */
