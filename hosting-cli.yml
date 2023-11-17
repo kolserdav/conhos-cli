@@ -1,5 +1,5 @@
 services:
-  node0:
+  node1:
     type: node
     size: mili
     image: 21-alpine3.17

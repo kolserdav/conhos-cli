@@ -7,7 +7,7 @@ const server = http.createServer((req, res) => {
   console.info('Request', req.url);
   res.end(
     JSON.stringify({
-      data: "It's working in cloud",
+      data: "It's working in cloud!",
     })
   );
 });

@@ -15,6 +15,25 @@ import { existsSync, readFileSync } from 'fs';
  * }} Options
  */
 
+/**
+ * @param {any} arg
+ */
+const getBrightUnderline = (arg) => {
+  let _arg = arg;
+  if (arg && typeof arg === 'object') {
+    try {
+      const copyArg = { ...arg };
+      if (arg.token) {
+        copyArg.token = '*******';
+      }
+      _arg = JSON.stringify(copyArg);
+    } catch (e) {
+      Console.error('Failed stringify log argument', arg);
+    }
+  }
+  return _arg ? chalk.white(_arg) : '';
+};
+
 export const console = {
   /**
    *
@@ -23,7 +42,7 @@ export const console = {
    */
   log: (...args) => {
     if (DEBUG) {
-      Console.log(...args);
+      Console.log(chalk.gray(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
     }
   },
   /**
@@ -32,7 +51,7 @@ export const console = {
    * @returns {void}
    */
   info: (...args) => {
-    Console.info(...args);
+    Console.info(chalk.cyanBright(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
   },
   /**
    *
@@ -40,7 +59,7 @@ export const console = {
    * @returns {void}
    */
   warn: (...args) => {
-    Console.warn(...args);
+    Console.warn(chalk.yellow(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
   },
   /**
    *
@@ -48,7 +67,7 @@ export const console = {
    * @returns {void}
    */
   error: (...args) => {
-    Console.error(...args);
+    Console.error(chalk.red(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
   },
 };
 

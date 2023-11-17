@@ -1,4 +1,3 @@
-import { v4 } from 'uuid';
 import WS from '../tools/ws.js';
 import Inquirer from '../utils/inquirer.js';
 import {
@@ -15,7 +14,7 @@ import {
   PORT_DEFAULT,
 } from '../types/interfaces.js';
 import { existsSync, writeFileSync } from 'fs';
-import { getConfigFilePath } from '../utils/lib.js';
+import { getConfigFilePath, console } from '../utils/lib.js';
 import Yaml from '../utils/yaml.js';
 
 const yaml = new Yaml();

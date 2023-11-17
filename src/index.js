@@ -14,7 +14,7 @@ if (!fs.existsSync(packageHomeDir)) {
 }
 
 console.info(`Starting "${PACKAGE_NAME}" v${PACKAGE_VERSION} ...`);
-console.info('Package data dir:', packageHomeDir, '\n');
+console.info('Package data dir:', packageHomeDir);
 
 const program = new Command();
 
@@ -47,6 +47,16 @@ program
   .usage(`[options] <service_name> [options]`)
   .description('Show logs of the service')
   .option('-w, --watch', 'Looking forward to the next logs')
+  .option('-t, --timestamps', 'Show timestamps')
+  .option(
+    '--since <time>',
+    'Show logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)'
+  )
+  .option(
+    '--until <time>',
+    'Show logs before a timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)'
+  )
+  .option('-n, --tail <number_of_lines>', 'Number of lines to show from the end of the logs')
   .argument('<service_name>', 'The name of target service')
   .action(async (arg, options) => {
     new Logs(options, arg);

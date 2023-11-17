@@ -35,6 +35,10 @@ const crypto = new Crypto();
  *  yes?: boolean;
  *  watch?: boolean;
  *  isLogin?: boolean;
+ *  timestamps?: boolean;
+ *  since?: string;
+ *  until?: string;
+ *  tail?: number
  * }} Options
  */
 
@@ -224,7 +228,8 @@ export default class WS {
           userId: this.userId,
         });
       } else {
-        console.info("Now it's using the saved session token");
+        const authPath = getPackagePath(SESSION_FILE_NAME);
+        console.info("Now it's using the saved session token:", authPath);
         /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkToken',

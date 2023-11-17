@@ -66,8 +66,12 @@
  * }} deployData
  * @property {{
  *  watch: boolean;
+ *  timestamps: boolean;
  *  project: string;
  *  serviceName: string;
+ * since: string | undefined;
+ *  until: string | undefined;
+ *  tail: number | undefined
  * }} getLogs
  * @property {{
  *  last: boolean;

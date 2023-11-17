@@ -1,7 +1,9 @@
+import Console from 'console';
 import WS from '../tools/ws.js';
 import { parseMessageCli } from '../types/interfaces.js';
 import { LANG } from '../utils/constants.js';
-import { getPackage } from '../utils/lib.js';
+import { getPackage, console } from '../utils/lib.js';
+import chalk from 'chalk';
 
 /**
  * @typedef {import("../tools/ws.js").Options} Options
@@ -53,7 +55,7 @@ export default class Logs extends WS {
    * @param {WSMessageCli<'logs'>} msg
    */
   handleLogs({ data: { text, last }, status }) {
-    console[status](text);
+    Console[status](chalk.whiteBright(text));
     if (last) {
       process.exit(0);
     }
@@ -75,8 +77,12 @@ export default class Logs extends WS {
       message: '',
       data: {
         watch: this.options.watch || false,
+        timestamps: this.options.timestamps || false,
         serviceName: this.serviceName,
         project: pack.name,
+        since: this.options.since,
+        until: this.options.until,
+        tail: this.options.tail,
       },
       lang: LANG,
       status: 'info',
