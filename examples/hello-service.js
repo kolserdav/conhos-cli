@@ -1,4 +1,4 @@
-import http from 'node:http';
+import http from 'http';
 import { PORT_DEFAULT } from '../src/types/interfaces.js';
 
 // Create a local server to receive data from
