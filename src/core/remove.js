@@ -63,6 +63,7 @@ export default class Remove extends WS {
       token: this.token,
       message: '',
       type: 'remove',
+      packageName: PACKAGE_NAME,
       userId: this.userId,
       data: {
         project: config.project,

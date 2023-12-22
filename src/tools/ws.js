@@ -147,7 +147,11 @@ export default class WS {
       console.warn('Missing connection in send message');
       return;
     }
-    console.log('Send message', data);
+    let _data = { ...data };
+    if (data.type === 'deploy') {
+      _data.data.chunk = ['[...]'];
+    }
+    console.log('Send message', _data);
     this.conn.send(JSON.stringify(data));
   }
 
@@ -165,6 +169,7 @@ export default class WS {
       /** @type {typeof ws.sendMessage<'setSocket'>} */ (ws.sendMessage)({
         status: 'info',
         type: 'setSocket',
+        packageName: PACKAGE_NAME,
         message: '',
         lang: LANG,
         data: '',
@@ -242,6 +247,7 @@ export default class WS {
         /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
           token,
           type: 'checkToken',
+          packageName: PACKAGE_NAME,
           data: false,
           lang: LANG,
           message: '',
@@ -254,6 +260,7 @@ export default class WS {
         /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkToken',
+          packageName: PACKAGE_NAME,
           data: false,
           lang: LANG,
           message: '',
@@ -283,14 +290,8 @@ export default class WS {
         await this.listenCheckToken(msg);
         break;
       case 'message':
-        console[status](`<cloud> ${message}`);
-        if (status === 'error' || data) {
-          if (msg.command === 'deploy' && data) {
-            console.info(
-              'For show logs run command',
-              `${PACKAGE_NAME} logs --watch [service-name]`
-            );
-          }
+        console[status](`<cloud> ${message}`, data.msg);
+        if (status === 'error' || data.end) {
           process.exit(!data ? 1 : 0);
         }
         break;

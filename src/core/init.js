@@ -6,6 +6,7 @@ import {
   CONFIG_EXCLUDE_DEFAULT,
   SIZE_INDEX_DEFAULT,
   COMMAND_DEFAULT,
+  PACKAGE_NAME,
 } from '../utils/constants.js';
 import {
   parseMessageCli,
@@ -292,6 +293,7 @@ export default class Init extends WS {
       /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
         token: this.token,
         type: 'getDeployData',
+        packageName: PACKAGE_NAME,
         message: '',
         data: null,
         lang: LANG,
@@ -310,6 +312,7 @@ export default class Init extends WS {
       /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
         token: this.token,
         type: 'getDeployData',
+        packageName: PACKAGE_NAME,
         message: '',
         data: null,
         lang: LANG,

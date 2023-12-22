@@ -2,7 +2,7 @@ import WS from '../tools/ws.js';
 import Tar from '../utils/tar.js';
 import { getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
 import { createReadStream, statSync, readdirSync } from 'fs';
-import { LANG, CWD, EXPLICIT_EXCLUDE } from '../utils/constants.js';
+import { LANG, CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
 import { parseMessageCli } from '../types/interfaces.js';
 
 /**
@@ -80,6 +80,7 @@ export default class Deploy extends WS {
         message: '',
         type: 'deploy',
         userId: this.userId,
+        packageName: PACKAGE_NAME,
         data: {
           num,
           project,
@@ -102,6 +103,7 @@ export default class Deploy extends WS {
         message: '',
         type: 'deploy',
         userId: this.userId,
+        packageName: PACKAGE_NAME,
         data: {
           num,
           project,

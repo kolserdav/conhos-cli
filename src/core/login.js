@@ -1,7 +1,13 @@
 import { v4 } from 'uuid';
 import WS from '../tools/ws.js';
 import { getPackagePath, openBrowser } from '../utils/lib.js';
-import { SESSION_FILE_NAME, LANG, LOGIN_PAGE, QUERY_STRING_CONN_ID } from '../utils/constants.js';
+import {
+  SESSION_FILE_NAME,
+  LANG,
+  LOGIN_PAGE,
+  QUERY_STRING_CONN_ID,
+  PACKAGE_NAME,
+} from '../utils/constants.js';
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
@@ -119,6 +125,7 @@ export default class Login extends WS {
       status: 'info',
       type: 'login',
       message: '',
+      packageName: PACKAGE_NAME,
       lang: LANG,
       data: this.connId,
       token: null,

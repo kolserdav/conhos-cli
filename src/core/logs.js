@@ -1,7 +1,7 @@
 import Console from 'console';
 import WS from '../tools/ws.js';
 import { parseMessageCli } from '../types/interfaces.js';
-import { LANG } from '../utils/constants.js';
+import { LANG, PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
 import chalk from 'chalk';
 
@@ -76,6 +76,7 @@ export default class Logs extends WS {
       token: this.token,
       type: 'getLogs',
       message: '',
+      packageName: PACKAGE_NAME,
       data: {
         watch: this.options.watch || false,
         timestamps: this.options.timestamps || false,

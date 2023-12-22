@@ -37,7 +37,10 @@
  * @property {string} test
  * @property {string} login
  * @property {boolean} checkToken
- * @property {null | true} message
+ * @property {{
+ *  msg: string | number;
+ *  end: boolean;
+ * }} message
  * @property {{
  *  num: number;
  *  project: string;
@@ -88,7 +91,7 @@
  * @typedef {{
  *  status: Status;
  *  type: T;
- *  command?: keyof WSMessageDataCli,
+ *  packageName: string;
  *  message: string;
  *  userId: string;
  *  lang: 'en';
