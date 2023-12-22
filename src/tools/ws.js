@@ -285,6 +285,12 @@ export default class WS {
       case 'message':
         console[status](`<cloud> ${message}`);
         if (status === 'error' || data) {
+          if (msg.command === 'deploy' && data) {
+            console.info(
+              'For show logs run command',
+              `${PACKAGE_NAME} logs --watch [service-name]`
+            );
+          }
           process.exit(!data ? 1 : 0);
         }
         break;

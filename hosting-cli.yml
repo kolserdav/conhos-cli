@@ -2,9 +2,9 @@ project: hosting-cli
 services:
   node0:
     type: node
-    size: kilo
+    size: mili
     image: 21-alpine3.18
-    command: sh -c "npm install && npm run start"
+    command: sh -c "echo Starting service... && npm install && npm run start"
     ports:
       - 3000
     environment:
