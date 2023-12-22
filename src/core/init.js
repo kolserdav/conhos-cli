@@ -14,8 +14,9 @@ import {
   PORT_DEFAULT,
 } from '../types/interfaces.js';
 import { existsSync, writeFileSync } from 'fs';
-import { getConfigFilePath, console } from '../utils/lib.js';
+import { getConfigFilePath, console, getPackageName } from '../utils/lib.js';
 import Yaml from '../utils/yaml.js';
+import path from 'path';
 
 const yaml = new Yaml();
 
@@ -135,6 +136,8 @@ export default class Init extends WS {
      */
     let ports = [];
 
+    const project = await this.getProject();
+
     /**
      * @type {any}
      */
@@ -158,6 +161,7 @@ export default class Init extends WS {
       writeFileSync(
         this.configFile,
         yaml.stringify({
+          project,
           services: {
             node1: {
               type: 'node',
@@ -166,7 +170,7 @@ export default class Init extends WS {
               command,
               ports: [PORT_DEFAULT],
               environment: {
-                PORT: PORT_DEFAULT.toString(),
+                PORT: PORT_DEFAULT,
               },
             },
           },
@@ -204,15 +208,13 @@ export default class Init extends WS {
       image,
       command,
       ports,
-      environment: {
-        PORT: ports[0] ? ports[0].toString() : undefined,
-      },
+      environment: ports.map((item, index) => `PORT${index === 0 ? '' : index}=${item}`),
     };
     this.increaseIndex();
 
     writeFileSync(
       this.configFile,
-      yaml.stringify({ services: this.services, exclude: CONFIG_EXCLUDE_DEFAULT })
+      yaml.stringify({ project, services: this.services, exclude: CONFIG_EXCLUDE_DEFAULT })
     );
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
@@ -258,6 +260,26 @@ export default class Init extends WS {
       return this.getPorts(_ports);
     }
     return _ports;
+  }
+
+  /**
+   *
+   * @returns {Promise<string>}
+   */
+  async getProject() {
+    const defaultProject = getPackageName();
+    const project = await inquirer.input(
+      'Setting up the project name',
+      defaultProject || path.basename(path.resolve()),
+      (input) => {
+        const projectNameReg = /^[0-9a-zA-z\-_\\.]+$/;
+        if (!projectNameReg.test(input)) {
+          return `Project name contain not allowed symbols. Allowed regex: ${projectNameReg}`;
+        }
+        return true;
+      }
+    );
+    return project;
   }
 
   /**

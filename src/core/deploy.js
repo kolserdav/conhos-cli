@@ -1,12 +1,9 @@
 import WS from '../tools/ws.js';
 import Tar from '../utils/tar.js';
-import { getPackage, getTmpArchive, stdoutWriteStart, getConfigFilePath } from '../utils/lib.js';
-import { createReadStream, statSync, existsSync, readFileSync, readdirSync } from 'fs';
-import { LANG, PACKAGE_NAME, CWD, EXPLICIT_EXCLUDE } from '../utils/constants.js';
+import { getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
+import { createReadStream, statSync, readdirSync } from 'fs';
+import { LANG, CWD, EXPLICIT_EXCLUDE } from '../utils/constants.js';
 import { parseMessageCli } from '../types/interfaces.js';
-import Yaml from '../utils/yaml.js';
-
-const yaml = new Yaml();
 
 /**
  * @typedef {import('../tools/ws.js').Options} Options
@@ -20,10 +17,6 @@ export default class Deploy extends WS {
    */
   constructor(options) {
     super(options);
-    /**
-     * @type {string}
-     */
-    this.configFile = getConfigFilePath();
   }
 
   /**
@@ -63,17 +56,11 @@ export default class Deploy extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    if (!existsSync(this.configFile)) {
-      console.warn('Config file is not exists run', `"${PACKAGE_NAME} init" first`);
-      process.exit(2);
-    }
-    const data = readFileSync(this.configFile).toString();
-    const config = yaml.parse(data);
-    const { exclude } = config;
+    const config = this.getConfig();
+    const { exclude, project } = config;
 
-    const pack = await getPackage();
-    console.info(`Starting deploy "${pack.name}" project`);
-    const fileTar = getTmpArchive(pack.name);
+    console.info(`Starting deploy "${project}" project`);
+    const fileTar = getTmpArchive(project);
     const tar = new Tar();
     await tar.create({
       fileList: readdirSync(CWD)
@@ -95,7 +82,7 @@ export default class Deploy extends WS {
         userId: this.userId,
         data: {
           num,
-          project: pack.name,
+          project,
           last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
           config: null,
@@ -117,7 +104,7 @@ export default class Deploy extends WS {
         userId: this.userId,
         data: {
           num,
-          project: pack.name,
+          project,
           last: true,
           chunk: new Uint8Array(),
           config,

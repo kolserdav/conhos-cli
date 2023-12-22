@@ -101,12 +101,22 @@ export function stdoutWriteStart(title) {
 
 /**
  *
- * @returns {any}
+ * @returns {string | undefined}
  */
-export function getPackage() {
+export function getPackageName() {
   const cwd = process.cwd();
   const data = readFileSync(path.resolve(cwd, 'package.json')).toString();
-  return JSON.parse(data);
+
+  /**
+   * @type {any}
+   */
+  let pack = {};
+  try {
+    pack = JSON.parse(data);
+  } catch (_) {
+    /** */
+  }
+  return pack.name;
 }
 
 /**

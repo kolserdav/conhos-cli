@@ -9,13 +9,14 @@
 
 /**
  * @typedef {{
+ *  project: string;
  *  services: Record<string, {
  *    type: ServiceType;
  *    size: string;
  *    image: string;
  *    command?: string;
  *    ports: number[];
- *    environment: Record<string, string | undefined>;
+ *    environment: string[] | Record<string, string | number>;
  *  }>
  *  exclude: string[]
  * }} ConfigFile
@@ -69,7 +70,7 @@
  *  timestamps: boolean;
  *  project: string;
  *  serviceName: string;
- * since: string | undefined;
+ *  since: string | undefined;
  *  until: string | undefined;
  *  tail: number | undefined
  * }} getLogs
@@ -77,6 +78,9 @@
  *  last: boolean;
  *  text: string;
  * }} logs
+ *  @property {{
+ *  project: string;
+ * }} remove
  */
 
 /**

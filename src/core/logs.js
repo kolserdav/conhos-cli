@@ -2,7 +2,7 @@ import Console from 'console';
 import WS from '../tools/ws.js';
 import { parseMessageCli } from '../types/interfaces.js';
 import { LANG } from '../utils/constants.js';
-import { getPackage, console } from '../utils/lib.js';
+import { console } from '../utils/lib.js';
 import chalk from 'chalk';
 
 /**
@@ -70,7 +70,8 @@ export default class Logs extends WS {
       this.options.watch ? 'in watching mode' : '',
       '...'
     );
-    const pack = await getPackage();
+    const { project } = this.getConfig();
+
     /** @type {typeof this.sendMessage<'getLogs'>} */ (this.sendMessage)({
       token: this.token,
       type: 'getLogs',
@@ -79,7 +80,7 @@ export default class Logs extends WS {
         watch: this.options.watch || false,
         timestamps: this.options.timestamps || false,
         serviceName: this.serviceName,
-        project: pack.name,
+        project,
         since: this.options.since,
         until: this.options.until,
         tail: this.options.tail,

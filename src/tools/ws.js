@@ -1,16 +1,19 @@
 import WebSocket from 'ws';
 import { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } from '../utils/constants.js';
-import { getPackagePath, console } from '../utils/lib.js';
+import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import { PROTOCOL_CLI } from '../types/interfaces.js';
 import { v4 } from 'uuid';
+import Yaml from '../utils/yaml.js';
 
 const crypto = new Crypto();
+const yaml = new Yaml();
 
 /**
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -102,9 +105,13 @@ export default class WS {
   token;
 
   /**
+   * @type {string}
+   */
+  configFile;
+
+  /**
    * @param {Options} options
    */
-
   constructor(options) {
     this.options = options;
     this.userId = '';
@@ -113,6 +120,7 @@ export default class WS {
     this.token = null;
     this.start();
     this.listener();
+    this.configFile = getConfigFilePath();
   }
 
   /**
@@ -184,6 +192,19 @@ export default class WS {
       failedLogin: !data,
       sessionExists: true,
     });
+  }
+
+  /**
+   *
+   * @returns {ConfigFile}
+   */
+  getConfig() {
+    if (!existsSync(this.configFile)) {
+      console.warn('Config file is not exists, run', `"${PACKAGE_NAME} init" first`);
+      process.exit(2);
+    }
+    const data = readFileSync(this.configFile).toString();
+    return yaml.parse(data);
   }
 
   /**
