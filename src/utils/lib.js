@@ -31,7 +31,7 @@ const getBrightUnderline = (arg) => {
       Console.error('Failed stringify log argument', arg);
     }
   }
-  return _arg ? chalk.white(_arg) : '';
+  return _arg ? (/https?:\/\//.test(_arg) ? chalk.blue(_arg) : chalk.white(_arg)) : '';
 };
 
 export const console = {

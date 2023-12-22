@@ -1,6 +1,6 @@
 import WS from '../tools/ws.js';
 import Tar from '../utils/tar.js';
-import { getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
+import { console, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
 import { createReadStream, statSync, readdirSync } from 'fs';
 import { LANG, CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
 import { parseMessageCli } from '../types/interfaces.js';
@@ -50,11 +50,27 @@ export default class Deploy extends WS {
   }
 
   /**
-   * @param {WSMessageCli<'login'>} param0
+   * @param {WSMessageCli<'setDomains'>} param0
    */
   setDomainsHandler({ data }) {
-    // TODO
-    console.log(data);
+    const configFile = this.getConfig();
+    const _configFile = structuredClone(configFile);
+    Object.keys(configFile.services).forEach((item) => {
+      const dataDomains = data.find((_item) => _item.service === item);
+      if (!dataDomains) {
+        console.warn(`Failed to find domains for service "${item}"`, data);
+        return;
+      }
+      const { domains } = dataDomains;
+      _configFile.services[item].domains = domains;
+      console.info(
+        `Service "${item}" links:\n`,
+        Object.keys(domains)
+          .map((dK) => `${dK}: http://${domains[parseInt(dK, 10)]}`)
+          .join('\n ')
+      );
+    });
+    this.writeConfigFile(_configFile);
   }
 
   /**
