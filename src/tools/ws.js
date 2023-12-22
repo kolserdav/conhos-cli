@@ -147,7 +147,7 @@ export default class WS {
       console.warn('Missing connection in send message');
       return;
     }
-    let _data = { ...data };
+    let _data = structuredClone(data);
     if (data.type === 'deploy') {
       _data.data.chunk = ['[...]'];
     }

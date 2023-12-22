@@ -34,7 +34,7 @@ export default class Login extends WS {
    * @param {Options} options
    */
   constructor(options) {
-    const _options = { ...options };
+    const _options = structuredClone(options);
     _options.isLogin = true;
     super(_options);
   }
