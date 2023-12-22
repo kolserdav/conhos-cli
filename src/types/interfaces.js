@@ -88,6 +88,7 @@
  * @typedef {{
  *  status: Status;
  *  type: T;
+ *  command?: keyof WSMessageDataCli,
  *  message: string;
  *  userId: string;
  *  lang: 'en';

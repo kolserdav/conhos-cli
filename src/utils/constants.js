@@ -45,7 +45,7 @@ export const PACKAGES_DIR_NAME = 'packages';
 export const SERVICE_SIZE_DEFAULT = 'micro';
 
 export const CURRENCY = 'RUB';
-export const COMMAND_DEFAULT = 'sh -c "npm install && npm run start"';
+export const COMMAND_DEFAULT = 'sh -c "echo Starting service... && npm install && npm run start"';
 export const CONFIG_EXCLUDE_DEFAULT = ['dist'];
 export const EXPLICIT_EXCLUDE = ['.git', '.vscode', 'node_modules'];
 export const SIZE_INDEX_DEFAULT = 3;
