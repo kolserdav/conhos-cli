@@ -11,6 +11,11 @@ import { parseMessageCli } from '../types/interfaces.js';
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 
+/**
+ * @template {keyof WSMessageDataCli} T
+ * @typedef {import('../tools/ws.js').WSMessageCli<T>} WSMessageCli<T>
+ */
+
 export default class Deploy extends WS {
   /**
    * @param {Options} options
@@ -35,10 +40,21 @@ export default class Deploy extends WS {
       }
       const { type } = rawMessage;
       switch (type) {
+        case 'setDomains':
+          this.setDomainsHandler(rawMessage);
+          break;
         default:
           await this.handleCommonMessages(rawMessage);
       }
     });
+  }
+
+  /**
+   * @param {WSMessageCli<'login'>} param0
+   */
+  setDomainsHandler({ data }) {
+    // TODO
+    console.log(data);
   }
 
   /**

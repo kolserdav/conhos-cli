@@ -6,8 +6,8 @@ services:
     image: 21-alpine3.18
     command: sh -c "echo Starting service... && npm install && npm run start"
     ports:
-      - 3003
+      - 3004
     environment:
-      - PORT=3003
+      - PORT=3004
 exclude:
   - dist

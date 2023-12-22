@@ -9,6 +9,13 @@
 
 /**
  * @typedef {{
+ *  service: string;
+ *  domains: Record<number, string>;
+ * }} NewDomains
+ */
+
+/**
+ * @typedef {{
  *  project: string;
  *  services: Record<string, {
  *    type: ServiceType;
@@ -16,6 +23,7 @@
  *    image: string;
  *    command?: string;
  *    ports: number[];
+ *    domains?: NewDomains['domains'],
  *    environment: string[] | Record<string, string | number>;
  *  }>
  *  exclude: string[]
@@ -84,6 +92,7 @@
  *  @property {{
  *  project: string;
  * }} remove
+ * @property {NewDomains[]} setDomains
  */
 
 /**

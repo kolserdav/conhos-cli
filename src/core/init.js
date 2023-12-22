@@ -14,12 +14,9 @@ import {
   PORT_MAX,
   PORT_DEFAULT,
 } from '../types/interfaces.js';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { getConfigFilePath, console, getPackageName } from '../utils/lib.js';
-import Yaml from '../utils/yaml.js';
 import path from 'path';
-
-const yaml = new Yaml();
 
 /**
  * @typedef {import('../tools/ws.js').Options} Options
@@ -38,26 +35,38 @@ const inquirer = new Inquirer();
 
 export default class Init extends WS {
   /**
+   * @type {string}
+   */
+  configFile;
+
+  /**
+   * @type {ConfigFile['services']}
+   */
+  services;
+
+  /**
+   * @type {Options}
+   */
+  options;
+
+  /**
+   * @type {number}
+   */
+  index;
+
+  /**
    *
    * @param {Options} options
    */
   constructor(options) {
     super(options);
-    /**
-     * @type {ConfigFile['services']}
-     */
+
     this.services = {};
-    /**
-     * @type {string}
-     */
+
     this.configFile = getConfigFilePath();
-    /**
-     * @type {Options}
-     */
+
     this.options = options;
-    /**
-     * @type {number}
-     */
+
     this.index = 0;
   }
 
@@ -159,25 +168,22 @@ export default class Init extends WS {
     }
 
     if (this.options.yes) {
-      writeFileSync(
-        this.configFile,
-        yaml.stringify({
-          project,
-          services: {
-            node1: {
-              type: 'node',
-              image: serv.tags[0],
-              size: sizes[SIZE_INDEX_DEFAULT].name,
-              command,
-              ports: [PORT_DEFAULT],
-              environment: {
-                PORT: PORT_DEFAULT,
-              },
+      this.writeConfigFile({
+        project,
+        services: {
+          node1: {
+            type: 'node',
+            image: serv.tags[0],
+            size: sizes[SIZE_INDEX_DEFAULT].name,
+            command,
+            ports: [PORT_DEFAULT],
+            environment: {
+              PORT: PORT_DEFAULT,
             },
           },
-          exclude: CONFIG_EXCLUDE_DEFAULT,
-        })
-      );
+        },
+        exclude: CONFIG_EXCLUDE_DEFAULT,
+      });
 
       console.info('Project successfully initialized', this.configFile);
       process.exit(0);
@@ -213,10 +219,7 @@ export default class Init extends WS {
     };
     this.increaseIndex();
 
-    writeFileSync(
-      this.configFile,
-      yaml.stringify({ project, services: this.services, exclude: CONFIG_EXCLUDE_DEFAULT })
-    );
+    this.writeConfigFile({ project, services: this.services, exclude: CONFIG_EXCLUDE_DEFAULT });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
     if (addAnother) {

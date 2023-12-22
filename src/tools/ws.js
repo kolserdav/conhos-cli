@@ -2,7 +2,7 @@ import WebSocket from 'ws';
 import { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } from '../utils/constants.js';
 import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import { PROTOCOL_CLI } from '../types/interfaces.js';
 import { v4 } from 'uuid';
@@ -210,6 +210,14 @@ export default class WS {
     }
     const data = readFileSync(this.configFile).toString();
     return yaml.parse(data);
+  }
+
+  /**
+   *
+   * @param {ConfigFile} config
+   */
+  writeConfigFile(config) {
+    writeFileSync(this.configFile, yaml.stringify(config));
   }
 
   /**
