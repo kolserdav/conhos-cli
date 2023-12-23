@@ -212,8 +212,10 @@ export default class WS {
     const config = yaml.parse(data);
     const checkErr = checkConfig(config);
     if (checkErr) {
-      console.warn(checkErr);
-      return null;
+      console.warn(checkErr.msg, checkErr.data);
+      if (checkErr.exit) {
+        process.exit(2);
+      }
     }
     return config;
   }

@@ -77,7 +77,6 @@ export default class Init extends WS {
       return;
     }
 
-    const ws = this;
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
       if (rawMessage === null) {
@@ -142,7 +141,31 @@ export default class Init extends WS {
     /**
      * @type {string | undefined}
      */
-    let command;
+    let command = COMMAND_DEFAULT;
+
+    if (this.options.yes) {
+      this.writeConfigFile({
+        project: this.getDefaultProject(),
+        services: {
+          node1: {
+            type: 'node',
+            active: true,
+            image: this.getService('node', services)?.tags[0] || 'latest',
+            size: sizes[SIZE_INDEX_DEFAULT].name,
+            command,
+            ports: [PORT_DEFAULT],
+            environment: {
+              PORT: PORT_DEFAULT.port,
+            },
+          },
+        },
+        exclude: CONFIG_EXCLUDE_DEFAULT,
+      });
+
+      console.info('Project successfully initialized', this.configFile);
+      process.exit(0);
+    }
+
     /**
      * @type {ConfigFile['services'][0]['ports']}
      */
@@ -169,28 +192,6 @@ export default class Init extends WS {
       process.exit(1);
     }
 
-    if (this.options.yes) {
-      this.writeConfigFile({
-        project,
-        services: {
-          node1: {
-            type: 'node',
-            image: serv.tags[0],
-            size: sizes[SIZE_INDEX_DEFAULT].name,
-            command,
-            ports: [{ port: PORT_DEFAULT, type: 'http' }],
-            environment: {
-              PORT: PORT_DEFAULT,
-            },
-          },
-        },
-        exclude: CONFIG_EXCLUDE_DEFAULT,
-      });
-
-      console.info('Project successfully initialized', this.configFile);
-      process.exit(0);
-    }
-
     const size = await inquirer.list(
       'Select size of service',
       sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue })),
@@ -206,7 +207,7 @@ export default class Init extends WS {
 
     // Switch services
     if (service === 'node') {
-      command = await inquirer.input('Specify service start command', COMMAND_DEFAULT);
+      command = await inquirer.input('Specify service start command', command);
 
       ports = await this.getPorts();
     }
@@ -214,6 +215,7 @@ export default class Init extends WS {
     this.services[`${service}${this.index}`] = {
       type: service,
       size,
+      active: true,
       image,
       command,
       ports,
@@ -241,14 +243,14 @@ export default class Init extends WS {
     const _ports = ports.slice();
     const port = await inquirer.input(
       ports.length === 0 ? 'Setting up a listening port' : 'Setting up another listening port',
-      PORT_DEFAULT,
+      PORT_DEFAULT.port,
       (input) => {
         const num = parseInt(input, 10);
         if (Number.isNaN(num) || !/^\d+$/.test(input)) {
           return 'Port must be a decimal number';
         }
-        if (num < PORT_DEFAULT) {
-          return `Port must be more than ${PORT_DEFAULT}`;
+        if (num < PORT_DEFAULT.port) {
+          return `Port must be more than ${PORT_DEFAULT.port}`;
         }
         if (num > PORT_MAX) {
           return `Port can't be more than ${PORT_MAX}`;
@@ -278,14 +280,21 @@ export default class Init extends WS {
   }
 
   /**
+   * @returns {string}
+   */
+  getDefaultProject() {
+    const defaultProject = getPackageName();
+    return defaultProject || path.basename(path.resolve());
+  }
+
+  /**
    *
    * @returns {Promise<string>}
    */
   async getProject() {
-    const defaultProject = getPackageName();
     const project = await inquirer.input(
       'Setting up the project name',
-      defaultProject || path.basename(path.resolve()),
+      this.getDefaultProject(),
       (input) => {
         const projectNameReg = /^[0-9a-zA-z\-_\\.]+$/;
         if (!projectNameReg.test(input)) {

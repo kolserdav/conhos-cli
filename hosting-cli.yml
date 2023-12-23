@@ -1,16 +1,15 @@
 project: hosting-cli
 services:
-  node0:
+  node1:
     type: node
-    size: pico
+    active: true
     image: 21-alpine3.18
+    size: mili
     command: sh -c "echo Starting service... && npm install && npm run start"
     ports:
       - port: 3000
-        type: ws
+        type: http
     environment:
-      - PORT=3000
-    domains:
-      "3000": foreanswer-classmate-plakat.cloud.uyem.ru
+      PORT: 3000
 exclude:
   - dist

@@ -1,19 +1,26 @@
 /**
  * @typedef {'node' | 'redis'} ServiceType
  * @typedef {'http' | 'ws'} PortType
- */
-
-/**
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
  *  'deca' | 'hecto' | 'kilo' | 'mega' | 'giga' | 'tera'} ServiceSize
- */
-
-/**
  * @typedef {{
  *  service: string;
  *  domains: Record<string, string>;
  * }} NewDomains
+ * @typedef {{
+ *  port: number;
+ *  type: PortType;
+ *  timeout?: string;
+ * }} Port
  */
+
+/**
+ * @type {Port}
+ */
+export const PORT_DEFAULT = {
+  port: 3000,
+  type: 'http',
+};
 
 /**
  * @type {PortType[]}
@@ -24,14 +31,12 @@ export const PORT_TYPES = ['http', 'ws'];
  * @typedef {{
  *  project: string;
  *  services: Record<string, {
+ *    active: boolean;
  *    type: ServiceType;
  *    size: string;
  *    image: string;
  *    command?: string;
- *    ports: {
- *      port: number;
- *      type: PortType
- *    }[];
+ *    ports: Port[];
  *    domains?: NewDomains['domains'],
  *    environment: string[] | Record<string, string | number>;
  *  }>
@@ -118,7 +123,6 @@ export const PORT_TYPES = ['http', 'ws'];
  * }} WSMessageCli
  */
 
-export const PORT_DEFAULT = 3000;
 export const PROTOCOL_CLI = 'cli';
 export const PORT_MAX = 65535;
 export const DOMAIN_MAX_LENGTH = 77;
@@ -159,21 +163,44 @@ export function parseMessageCli(msg) {
 }
 
 /**
+ * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
- * @returns {string | null}
+ * @returns {CheckConfigResult | null}
  */
 export function checkConfig(config) {
   /**
-   * @type {string | null}
+   * @type {CheckConfigResult | null}
    */
   let res = null;
   Object.keys(config.services).every((item) => {
-    const { domains } = config.services[item];
+    const { domains, ports } = config.services[item];
+
+    // Check ports
+    ports.forEach((item) => {
+      if (PORT_TYPES.indexOf(item.type) === -1) {
+        res = {
+          msg: `Port type "${item.type}" is not allowed`,
+          data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
+          exit: true,
+        };
+        return false;
+      }
+      return true;
+    });
+    if (res) {
+      return res;
+    }
+
+    // Check domains
     if (domains) {
       Object.keys(domains).every((_item) => {
         const domain = domains[_item];
         if (domain.length > DOMAIN_MAX_LENGTH) {
-          res = `Maximum allowed domain length is ${DOMAIN_MAX_LENGTH}. Domain "${domain}" is too long: ${domain.length}`;
+          res = {
+            msg: `Maximum allowed domain length is ${DOMAIN_MAX_LENGTH}. Passed domain is too long: ${domain.length}`,
+            data: domain,
+            exit: true,
+          };
           return false;
         }
         return true;
