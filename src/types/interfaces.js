@@ -1,5 +1,6 @@
 /**
  * @typedef {'node' | 'redis'} ServiceType
+ * @typedef {'http' | 'ws'} PortType
  */
 
 /**
@@ -15,6 +16,11 @@
  */
 
 /**
+ * @type {PortType[]}
+ */
+export const PORT_TYPES = ['http', 'ws'];
+
+/**
  * @typedef {{
  *  project: string;
  *  services: Record<string, {
@@ -22,7 +28,10 @@
  *    size: string;
  *    image: string;
  *    command?: string;
- *    ports: number[];
+ *    ports: {
+ *      port: number;
+ *      type: PortType
+ *    }[];
  *    domains?: NewDomains['domains'],
  *    environment: string[] | Record<string, string | number>;
  *  }>

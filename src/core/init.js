@@ -13,6 +13,7 @@ import {
   computeCostService,
   PORT_MAX,
   PORT_DEFAULT,
+  PORT_TYPES,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import { getConfigFilePath, console, getPackageName } from '../utils/lib.js';
@@ -25,6 +26,7 @@ import path from 'path';
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  * @typedef {import('../tools/ws.js').Session} Session
  * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
+ * @typedef {import('../types/interfaces.js').PortType} PortType
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -142,7 +144,7 @@ export default class Init extends WS {
      */
     let command;
     /**
-     * @type {number[]}
+     * @type {ConfigFile['services'][0]['ports']}
      */
     let ports = [];
 
@@ -176,7 +178,7 @@ export default class Init extends WS {
             image: serv.tags[0],
             size: sizes[SIZE_INDEX_DEFAULT].name,
             command,
-            ports: [PORT_DEFAULT],
+            ports: [{ port: PORT_DEFAULT, type: 'http' }],
             environment: {
               PORT: PORT_DEFAULT,
             },
@@ -215,7 +217,7 @@ export default class Init extends WS {
       image,
       command,
       ports,
-      environment: ports.map((item, index) => `PORT${index === 0 ? '' : index}=${item}`),
+      environment: ports.map((item, index) => `PORT${index === 0 ? '' : index}=${item.port}`),
     };
     this.increaseIndex();
 
@@ -232,8 +234,8 @@ export default class Init extends WS {
 
   /**
    *
-   * @param {number[]} ports
-   * @returns {Promise<number[]>}
+   * @param {ConfigFile['services'][0]['ports']} ports
+   * @returns {Promise<ConfigFile['services'][0]['ports']>}
    */
   async getPorts(ports = []) {
     const _ports = ports.slice();
@@ -251,13 +253,22 @@ export default class Init extends WS {
         if (num > PORT_MAX) {
           return `Port can't be more than ${PORT_MAX}`;
         }
-        if (_ports.indexOf(num) !== -1) {
+        if (_ports.find((item) => item.port === num)) {
           return 'The same port is already exists';
         }
         return true;
       }
     );
-    _ports.push(parseInt(port, 10));
+
+    /**
+     * @type {any}
+     */
+    const type = await inquirer.list('Select port type', PORT_TYPES, 0);
+
+    _ports.push({
+      port: parseInt(port, 10),
+      type,
+    });
 
     const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);
     if (anotherPort) {
