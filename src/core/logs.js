@@ -70,8 +70,12 @@ export default class Logs extends WS {
       this.options.watch ? 'in watching mode' : '',
       '...'
     );
-    const { project } = this.getConfig();
+    const config = this.getConfig();
+    if (!config) {
+      return;
+    }
 
+    const { project } = config;
     /** @type {typeof this.sendMessage<'getLogs'>} */ (this.sendMessage)({
       token: this.token,
       type: 'getLogs',

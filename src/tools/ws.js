@@ -4,7 +4,7 @@ import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
-import { PROTOCOL_CLI } from '../types/interfaces.js';
+import { PROTOCOL_CLI, checkConfig } from '../types/interfaces.js';
 import { v4 } from 'uuid';
 import Yaml from '../utils/yaml.js';
 
@@ -201,7 +201,7 @@ export default class WS {
 
   /**
    *
-   * @returns {ConfigFile}
+   * @returns {ConfigFile | null}
    */
   getConfig() {
     if (!existsSync(this.configFile)) {
@@ -209,7 +209,13 @@ export default class WS {
       process.exit(2);
     }
     const data = readFileSync(this.configFile).toString();
-    return yaml.parse(data);
+    const config = yaml.parse(data);
+    const checkErr = checkConfig(config);
+    if (checkErr) {
+      console.warn(checkErr);
+      return null;
+    }
+    return config;
   }
 
   /**

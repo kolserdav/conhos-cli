@@ -10,7 +10,7 @@
 /**
  * @typedef {{
  *  service: string;
- *  domains: Record<number, string>;
+ *  domains: Record<string, string>;
  * }} NewDomains
  */
 
@@ -109,6 +109,11 @@
  * }} WSMessageCli
  */
 
+export const PORT_DEFAULT = 3000;
+export const PROTOCOL_CLI = 'cli';
+export const PORT_MAX = 65535;
+export const DOMAIN_MAX_LENGTH = 77;
+
 /**
  *
  * @param {string} serviceSize
@@ -144,6 +149,31 @@ export function parseMessageCli(msg) {
   return data;
 }
 
-export const PORT_DEFAULT = 3000;
-export const PROTOCOL_CLI = 'cli';
-export const PORT_MAX = 65535;
+/**
+ * @param {ConfigFile} config
+ * @returns {string | null}
+ */
+export function checkConfig(config) {
+  /**
+   * @type {string | null}
+   */
+  let res = null;
+  Object.keys(config.services).every((item) => {
+    const { domains } = config.services[item];
+    if (domains) {
+      Object.keys(domains).every((_item) => {
+        const domain = domains[_item];
+        if (domain.length > DOMAIN_MAX_LENGTH) {
+          res = `Maximum allowed domain length is ${DOMAIN_MAX_LENGTH}. Domain "${domain}" is too long: ${domain.length}`;
+          return false;
+        }
+        return true;
+      });
+      if (res !== null) {
+        return false;
+      }
+    }
+    return true;
+  });
+  return res;
+}

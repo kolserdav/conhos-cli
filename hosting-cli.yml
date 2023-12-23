@@ -7,11 +7,9 @@ services:
     command: sh -c "echo Starting service... && npm install && npm run start"
     ports:
       - 3004
-      - 3005
     environment:
       - PORT=3004
     domains:
       '3004': optics-abelmosk-furanose.cloud.uyem.ru
-      '3005': galluses-subers-torments.cloud.uyem.ru
 exclude:
   - dist

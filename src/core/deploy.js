@@ -54,6 +54,9 @@ export default class Deploy extends WS {
    */
   setDomainsHandler({ data }) {
     const configFile = this.getConfig();
+    if (!configFile) {
+      return;
+    }
     const _configFile = structuredClone(configFile);
     Object.keys(configFile.services).forEach((item) => {
       const dataDomains = data.find((_item) => _item.service === item);
@@ -89,6 +92,10 @@ export default class Deploy extends WS {
    */
   async handler() {
     const config = this.getConfig();
+    if (!config) {
+      return;
+    }
+
     const { exclude, project } = config;
 
     console.info(`Starting deploy "${project}" project`);
