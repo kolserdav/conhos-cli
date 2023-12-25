@@ -2,7 +2,7 @@ import WS from '../tools/ws.js';
 import Tar from '../utils/tar.js';
 import { console, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
 import { createReadStream, statSync, readdirSync } from 'fs';
-import { LANG, CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
+import { CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
 import { parseMessageCli } from '../types/interfaces.js';
 
 /**
@@ -125,9 +125,8 @@ export default class Deploy extends WS {
           project,
           last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
-          config: null,
+          config: num === 0 ? config : null,
         },
-        lang: LANG,
         status: 'info',
       });
       num++;
@@ -148,9 +147,8 @@ export default class Deploy extends WS {
           project,
           last: true,
           chunk: new Uint8Array(),
-          config,
+          config: null,
         },
-        lang: LANG,
         status: 'info',
       });
       stdoutWriteStart('');

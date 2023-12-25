@@ -11,5 +11,7 @@ services:
         type: http
     environment:
       PORT: 3000
+    domains:
+      "3000": beeweed-taimen-nific.cloud.uyem.ru
 exclude:
   - dist

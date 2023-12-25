@@ -1,10 +1,10 @@
 import WebSocket from 'ws';
-import { LANG, WEBSOCKET_ADDRESS, SESSION_FILE_NAME, PACKAGE_NAME } from '../utils/constants.js';
+import { SESSION_FILE_NAME, PACKAGE_NAME } from '../utils/constants.js';
 import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
-import { PROTOCOL_CLI, checkConfig } from '../types/interfaces.js';
+import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS } from '../types/interfaces.js';
 import { v4 } from 'uuid';
 import Yaml from '../utils/yaml.js';
 
@@ -171,7 +171,6 @@ export default class WS {
         type: 'setSocket',
         packageName: PACKAGE_NAME,
         message: '',
-        lang: LANG,
         data: '',
         token: null,
         userId: ws.userId,
@@ -265,7 +264,6 @@ export default class WS {
           type: 'checkToken',
           packageName: PACKAGE_NAME,
           data: false,
-          lang: LANG,
           message: '',
           status: 'info',
           userId: this.userId,
@@ -278,7 +276,6 @@ export default class WS {
           type: 'checkToken',
           packageName: PACKAGE_NAME,
           data: false,
-          lang: LANG,
           message: '',
           status: 'info',
           userId: this.userId,

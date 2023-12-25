@@ -1,7 +1,7 @@
 import WS from '../tools/ws.js';
 import { getConfigFilePath } from '../utils/lib.js';
 import { existsSync, readFileSync } from 'fs';
-import { LANG, PACKAGE_NAME } from '../utils/constants.js';
+import { PACKAGE_NAME } from '../utils/constants.js';
 import { parseMessageCli } from '../types/interfaces.js';
 import Yaml from '../utils/yaml.js';
 
@@ -68,7 +68,6 @@ export default class Remove extends WS {
       data: {
         project: config.project,
       },
-      lang: LANG,
       status: 'info',
     });
   }

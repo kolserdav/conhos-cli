@@ -14,6 +14,8 @@
  * }} Port
  */
 
+export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'http://localhost:3002';
+
 /**
  * @type {Port}
  */
@@ -117,7 +119,6 @@ export const PORT_TYPES = ['http', 'ws'];
  *  packageName: string;
  *  message: string;
  *  userId: string;
- *  lang: 'en';
  *  data: WSMessageDataCli[T];
  *  token: string | null;
  * }} WSMessageCli

@@ -1,7 +1,6 @@
 import WS from '../tools/ws.js';
 import Inquirer from '../utils/inquirer.js';
 import {
-  LANG,
   CURRENCY,
   CONFIG_EXCLUDE_DEFAULT,
   SIZE_INDEX_DEFAULT,
@@ -319,7 +318,6 @@ export default class Init extends WS {
         packageName: PACKAGE_NAME,
         message: '',
         data: null,
-        lang: LANG,
         status: 'info',
         userId: this.userId,
       });
@@ -338,7 +336,6 @@ export default class Init extends WS {
         packageName: PACKAGE_NAME,
         message: '',
         data: null,
-        lang: LANG,
         status: 'info',
         userId: this.userId,
       });

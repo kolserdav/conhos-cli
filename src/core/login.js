@@ -1,9 +1,7 @@
-import { v4 } from 'uuid';
 import WS from '../tools/ws.js';
 import { getPackagePath, openBrowser } from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
-  LANG,
   LOGIN_PAGE,
   QUERY_STRING_CONN_ID,
   PACKAGE_NAME,
@@ -126,7 +124,6 @@ export default class Login extends WS {
       type: 'login',
       message: '',
       packageName: PACKAGE_NAME,
-      lang: LANG,
       data: this.connId,
       token: null,
       userId: this.userId,

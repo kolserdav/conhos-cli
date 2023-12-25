@@ -1,7 +1,7 @@
 import Console from 'console';
 import WS from '../tools/ws.js';
 import { parseMessageCli } from '../types/interfaces.js';
-import { LANG, PACKAGE_NAME } from '../utils/constants.js';
+import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
 import chalk from 'chalk';
 
@@ -90,7 +90,6 @@ export default class Logs extends WS {
         until: this.options.until,
         tail: this.options.tail,
       },
-      lang: LANG,
       status: 'info',
       userId: this.userId,
     });

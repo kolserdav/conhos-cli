@@ -19,8 +19,6 @@ export const LOGIN_PAGE = process.env.LOGIN_PAGE || 'http://localhost:3000/accou
 
 export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'http://localhost:3001';
 
-export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'http://localhost:3002';
-
 export const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || 'strong-string';
 
 export const CRYPTO_SALT = process.env.CRYPTO_SALT || 'strong-string';
@@ -29,7 +27,6 @@ export const DEBUG = process.env.DEBUG === '1';
 
 export const CRYPTO_IV = process.env.CRYPTO_IV || 'string';
 
-export const LANG = 'en';
 // deps app
 export const QUERY_STRING_CONN_ID = 'conn';
 
