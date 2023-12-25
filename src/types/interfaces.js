@@ -37,7 +37,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *    type: ServiceType;
  *    size: string;
  *    image: string;
- *    command?: string;
+ *    command?: string | string[];
  *    ports: Port[];
  *    domains?: NewDomains['domains'],
  *    environment: string[] | Record<string, string | number>;
