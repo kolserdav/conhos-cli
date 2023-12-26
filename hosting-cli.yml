@@ -7,10 +7,10 @@ services:
     size: mili
     command: sh -c "echo Starting service... && npm install && npm run start"
     ports:
-      - port: 3002
+      - port: 3003
         type: http
     environment:
-      PORT: 3002
+      PORT: 3003
     domains:
       '3000': beeweed-taimen-nific.cloud.uyem.ru
 exclude:
