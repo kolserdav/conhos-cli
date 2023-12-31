@@ -42,6 +42,7 @@ const yaml = new Yaml();
  *  since?: string;
  *  until?: string;
  *  tail?: number
+ *  node?: string
  * }} Options
  */
 

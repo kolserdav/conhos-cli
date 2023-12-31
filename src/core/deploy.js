@@ -126,6 +126,7 @@ export default class Deploy extends WS {
           last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
           config: num === 0 ? config : null,
+          nodeName: this.options.node,
         },
         status: 'info',
       });

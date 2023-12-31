@@ -38,6 +38,7 @@ program
 program
   .command('deploy')
   .description('Upload files and run app in cloud')
+  .option('-n --node <string>', 'Specify node')
   .action(async (options) => {
     new Deploy(options);
   });
