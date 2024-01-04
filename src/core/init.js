@@ -2,10 +2,11 @@ import WS from '../tools/ws.js';
 import Inquirer from '../utils/inquirer.js';
 import {
   CURRENCY,
-  CONFIG_EXCLUDE_DEFAULT,
   SIZE_INDEX_DEFAULT,
   COMMAND_DEFAULT,
   PACKAGE_NAME,
+  EXCLUDE_NODE,
+  EXCLUDE_RUST,
 } from '../utils/constants.js';
 import {
   parseMessageCli,
@@ -16,7 +17,6 @@ import {
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
-import path from 'path';
 
 /**
  * @typedef {import('../tools/ws.js').Options} Options
@@ -159,7 +159,7 @@ export default class Init extends WS {
             },
           },
         },
-        exclude: CONFIG_EXCLUDE_DEFAULT,
+        exclude: EXCLUDE_NODE,
       });
 
       console.info('Project successfully initialized', this.configFile);
@@ -205,16 +205,22 @@ export default class Init extends WS {
       true
     );
 
+    /**
+     * @type {string[]}
+     */
+    let exclude = [];
     const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
     switch (service) {
       case 'node':
         command = await inquirer.input(GET_SERVICE_MESSAGE, command);
         ports = await this.getPorts();
+        exclude = EXCLUDE_NODE;
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
         ports = await this.getPorts();
+        exclude = EXCLUDE_RUST;
         break;
     }
 
@@ -229,7 +235,7 @@ export default class Init extends WS {
     };
     this.increaseIndex();
 
-    this.writeConfigFile({ project, services: this.services, exclude: CONFIG_EXCLUDE_DEFAULT });
+    this.writeConfigFile({ project, services: this.services, exclude });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
     if (addAnother) {
