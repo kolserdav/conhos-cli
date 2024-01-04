@@ -15,7 +15,7 @@ import {
   PORT_TYPES,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
-import { getConfigFilePath, console, getPackageName } from '../utils/lib.js';
+import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
 import path from 'path';
 
 /**
@@ -141,10 +141,11 @@ export default class Init extends WS {
      * @type {string | undefined}
      */
     let command = COMMAND_DEFAULT;
+    const packageName = getPackageName();
 
     if (this.options.yes) {
       this.writeConfigFile({
-        project: this.getDefaultProject(),
+        project: packageName,
         services: {
           node1: {
             type: 'node',
@@ -204,11 +205,17 @@ export default class Init extends WS {
       true
     );
 
+    const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
-    if (service === 'node') {
-      command = await inquirer.input('Specify service start command', command);
-
-      ports = await this.getPorts();
+    switch (service) {
+      case 'node':
+        command = await inquirer.input(GET_SERVICE_MESSAGE, command);
+        ports = await this.getPorts();
+        break;
+      case 'rust':
+        command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
+        ports = await this.getPorts();
+        break;
     }
 
     this.services[`${service}${this.index}`] = {
@@ -279,21 +286,13 @@ export default class Init extends WS {
   }
 
   /**
-   * @returns {string}
-   */
-  getDefaultProject() {
-    const defaultProject = getPackageName();
-    return defaultProject || path.basename(path.resolve());
-  }
-
-  /**
    *
    * @returns {Promise<string>}
    */
   async getProject() {
     const project = await inquirer.input(
       'Setting up the project name',
-      this.getDefaultProject(),
+      getPackageName(),
       (input) => {
         const projectNameReg = /^[0-9a-zA-z\-_\\.]+$/;
         if (!projectNameReg.test(input)) {

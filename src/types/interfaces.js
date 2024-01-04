@@ -1,5 +1,12 @@
 /**
- * @typedef {'node' | 'redis'} ServiceType
+ * @typedef {'node' | 'rust' | 'redis'} ServiceType
+ */
+/**
+ * @type {ServiceType[]}
+ */
+const SERVICE_TYPES = ['node', 'rust', 'redis'];
+
+/**
  * @typedef {'http' | 'ws'} PortType
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
  *  'deca' | 'hecto' | 'kilo' | 'mega' | 'giga' | 'tera'} ServiceSize
@@ -175,7 +182,17 @@ export function checkConfig(config) {
    */
   let res = null;
   Object.keys(config.services).every((item) => {
-    const { domains, ports } = config.services[item];
+    const { domains, ports, type } = config.services[item];
+
+    // Check service type
+    if (SERVICE_TYPES.indexOf(type) === -1) {
+      res = {
+        msg: `Service type "${type}" is not allowed`,
+        data: `Allowed service types: [${SERVICE_TYPES.join('|')}]`,
+        exit: true,
+      };
+      return res;
+    }
 
     // Check ports
     ports.forEach((item) => {

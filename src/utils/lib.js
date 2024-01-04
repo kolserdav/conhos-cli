@@ -101,11 +101,17 @@ export function stdoutWriteStart(title) {
 
 /**
  *
- * @returns {string | undefined}
+ * @returns {string}
  */
 export function getPackageName() {
   const cwd = process.cwd();
-  const data = readFileSync(path.resolve(cwd, 'package.json')).toString();
+  const packageJsonPath = path.resolve(cwd, 'package.json');
+  // TODO get package name from rust
+  if (!existsSync(packageJsonPath)) {
+    return path.basename(path.resolve());
+  }
+
+  const data = readFileSync(packageJsonPath).toString();
 
   /**
    * @type {any}
@@ -116,7 +122,7 @@ export function getPackageName() {
   } catch (_) {
     /** */
   }
-  return pack.name;
+  return pack.name || path.basename(path.resolve());
 }
 
 /**
@@ -138,4 +144,12 @@ export function getConfigFilePath() {
     fileYml = fileYml.replace(/yaml$/, 'yml');
   }
   return fileYml;
+}
+
+/**
+ * @param {string} packageName
+ * @returns {string}
+ */
+export function getRustCommandDefault(packageName) {
+  return `sh -c "echo Starting service... && cargo build --release && ./target/release/${packageName}"`;
 }
