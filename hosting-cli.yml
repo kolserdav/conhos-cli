@@ -7,11 +7,11 @@ services:
     image: 21-alpine3.18
     command: sh -c "echo Starting service... && npm install && npm run start"
     ports:
-      - port: 3000
+      - port: 3023
         type: http
     environment:
-      - PORT=3000
+      - PORT=3023
     domains:
-      "3000": cupreine-adpress-depeopling.cloud.uyem.ru
+      "3023": polygons-mellitus-adorning.cloud.uyem.ru
 exclude:
-  - dist
+  - node_modules
