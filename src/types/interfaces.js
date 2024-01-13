@@ -112,6 +112,7 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {{
  *  last: boolean;
  *  text: string;
+ *  num: number;
  * }} logs
  *  @property {{
  *  project: string;

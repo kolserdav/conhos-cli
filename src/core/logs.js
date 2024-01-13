@@ -15,6 +15,7 @@ import chalk from 'chalk';
  */
 
 export default class Logs extends WS {
+  num = 0;
   /**
    * @type {string}
    */
@@ -54,11 +55,27 @@ export default class Logs extends WS {
    *
    * @param {WSMessageCli<'logs'>} msg
    */
-  handleLogs({ data: { text, last }, status }) {
+  async handleLogs({ data: { text, last, num }, status }) {
+    await this.waitQueue(num);
+    this.num++;
     Console[status](chalk.whiteBright(text));
     if (last) {
       process.exit(0);
     }
+  }
+
+  /**
+   * @param {number} num
+   */
+  async waitQueue(num) {
+    await new Promise((resolve) => {
+      let interval = setInterval(() => {
+        if (num === this.num) {
+          clearInterval(interval);
+          resolve(0);
+        }
+      }, 0);
+    });
   }
 
   /**
