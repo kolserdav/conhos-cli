@@ -88,7 +88,7 @@ export default class WS {
   /**
    * @type {string}
    */
-  connId;
+  connId = '';
 
   /**
    * @type {WebSocket | null}
@@ -116,7 +116,6 @@ export default class WS {
   constructor(options) {
     this.options = options;
     this.userId = '';
-    this.connId = v4();
     this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
     this.token = null;
     this.start();
@@ -173,6 +172,7 @@ export default class WS {
         packageName: PACKAGE_NAME,
         message: '',
         data: '',
+        connId: ws.connId,
         token: null,
         userId: ws.userId,
       });
@@ -197,6 +197,13 @@ export default class WS {
       failedLogin: !data,
       sessionExists: true,
     });
+  }
+
+  /**
+   * @param {string} connId
+   */
+  setConnId(connId) {
+    this.connId = connId;
   }
 
   /**
@@ -242,9 +249,11 @@ export default class WS {
   }
 
   /**
-   *
+   * @param {WSMessageCli<'test'>} msg
    */
-  async listenTest() {
+  async listenTest({ connId }) {
+    this.setConnId(connId);
+
     const authData = this.readSessionFile();
     if (authData) {
       if (authData.iv !== '') {
@@ -268,6 +277,7 @@ export default class WS {
           message: '',
           status: 'info',
           userId: this.userId,
+          connId: this.connId,
         });
       } else {
         const authPath = getPackagePath(SESSION_FILE_NAME);
@@ -280,6 +290,7 @@ export default class WS {
           message: '',
           status: 'info',
           userId: this.userId,
+          connId: this.connId,
         });
       }
     } else if (!this.options.isLogin) {
@@ -298,7 +309,7 @@ export default class WS {
     const { type, status, message, data } = msg;
     switch (type) {
       case 'test':
-        await this.listenTest();
+        await this.listenTest(msg);
         break;
       case 'checkToken':
         await this.listenCheckToken(msg);

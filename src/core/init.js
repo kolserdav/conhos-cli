@@ -325,6 +325,7 @@ export default class Init extends WS {
         data: null,
         status: 'info',
         userId: this.userId,
+        connId: this.connId,
       });
       return;
     }
@@ -343,6 +344,7 @@ export default class Init extends WS {
         data: null,
         status: 'info',
         userId: this.userId,
+        connId: this.connId,
       });
       return;
     }

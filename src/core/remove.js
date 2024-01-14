@@ -68,6 +68,7 @@ export default class Remove extends WS {
       data: {
         project: config.project,
       },
+      connId: this.connId,
       status: 'info',
     });
   }

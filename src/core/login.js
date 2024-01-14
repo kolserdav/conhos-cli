@@ -39,6 +39,7 @@ export default class Login extends WS {
 
   listener() {
     if (!this.conn) {
+      console.warn('Connection ID is missing', 'Need to update the program version');
       return;
     }
 
@@ -127,6 +128,7 @@ export default class Login extends WS {
       data: this.connId,
       token: null,
       userId: this.userId,
+      connId: this.connId,
     });
     openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${this.connId}`);
   }

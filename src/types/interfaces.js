@@ -130,6 +130,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  userId: string;
  *  data: WSMessageDataCli[T];
  *  token: string | null;
+ *  connId: string;
  * }} WSMessageCli
  */
 

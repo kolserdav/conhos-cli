@@ -114,6 +114,7 @@ export default class Deploy extends WS {
           nodeName: this.options.node,
         },
         status: 'info',
+        connId: this.connId,
       });
       console.info('Starting remove project', project);
       return;
@@ -150,6 +151,7 @@ export default class Deploy extends WS {
           nodeName: this.options.node,
         },
         status: 'info',
+        connId: this.connId,
       });
       num++;
       curSize += chunk.length;
@@ -172,6 +174,7 @@ export default class Deploy extends WS {
           config: null,
         },
         status: 'info',
+        connId: this.connId,
       });
       stdoutWriteStart('');
       const percent = this.calculatePercents(size, curSize);

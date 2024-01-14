@@ -107,6 +107,7 @@ export default class Logs extends WS {
         until: this.options.until,
         tail: this.options.tail,
       },
+      connId: this.connId,
       status: 'info',
       userId: this.userId,
     });
