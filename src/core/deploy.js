@@ -96,9 +96,30 @@ export default class Deploy extends WS {
       return;
     }
 
-    const { exclude, project } = config;
+    const { exclude, project, services } = config;
 
-    console.info(`Starting deploy "${project}" project`);
+    if (!Object.keys(services).find((item) => services[item].active)) {
+      /** @type {typeof this.sendMessage<'deploy'>} */ (this.sendMessage)({
+        token: this.token,
+        message: '',
+        type: 'deploy',
+        userId: this.userId,
+        packageName: PACKAGE_NAME,
+        data: {
+          num: 0,
+          project,
+          last: true,
+          chunk: new Uint8Array(),
+          config,
+          nodeName: this.options.node,
+        },
+        status: 'info',
+      });
+      console.info('Starting remove project', project);
+      return;
+    }
+
+    console.info('Starting deploy project', project);
     const fileTar = getTmpArchive(project);
     const tar = new Tar();
     await tar.create({

@@ -182,7 +182,30 @@ export function checkConfig(config) {
    * @type {CheckConfigResult | null}
    */
   let res = null;
-  Object.keys(config.services).every((item) => {
+
+  // Check services field
+  if (!config.services) {
+    res = {
+      msg: 'Required field is missing',
+      data: 'services',
+      exit: true,
+    };
+    return res;
+  }
+
+  const serviceKeys = Object.keys(config.services);
+
+  // Check services lenght
+  if (serviceKeys.length === 0) {
+    res = {
+      msg: 'Services list can not be empty',
+      data: 'Add at least one service',
+      exit: true,
+    };
+    return res;
+  }
+
+  serviceKeys.every((item) => {
     const { domains, ports, type } = config.services[item];
 
     // Check service type
@@ -229,6 +252,7 @@ export function checkConfig(config) {
         return false;
       }
     }
+
     return true;
   });
   return res;
