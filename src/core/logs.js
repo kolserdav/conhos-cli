@@ -91,7 +91,7 @@ export default class Logs extends WS {
     }
 
     if (this.options.clear) {
-      console.warn('While logs are cleaning service will be restart');
+      console.warn('While logs are cleaning service will be restart!');
       const clearLogs = await inquirer.confirm(
         `Do you want to clear all logs for the service ${this.serviceName}?`,
         false

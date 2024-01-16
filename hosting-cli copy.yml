@@ -1,0 +1,17 @@
+project: hosting-cli
+services:
+  node0:
+    type: node
+    size: mili
+    active: true
+    image: 21-alpine3.18
+    command: npm install && npm run start
+    ports:
+      - port: 3000
+        type: http
+    environment:
+      - PORT=3000
+    domains:
+      "3000": phorous-reerects-vesicatory.cloud.uyem.ru
+exclude:
+  - node_modules

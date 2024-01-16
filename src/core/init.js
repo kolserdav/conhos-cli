@@ -14,9 +14,16 @@ import {
   PORT_MAX,
   PORT_DEFAULT,
   PORT_TYPES,
+  SERVICES_CUSTOM,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
-import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
+import {
+  getConfigFilePath,
+  console,
+  getPackageName,
+  getRustCommandDefault,
+  cast,
+} from '../utils/lib.js';
 
 /**
  * @typedef {import('../tools/ws.js').Options} Options
@@ -25,6 +32,7 @@ import { getConfigFilePath, console, getPackageName, getRustCommandDefault } fro
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  * @typedef {import('../tools/ws.js').Session} Session
  * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
+ * @typedef {import('../types/interfaces.js').ServiceTypeCustom} ServiceTypeCustom
  * @typedef {import('../types/interfaces.js').PortType} PortType
  */
 /**
@@ -206,32 +214,39 @@ export default class Init extends WS {
     );
 
     /**
-     * @type {string[]}
+     * @type {ConfigFile['exclude']}
      */
-    let exclude = [];
+    let exclude = undefined;
     const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
     switch (service) {
       case 'node':
         command = await inquirer.input(GET_SERVICE_MESSAGE, command);
-        ports = await this.getPorts();
         exclude = EXCLUDE_NODE;
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
-        ports = await this.getPorts();
         exclude = EXCLUDE_RUST;
         break;
     }
+    // Group services
+    if (
+      SERVICES_CUSTOM.indexOf(/** @type {typeof cast<ServiceTypeCustom>} */ (cast)(service)) !== -1
+    ) {
+      ports = await this.getPorts();
+    }
 
+    const environment = (ports || []).map(
+      (item, index) => `PORT${index === 0 ? '' : index}=${item.port}`
+    );
     this.services[`${service}${this.index}`] = {
       type: service,
       size,
       active: true,
       image,
       command,
-      ports,
-      environment: ports.map((item, index) => `PORT${index === 0 ? '' : index}=${item.port}`),
+      ports: ports?.length ? ports : undefined,
+      environment: environment?.length ? environment : undefined,
     };
     this.increaseIndex();
 

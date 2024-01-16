@@ -153,3 +153,12 @@ export function getConfigFilePath() {
 export function getRustCommandDefault(packageName) {
   return `echo Starting service... && cargo build --release && ./target/release/${packageName}`;
 }
+
+/**
+ * @template T
+ * @param {any} data
+ * @returns {T}
+ */
+export function cast(data) {
+  return data;
+}

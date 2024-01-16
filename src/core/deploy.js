@@ -125,7 +125,7 @@ export default class Deploy extends WS {
     const tar = new Tar();
     await tar.create({
       fileList: readdirSync(CWD)
-        .filter((item) => exclude.indexOf(item) === -1)
+        .filter((item) => (exclude || []).indexOf(item) === -1)
         .filter((item) => EXPLICIT_EXCLUDE.indexOf(item) === -1),
       file: fileTar,
     });

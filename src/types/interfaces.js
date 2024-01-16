@@ -1,10 +1,28 @@
 /**
- * @typedef {'node' | 'rust' | 'redis'} ServiceType
+ * @typedef {'node' | 'rust'} ServiceTypeCustom
+ * @typedef {'redis'} ServiceTypeCommon
+ * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
+
+/**
+ * @type {ServiceTypeCustom[]}
+ */
+export const SERVICES_CUSTOM = ['node', 'rust'];
+
+/**
+ * @type {ServiceTypeCommon[]}
+ */
+export const SERVICES_COMMON = ['redis'];
+
+/**
+ * @type {any[]}
+ */
+const _SERVICES_COMMON = SERVICES_COMMON;
+
 /**
  * @type {ServiceType[]}
  */
-const SERVICE_TYPES = ['node', 'rust', 'redis'];
+const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
 
 /**
  * @typedef {'http' | 'ws'} PortType
@@ -45,11 +63,11 @@ export const PORT_TYPES = ['http', 'ws'];
  *    size: string;
  *    image: string;
  *    command?: string | string[];
- *    ports: Port[];
+ *    ports?: Port[];
  *    domains?: NewDomains['domains'],
- *    environment: string[] | Record<string, string | number>;
+ *    environment?: string[] | Record<string, string | number>;
  *  }>
- *  exclude: string[]
+ *  exclude?: string[]
  * }} ConfigFile
  */
 
@@ -221,7 +239,7 @@ export function checkConfig(config) {
     }
 
     // Check ports
-    ports.forEach((item) => {
+    (ports || []).forEach((item) => {
       if (PORT_TYPES.indexOf(item.type) === -1) {
         res = {
           msg: `Port type "${item.type}" is not allowed`,
