@@ -43,6 +43,7 @@ const yaml = new Yaml();
  *  until?: string;
  *  tail?: number
  *  node?: string
+ *  clear?: boolean;
  * }} Options
  */
 

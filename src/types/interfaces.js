@@ -107,7 +107,8 @@ export const PORT_TYPES = ['http', 'ws'];
  *  serviceName: string;
  *  since: string | undefined;
  *  until: string | undefined;
- *  tail: number | undefined
+ *  tail: number | undefined;
+ *  clear: boolean;
  * }} getLogs
  * @property {{
  *  last: boolean;

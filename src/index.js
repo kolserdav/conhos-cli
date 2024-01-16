@@ -56,6 +56,7 @@ program
   .description('Show logs of the service')
   .option('-w, --watch', 'Looking forward to the next logs')
   .option('-t, --timestamps', 'Show timestamps')
+  .option('-c, --clear', 'Clear service logs')
   .option(
     '--since <time>',
     'Show logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)'

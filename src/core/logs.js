@@ -4,6 +4,7 @@ import { parseMessageCli } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
 import chalk from 'chalk';
+import Inquirer from '../utils/inquirer.js';
 
 /**
  * @typedef {import("../tools/ws.js").Options} Options
@@ -13,6 +14,8 @@ import chalk from 'chalk';
  * @template {keyof import('../types/interfaces.js').WSMessageDataCli} T
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
+
+const inquirer = new Inquirer();
 
 export default class Logs extends WS {
   num = 0;
@@ -82,14 +85,21 @@ export default class Logs extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    console.info(
-      `Starting show logs of service "${this.serviceName}"`,
-      this.options.watch ? 'in watching mode' : '',
-      '...'
-    );
     const config = this.getConfig();
     if (!config) {
       return;
+    }
+
+    if (this.options.clear) {
+      console.warn('While logs are cleaning service will be restart');
+      const clearLogs = await inquirer.confirm(
+        `Do you want to clear all logs for the service ${this.serviceName}?`,
+        false
+      );
+      if (!clearLogs) {
+        console.warn('Clear logs is skipped');
+        this.options.clear = false;
+      }
     }
 
     const { project } = config;
@@ -106,6 +116,7 @@ export default class Logs extends WS {
         since: this.options.since,
         until: this.options.until,
         tail: this.options.tail,
+        clear: this.options.clear || false,
       },
       connId: this.connId,
       status: 'info',
