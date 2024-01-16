@@ -130,6 +130,8 @@ export default class Login extends WS {
       userId: this.userId,
       connId: this.connId,
     });
-    openBrowser(`${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${this.connId}`);
+    const url = `${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${this.connId}`;
+    console.info('Login via browser', url);
+    openBrowser(url);
   }
 }

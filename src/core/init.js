@@ -15,15 +15,10 @@ import {
   PORT_DEFAULT,
   PORT_TYPES,
   SERVICES_CUSTOM,
+  as,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
-import {
-  getConfigFilePath,
-  console,
-  getPackageName,
-  getRustCommandDefault,
-  cast,
-} from '../utils/lib.js';
+import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
 
 /**
  * @typedef {import('../tools/ws.js').Options} Options
@@ -64,6 +59,11 @@ export default class Init extends WS {
   index;
 
   /**
+   * @type {string}
+   */
+  project = getPackageName();
+
+  /**
    *
    * @param {Options} options
    */
@@ -92,6 +92,7 @@ export default class Init extends WS {
       const { type } = rawMessage;
       switch (type) {
         case 'deployData':
+          this.project = await this.getProject();
           await this.handleDeployData(rawMessage);
           break;
         default:
@@ -179,8 +180,6 @@ export default class Init extends WS {
      */
     let ports = [];
 
-    const project = await this.getProject();
-
     /**
      * @type {any}
      */
@@ -230,9 +229,7 @@ export default class Init extends WS {
         break;
     }
     // Group services
-    if (
-      SERVICES_CUSTOM.indexOf(/** @type {typeof cast<ServiceTypeCustom>} */ (cast)(service)) !== -1
-    ) {
+    if (SERVICES_CUSTOM.indexOf(/** @type {typeof as<ServiceTypeCustom>} */ (as)(service)) !== -1) {
       ports = await this.getPorts();
     }
 
@@ -250,7 +247,7 @@ export default class Init extends WS {
     };
     this.increaseIndex();
 
-    this.writeConfigFile({ project, services: this.services, exclude });
+    this.writeConfigFile({ project: this.project, services: this.services, exclude });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
     if (addAnother) {
@@ -311,17 +308,13 @@ export default class Init extends WS {
    * @returns {Promise<string>}
    */
   async getProject() {
-    const project = await inquirer.input(
-      'Setting up the project name',
-      getPackageName(),
-      (input) => {
-        const projectNameReg = /^[0-9a-zA-z\-_\\.]+$/;
-        if (!projectNameReg.test(input)) {
-          return `Project name contain not allowed symbols. Allowed regex: ${projectNameReg}`;
-        }
-        return true;
+    const project = await inquirer.input('Setting up the project name', this.project, (input) => {
+      const projectNameReg = /^[0-9a-zA-z\-_\\.]+$/;
+      if (!projectNameReg.test(input)) {
+        return `Project name contain not allowed symbols. Allowed regex: ${projectNameReg}`;
       }
-    );
+      return true;
+    });
     return project;
   }
 

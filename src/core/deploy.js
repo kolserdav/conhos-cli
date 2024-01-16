@@ -3,7 +3,7 @@ import Tar from '../utils/tar.js';
 import { console, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
 import { createReadStream, statSync, readdirSync } from 'fs';
 import { CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
-import { parseMessageCli } from '../types/interfaces.js';
+import { isCommonService, parseMessageCli } from '../types/interfaces.js';
 
 /**
  * @typedef {import('../tools/ws.js').Options} Options
@@ -59,6 +59,10 @@ export default class Deploy extends WS {
     }
     const _configFile = structuredClone(configFile);
     Object.keys(configFile.services).forEach((item) => {
+      // Group services
+      if (isCommonService(configFile.services[item].type)) {
+        return;
+      }
       const dataDomains = data.find((_item) => _item.service === item);
       if (!dataDomains) {
         console.warn(`Failed to find domains for service "${item}"`, data);

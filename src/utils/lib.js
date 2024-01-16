@@ -106,7 +106,6 @@ export function stdoutWriteStart(title) {
 export function getPackageName() {
   const cwd = process.cwd();
   const packageJsonPath = path.resolve(cwd, 'package.json');
-  // TODO get package name from rust
   if (!existsSync(packageJsonPath)) {
     return path.basename(path.resolve());
   }
@@ -152,13 +151,4 @@ export function getConfigFilePath() {
  */
 export function getRustCommandDefault(packageName) {
   return `echo Starting service... && cargo build --release && ./target/release/${packageName}`;
-}
-
-/**
- * @template T
- * @param {any} data
- * @returns {T}
- */
-export function cast(data) {
-  return data;
 }

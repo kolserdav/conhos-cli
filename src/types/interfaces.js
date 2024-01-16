@@ -5,6 +5,15 @@
  */
 
 /**
+ * @template T
+ * @param {any} data
+ * @returns {T}
+ */
+export function as(data) {
+  return data;
+}
+
+/**
  * @type {ServiceTypeCustom[]}
  */
 export const SERVICES_CUSTOM = ['node', 'rust'];
@@ -55,6 +64,10 @@ export const PORT_DEFAULT = {
 export const PORT_TYPES = ['http', 'ws'];
 
 /**
+ * @typedef {'custom' | 'common'} ServiceKind
+ */
+
+/**
  * @typedef {{
  *  project: string;
  *  services: Record<string, {
@@ -64,6 +77,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *    image: string;
  *    command?: string | string[];
  *    ports?: Port[];
+ *    depends_on?: string[];
  *    domains?: NewDomains['domains'],
  *    environment?: string[] | Record<string, string | number>;
  *  }>
@@ -193,6 +207,20 @@ export function parseMessageCli(msg) {
 }
 
 /**
+ * @param {ServiceType} type
+ */
+export const isCustomService = (type) => {
+  return SERVICES_CUSTOM.indexOf(/** @type {typeof as<ServiceTypeCustom>} */ (as)(type)) !== -1;
+};
+
+/**
+ * @param {ServiceType} type
+ */
+export const isCommonService = (type) => {
+  return SERVICES_COMMON.indexOf(/** @type {typeof as<ServiceTypeCommon>} */ (as)(type)) !== -1;
+};
+
+/**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
  * @returns {CheckConfigResult | null}
@@ -238,38 +266,67 @@ export function checkConfig(config) {
       return res;
     }
 
-    // Check ports
-    (ports || []).forEach((item) => {
-      if (PORT_TYPES.indexOf(item.type) === -1) {
-        res = {
-          msg: `Port type "${item.type}" is not allowed`,
-          data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
-          exit: true,
-        };
-        return false;
-      }
-      return true;
-    });
-    if (res) {
-      return res;
-    }
-
-    // Check domains
-    if (domains) {
-      Object.keys(domains).every((_item) => {
-        const domain = domains[_item];
-        if (domain.length > DOMAIN_MAX_LENGTH) {
+    // Check custom services
+    if (isCustomService(type)) {
+      // Check ports
+      (ports || []).forEach((item) => {
+        if (PORT_TYPES.indexOf(item.type) === -1) {
           res = {
-            msg: `Maximum allowed domain length is ${DOMAIN_MAX_LENGTH}. Passed domain is too long: ${domain.length}`,
-            data: domain,
+            msg: `Port type "${item.type}" is not allowed`,
+            data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
             exit: true,
           };
           return false;
         }
         return true;
       });
-      if (res !== null) {
-        return false;
+      if (res) {
+        return res;
+      }
+
+      // Check domains
+      if (domains) {
+        Object.keys(domains).every((_item) => {
+          const domain = domains[_item];
+          if (domain.length > DOMAIN_MAX_LENGTH) {
+            res = {
+              msg: `Maximum allowed domain length is ${DOMAIN_MAX_LENGTH}. Passed domain is too long: ${domain.length}`,
+              data: domain,
+              exit: true,
+            };
+            return false;
+          }
+          return true;
+        });
+        if (res !== null) {
+          return false;
+        }
+      }
+    }
+
+    // Check common services
+    if (isCommonService(type)) {
+      let check = false;
+      serviceKeys.every((_item) => {
+        const { type: _type, depends_on } = config.services[_item];
+        if (isCustomService(_type)) {
+          if (!depends_on) {
+            return true;
+          }
+          if (depends_on.indexOf(item) !== -1) {
+            check = true;
+            return false;
+          }
+        }
+        return true;
+      });
+      if (!check) {
+        res = {
+          msg: `You have ${type} service with name ${item}, bun noone another service depends on it`,
+          data: `Add "depends_on" field with item ${item} to any custom service`,
+          exit: false,
+        };
+        return res;
       }
     }
 

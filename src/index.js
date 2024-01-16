@@ -44,13 +44,6 @@ program
   });
 
 program
-  .command('remove')
-  .description('Remove all deployed services from the cloud')
-  .action(async (options) => {
-    new Deploy(options);
-  });
-
-program
   .command('logs')
   .usage(`[options] <service_name> [options]`)
   .description('Show logs of the service')

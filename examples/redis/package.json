@@ -1,0 +1,14 @@
+{
+  "name": "examples",
+  "version": "0.0.1",
+  "description": "Examples for services",
+  "type": "module",
+  "scripts": {
+    "start": "node ./index.js"
+  },
+  "author": "kolserdav",
+  "license": "MIT",
+  "dependencies": {
+    "redis": "^4.6.12"
+  }
+}
