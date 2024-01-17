@@ -18,12 +18,11 @@ console.info('Package data dir:', packageHomeDir);
 
 const program = new Command();
 
-/*
 program.configureOutput({
-  writeErr: (str) => process.stdout.write(`[ERR] ${str}`),
-  // Highlight errors in color.
+  writeErr: (str) => {
+    console.warn(str.replace(/error:\s+/, ''));
+  },
 });
-*/
 
 program
   .enablePositionalOptions()
