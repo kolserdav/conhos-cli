@@ -163,9 +163,7 @@ export default class Init extends WS {
             size: sizes[SIZE_INDEX_DEFAULT].name,
             command,
             ports: [PORT_DEFAULT],
-            environment: {
-              PORT: PORT_DEFAULT.port,
-            },
+            environment: [`PORT=${PORT_DEFAULT.port}`],
           },
         },
         exclude: EXCLUDE_NODE,

@@ -6,6 +6,7 @@ const REDIS_HELLO_NAME = 'REDIS_HELLO_NAME';
 
 const redis = createClient({
   socket: { host: process.env.REDIS_HOST },
+  password: process.env.REDIS_PASSWORD,
 });
 
 (async () => {
