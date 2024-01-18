@@ -85,7 +85,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *    type: ServiceType;
  *    size: string;
  *    image: string;
- *    command?: string | string[];
+ *    command?: string;
  *    ports?: Port[];
  *    depends_on?: string[];
  *    domains?: NewDomains['domains'],
@@ -251,7 +251,7 @@ const getEnvironmentValue = (item, name = null) => {
  * @param {string} name
  * @returns {string | null}
  */
-const getEnvironmentName = (name) => {
+export const getEnvironmentName = (name) => {
   /**
    * @type {string | null}
    */
@@ -274,7 +274,10 @@ export const findEnvironmentValue = (environment, name) => {
    */
   let res = null;
   environment.forEach((item) => {
-    res = getEnvironmentValue(item, name);
+    const _name = getEnvironmentName(item);
+    if (_name === name) {
+      res = item.replace(/^[A-Za-z0-9_]+=/, '');
+    }
   });
   return res;
 };
