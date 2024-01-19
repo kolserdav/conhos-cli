@@ -1,0 +1,14 @@
+{
+  "name": "examples",
+  "version": "0.0.1",
+  "description": "Example for connect to service PostgreSQL",
+  "type": "module",
+  "scripts": {
+    "start": "node ./index.js"
+  },
+  "author": "kolserdav",
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

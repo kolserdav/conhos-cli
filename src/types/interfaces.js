@@ -1,6 +1,6 @@
 /**
  * @typedef {'node' | 'rust'} ServiceTypeCustom
- * @typedef {'redis'} ServiceTypeCommon
+ * @typedef {'redis' | 'postgres'} ServiceTypeCommon
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
 
@@ -10,6 +10,21 @@
  */
 export const PASSWORD_ENV_NAME = {
   redis: 'REDIS_PASSWORD',
+  postgres: 'POSTGRES_PASSWORD',
+};
+/**
+ * @type {Record<ServiceTypeCommon, string>}
+ */
+export const ENVIRONMENT_EXCLUDED_CUSTOM = {
+  redis: 'REDIS_HOST',
+  postgres: 'POSTGRES_HOST',
+};
+/**
+ * @type {Record<ServiceTypeCommon, string[]>}
+ */
+export const ENVIRONMENT_REQUIRED_FIELDS_CUSTOM = {
+  redis: [],
+  postgres: [PASSWORD_ENV_NAME.postgres, 'POSTGRES_USER', 'POSTGRES_DB'],
 };
 
 /**
@@ -21,8 +36,6 @@ export function as(data) {
   return data;
 }
 
-export const ENVIRONMENT_EXCLUDED_CUSTOM = ['REDIS_HOST'];
-
 /**
  * @type {ServiceTypeCustom[]}
  */
@@ -31,7 +44,7 @@ export const SERVICES_CUSTOM = ['node', 'rust'];
 /**
  * @type {ServiceTypeCommon[]}
  */
-export const SERVICES_COMMON = ['redis'];
+export const SERVICES_COMMON = ['redis', 'postgres'];
 
 /**
  * @type {any[]}
@@ -84,7 +97,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *    active: boolean;
  *    type: ServiceType;
  *    size: string;
- *    image: string;
+ *    version: string;
  *    command?: string;
  *    ports?: Port[];
  *    depends_on?: string[];
@@ -283,6 +296,23 @@ export const findEnvironmentValue = (environment, name) => {
 };
 
 /**
+ *
+ * @param {Record<string, string>} record
+ * @param {string} name
+ * @returns
+ */
+export const checkRecord = (record, name) => {
+  let check = false;
+  const keys = Object.keys(record);
+  keys.forEach((t) => {
+    if (record[/** @type {typeof as<ServiceType>} */ (as)(t)] === name) {
+      check = true;
+    }
+  });
+  return check;
+};
+
+/**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
  * @returns {CheckConfigResult | null}
@@ -316,13 +346,23 @@ export function checkConfig(config) {
   }
 
   serviceKeys.every((item) => {
-    const { domains, ports, type, environment } = config.services[item];
+    const { domains, ports, type, environment, version } = config.services[item];
 
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {
       res = {
         msg: `Service type "${type}" is not allowed`,
         data: `Allowed service types: [${SERVICE_TYPES.join('|')}]`,
+        exit: true,
+      };
+      return res;
+    }
+
+    // Check service version
+    if (!version) {
+      res = {
+        msg: `Version doesn't exists in service "${item}"`,
+        data: 'Try to add the field version to the config file',
         exit: true,
       };
       return res;
@@ -368,9 +408,18 @@ export function checkConfig(config) {
       // Check environment
       if (environment) {
         environment.forEach((_item) => {
+          const envName = getEnvironmentName(_item);
+          if (!envName) {
+            res = {
+              msg: `Environment variable ${_item} has wrong format`,
+              data: 'Try use NAME=value instead',
+              exit: true,
+            };
+            return res;
+          }
           const envVal = getEnvironmentValue(_item);
           if (envVal) {
-            if (ENVIRONMENT_EXCLUDED_CUSTOM.includes(envVal)) {
+            if (checkRecord(ENVIRONMENT_EXCLUDED_CUSTOM, envName)) {
               res = {
                 msg: `Environment variable ${_item} is not allowed here`,
                 data: _item,

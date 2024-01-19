@@ -16,6 +16,7 @@ import {
   PORT_TYPES,
   SERVICES_CUSTOM,
   as,
+  isCustomService,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
@@ -149,7 +150,7 @@ export default class Init extends WS {
     /**
      * @type {string | undefined}
      */
-    let command = COMMAND_DEFAULT;
+    let command;
     const packageName = getPackageName();
 
     if (this.options.yes) {
@@ -159,9 +160,9 @@ export default class Init extends WS {
           node1: {
             type: 'node',
             active: true,
-            image: this.getService('node', services)?.tags[0] || 'latest',
+            version: this.getService('node', services)?.tags[0] || 'latest',
             size: sizes[SIZE_INDEX_DEFAULT].name,
-            command,
+            command: COMMAND_DEFAULT,
             ports: [PORT_DEFAULT],
             environment: [`PORT=${PORT_DEFAULT.port}`],
           },
@@ -203,8 +204,8 @@ export default class Init extends WS {
       SIZE_INDEX_DEFAULT
     );
 
-    const image = await inquirer.list(
-      `Select ${serv.name} image`,
+    const version = await inquirer.list(
+      `Select ${serv.name} version`,
       serv.tags.map((item) => item.toString()),
       serv.tags.length,
       true
@@ -218,7 +219,7 @@ export default class Init extends WS {
     // Switch services
     switch (service) {
       case 'node':
-        command = await inquirer.input(GET_SERVICE_MESSAGE, command);
+        command = await inquirer.input(GET_SERVICE_MESSAGE, command || COMMAND_DEFAULT);
         exclude = EXCLUDE_NODE;
         break;
       case 'rust':
@@ -227,7 +228,7 @@ export default class Init extends WS {
         break;
     }
     // Group services
-    if (SERVICES_CUSTOM.indexOf(/** @type {typeof as<ServiceTypeCustom>} */ (as)(service)) !== -1) {
+    if (isCustomService(service)) {
       ports = await this.getPorts();
     }
 
@@ -238,7 +239,7 @@ export default class Init extends WS {
       type: service,
       size,
       active: true,
-      image,
+      version,
       command,
       ports: ports?.length ? ports : undefined,
       environment: environment?.length ? environment : undefined,
