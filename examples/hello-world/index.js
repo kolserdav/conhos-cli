@@ -1,5 +1,4 @@
 import http from 'http';
-import { PORT_DEFAULT } from '../../src/types/interfaces.js';
 
 // Create a local server to receive data from
 const server = http.createServer((req, res) => {
@@ -12,7 +11,7 @@ const server = http.createServer((req, res) => {
   );
 });
 
-const port = process.env.PORT || PORT_DEFAULT;
+const port = process.env.PORT;
 server.listen(port, () => {
   console.log('Server is listenning at port', port);
 });

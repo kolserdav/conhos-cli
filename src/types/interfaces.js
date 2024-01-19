@@ -4,14 +4,13 @@
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
 
-// Switch services
-/**
- * @type {Record<ServiceTypeCommon, string>}
- */
-export const PASSWORD_ENV_NAME = {
-  redis: 'REDIS_PASSWORD',
-  postgres: 'POSTGRES_PASSWORD',
+export const ENVIRONMENT_SWITCH = {
+  redis: {
+    password: 'REDIS_PASSWORD',
+  },
 };
+
+// Switch services
 /**
  * @type {Record<ServiceTypeCommon, string>}
  */
@@ -22,9 +21,9 @@ export const ENVIRONMENT_EXCLUDED_CUSTOM = {
 /**
  * @type {Record<ServiceTypeCommon, string[]>}
  */
-export const ENVIRONMENT_REQUIRED_FIELDS_CUSTOM = {
-  redis: [],
-  postgres: [PASSWORD_ENV_NAME.postgres, 'POSTGRES_USER', 'POSTGRES_DB'],
+export const ENVIRONMENT_REQUIRED_COMMON = {
+  redis: [ENVIRONMENT_SWITCH.redis.password],
+  postgres: ['POSTGRES_PASSWORD', 'POSTGRES_USER', 'POSTGRES_DB'],
 };
 
 /**
@@ -245,15 +244,14 @@ export const isCommonService = (type) => {
 
 /**
  * @param {string} item
- * @param {string | null} name
  * @returns {string | null}
  */
-const getEnvironmentValue = (item, name = null) => {
+const getEnvironmentValue = (item) => {
   /**
    * @type {string | null}
    */
   let res = null;
-  const nameReg = name ? new RegExp(`^${name}=`) : /^[A-Za-z0-9_]+=/;
+  const nameReg = /^[A-Za-z0-9_]+=/;
   if (nameReg.test(item)) {
     res = item.replace(nameReg, '');
   }
@@ -264,7 +262,7 @@ const getEnvironmentValue = (item, name = null) => {
  * @param {string} name
  * @returns {string | null}
  */
-export const getEnvironmentName = (name) => {
+const getEnvironmentName = (name) => {
   /**
    * @type {string | null}
    */
@@ -313,6 +311,43 @@ export const checkRecord = (record, name) => {
 };
 
 /**
+ * @param {string} variable
+ * @returns {{
+ *  name: string;
+ *  value: string;
+ * } | null}
+ */
+export const parseEnvironmentVariable = (variable) => {
+  const name = getEnvironmentName(variable);
+  const value = getEnvironmentValue(variable);
+  if (!name || !value) {
+    return null;
+  }
+  return {
+    name,
+    value,
+  };
+};
+
+/**
+ * @param {string} name
+ * @returns {boolean}
+ */
+export const checkEnvironmentRequired = (name) => {
+  let check = false;
+  Object.keys(ENVIRONMENT_REQUIRED_COMMON).forEach((item) => {
+    ENVIRONMENT_REQUIRED_COMMON[/** @type {typeof as<ServiceTypeCommon>} */ (as)(item)].forEach(
+      (_item) => {
+        if (_item === name) {
+          check = true;
+        }
+      }
+    );
+  });
+  return check;
+};
+
+/**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
  * @returns {CheckConfigResult | null}
@@ -346,7 +381,7 @@ export function checkConfig(config) {
   }
 
   serviceKeys.every((item) => {
-    const { domains, ports, type, environment, version } = config.services[item];
+    const { domains, ports, type, environment, version, command } = config.services[item];
 
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {
@@ -405,43 +440,61 @@ export function checkConfig(config) {
         }
       }
 
-      // Check environment
-      if (environment) {
-        environment.forEach((_item) => {
-          const envName = getEnvironmentName(_item);
-          if (!envName) {
-            res = {
-              msg: `Environment variable ${_item} has wrong format`,
-              data: 'Try use NAME=value instead',
-              exit: true,
-            };
-            return res;
-          }
-          const envVal = getEnvironmentValue(_item);
-          if (envVal) {
-            if (checkRecord(ENVIRONMENT_EXCLUDED_CUSTOM, envName)) {
-              res = {
-                msg: `Environment variable ${_item} is not allowed here`,
-                data: _item,
-                exit: true,
-              };
-            }
-          } else {
-            res = {
-              msg: `Environment variable ${_item} has wrong format`,
-              data: 'Try use NAME=value instead',
-              exit: true,
-            };
-          }
-        });
-        if (res) {
-          return res;
+      // Check environment format
+      (environment || []).forEach((_item) => {
+        const variable = parseEnvironmentVariable(_item);
+        if (!variable) {
+          res = {
+            msg: `Environment variable ${_item} has wrong format`,
+            data: `Try use NAME=value instead of ${_item}`,
+            exit: true,
+          };
         }
+      });
+      if (res) {
+        return res;
+      }
+
+      // Check environment exclude
+      (environment || []).forEach((_item) => {
+        const variable = parseEnvironmentVariable(_item);
+        if (!variable) {
+          return;
+        }
+        const { name } = variable;
+        if (name) {
+          if (checkRecord(ENVIRONMENT_EXCLUDED_CUSTOM, name)) {
+            res = {
+              msg: `Environment variable ${_item} is not allowed here`,
+              data: _item,
+              exit: true,
+            };
+          }
+        } else {
+          res = {
+            msg: `Environment variable ${_item} has wrong format`,
+            data: 'Try use NAME=value instead',
+            exit: true,
+          };
+        }
+      });
+      if (res) {
+        return res;
       }
     }
 
     // Check common services
     if (isCommonService(type)) {
+      // Check command
+      if (command) {
+        return {
+          msg: `Field "command" is not allowed for service "${item}"`,
+          data: `Command is only allowed for services [${SERVICES_CUSTOM.join('|')}]`,
+          exit: false,
+        };
+      }
+
+      // Check depends on
       let check = false;
       serviceKeys.every((_item) => {
         const { type: _type, depends_on } = config.services[_item];
@@ -464,70 +517,84 @@ export function checkConfig(config) {
         };
         return res;
       }
-    }
 
-    // Check environment
-    if (environment) {
-      environment.forEach((_item) => {
-        const envName = getEnvironmentName(_item);
-        if (envName) {
-          const envVal = getEnvironmentValue(_item);
-          if (envVal) {
-            const variable =
-              PASSWORD_ENV_NAME[/** @type {typeof as<ServiceTypeCommon>} */ (as)(type)];
-            if (!variable) {
-              return;
-            }
-            if (variable === envName) {
-              serviceKeys.every((__item) => {
-                const { type: _type, environment: _environment } = config.services[__item];
-                if (isCustomService(_type)) {
-                  if (_environment) {
-                    let check = false;
-                    /**
-                     * @type {string | null}
-                     */
-                    let _envVal = null;
-                    _environment.forEach((___item) => {
-                      const _envName = getEnvironmentName(___item);
-                      if (_envName && _envName === envName) {
-                        check = true;
-                        _envVal = getEnvironmentValue(___item);
-                      }
-                    });
-                    if (!check) {
-                      res = {
-                        msg: `Service "${item}" provided ${envName}, but in a service ${__item} dependent on it is not provided`,
-                        data: `Try to add environment variable ${envName} to the service ${__item}`,
-                        exit: true,
-                      };
-                      return false;
-                    }
-                    if (envVal !== _envVal) {
-                      res = {
-                        msg: `Service "${item}" provided ${envName}, but in a service ${__item} dependent on it this variable value is not the same`,
-                        data: `Your service ${__item} will not be able to connect to service ${item}`,
-                        exit: false,
-                      };
-                    }
-                  }
-                }
-                return true;
-              });
-            }
-          } else {
-            res = {
-              msg: `Environment variable ${item} has wrong format`,
-              data: 'Try use NAME=value instead',
-              exit: true,
-            };
+      const commonVaribles =
+        ENVIRONMENT_REQUIRED_COMMON[/** @type {typeof as<ServiceTypeCommon>} */ (as)(type)];
+
+      const _commonVariables = structuredClone(commonVaribles);
+      // Check required environment
+      commonVaribles.every((_item, index) => {
+        let check = false;
+        (environment || []).forEach((__item) => {
+          const variable = parseEnvironmentVariable(__item);
+          if (!variable) {
+            return;
           }
-        } else {
+          const { name } = variable;
+          if (name === _item) {
+            check = true;
+            _commonVariables.splice(index, 1);
+          }
+        });
+        if (!check) {
           res = {
-            msg: `Environment variable ${item} has wrong format`,
-            data: 'Try use NAME=value instead',
+            msg: `One or more required environment variables for service "${item}" is missing`,
+            data: `Required [${_commonVariables.join(' & ')}]`,
             exit: true,
           };
+          return false;
+        }
+        return true;
+      });
+      if (res) {
+        return res;
+      }
+
+      // Check depends on
+      (environment || []).forEach((_item) => {
+        const variable = parseEnvironmentVariable(_item);
+        if (!variable) {
+          return;
+        }
+        const { name, value } = variable;
+
+        const index = commonVaribles.indexOf(name);
+        if (index !== -1) {
+          serviceKeys.every((__item) => {
+            const { type: _type, environment: _environment } = config.services[__item];
+            if (isCustomService(_type)) {
+              if (_environment) {
+                let check = false;
+                /**
+                 * @type {string | null}
+                 */
+                let _envVal = null;
+                _environment.forEach((___item) => {
+                  const _envName = getEnvironmentName(___item);
+                  if (_envName && _envName === name) {
+                    check = true;
+                    _envVal = getEnvironmentValue(___item);
+                  }
+                });
+                if (!check) {
+                  res = {
+                    msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it is not provided`,
+                    data: `Try to add environment variable ${name} to the service ${__item}`,
+                    exit: true,
+                  };
+                  return false;
+                }
+                if (value !== _envVal) {
+                  res = {
+                    msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it this variable value is not the same`,
+                    data: `Your service ${__item} will not be able to connect to service ${item}`,
+                    exit: false,
+                  };
+                }
+              }
+            }
+            return true;
+          });
         }
       });
       if (res) {
