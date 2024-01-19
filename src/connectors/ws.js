@@ -5,7 +5,6 @@ import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS } from '../types/interfaces.js';
-import { v4 } from 'uuid';
 import Yaml from '../utils/yaml.js';
 
 const crypto = new Crypto();
@@ -209,7 +208,7 @@ export default class WS {
 
   /**
    *
-   * @returns {ConfigFile | null}
+   * @returns {ConfigFile}
    */
   getConfig() {
     if (!existsSync(this.configFile)) {

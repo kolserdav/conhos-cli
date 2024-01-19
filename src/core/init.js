@@ -1,4 +1,4 @@
-import WS from '../tools/ws.js';
+import WS from '../connectors/ws.js';
 import Inquirer from '../utils/inquirer.js';
 import {
   CURRENCY,
@@ -14,26 +14,24 @@ import {
   PORT_MAX,
   PORT_DEFAULT,
   PORT_TYPES,
-  SERVICES_CUSTOM,
-  as,
   isCustomService,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
 
 /**
- * @typedef {import('../tools/ws.js').Options} Options
- * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
+ * @typedef {import('../connectors/ws.js').Options} Options
+ * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
- * @typedef {import('../tools/ws.js').Session} Session
+ * @typedef {import('../connectors/ws.js').Session} Session
  * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
  * @typedef {import('../types/interfaces.js').ServiceTypeCustom} ServiceTypeCustom
  * @typedef {import('../types/interfaces.js').PortType} PortType
  */
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('../tools/ws.js').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../connectors/ws.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();
@@ -48,6 +46,8 @@ export default class Init extends WS {
    * @type {ConfigFile['services']}
    */
   services;
+
+  overwrite = false;
 
   /**
    * @type {Options}
@@ -73,6 +73,11 @@ export default class Init extends WS {
 
     this.services = {};
 
+    /**
+     * @type {ConfigFile | null}
+     */
+    this.config = null;
+
     this.configFile = getConfigFilePath();
 
     this.options = options;
@@ -93,7 +98,12 @@ export default class Init extends WS {
       const { type } = rawMessage;
       switch (type) {
         case 'deployData':
-          this.project = await this.getProject();
+          if (this.overwrite) {
+            this.project = await this.getProject();
+          } else {
+            this.config = this.getConfig();
+            this.services = this.config.services;
+          }
           await this.handleDeployData(rawMessage);
           break;
         default:
@@ -235,7 +245,7 @@ export default class Init extends WS {
     const environment = (ports || []).map(
       (item, index) => `PORT${index === 0 ? '' : index}=${item.port}`
     );
-    this.services[`${service}${this.index}`] = {
+    this.services[this.getServiceName(service)] = {
       type: service,
       size,
       active: true,
@@ -246,6 +256,16 @@ export default class Init extends WS {
     };
     this.increaseIndex();
 
+    if (exclude) {
+      if (this.config) {
+        exclude.concat(this.config.exclude || []);
+      }
+    } else {
+      if (this.config) {
+        exclude = this.config.exclude;
+      }
+    }
+
     this.writeConfigFile({ project: this.project, services: this.services, exclude });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
@@ -255,6 +275,19 @@ export default class Init extends WS {
       console.info('Project successfully initialized', this.configFile);
       process.exit(0);
     }
+  }
+
+  /**
+   * @param {string} service
+   * @returns {string}
+   */
+  getServiceName(service) {
+    const name = `${service}${this.index}`;
+    if (this.services[name]) {
+      this.index++;
+      return this.getServiceName(service);
+    }
+    return name;
   }
 
   /**
@@ -337,26 +370,40 @@ export default class Init extends WS {
       return;
     }
     console.info('Config file is exists', this.configFile);
-    const overwriteConf = await inquirer.confirm(
-      'Do you want to overwrite the config file?',
-      false
-    );
-    if (overwriteConf) {
-      console.info('Config file will be overwrite');
-      /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
-        token: this.token,
-        type: 'getDeployData',
-        packageName: PACKAGE_NAME,
-        message: '',
-        data: null,
-        status: 'info',
-        userId: this.userId,
-        connId: this.connId,
-      });
-      return;
+    const OVERWRITE = 'Overwrite';
+    const rewrite = await inquirer.expand('What do you want to make with old config file', 'H', [
+      { key: 'o', value: OVERWRITE },
+      { key: 'a', value: 'Add new service' },
+    ]);
+    if (rewrite === OVERWRITE) {
+      this.overwrite = true;
     }
-    console.info('This project has already been initialized');
-    process.exit(0);
+    if (this.overwrite) {
+      console.warn(
+        'If you overwrite the config file that all old services will delete',
+        'Old services will delete from cloud with all their data, when you run "deploy"'
+      );
+      const overwriteConf = await inquirer.confirm(
+        'Do you want to overwrite the config file?',
+        false
+      );
+      if (overwriteConf) {
+        console.info('Config file will be overwrite');
+      } else {
+        console.info('This project has been initialized before');
+        process.exit(0);
+      }
+    }
+    /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
+      token: this.token,
+      type: 'getDeployData',
+      packageName: PACKAGE_NAME,
+      message: '',
+      data: null,
+      status: 'info',
+      userId: this.userId,
+      connId: this.connId,
+    });
   }
 
   increaseIndex() {

@@ -1,4 +1,4 @@
-import WS from '../tools/ws.js';
+import WS from '../connectors/ws.js';
 import { getPackagePath, openBrowser } from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
@@ -12,15 +12,15 @@ import Inquirer from '../utils/inquirer.js';
 import { parseMessageCli } from '../types/interfaces.js';
 
 /**
- * @typedef {import('../tools/ws.js').Options} Options
- * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
+ * @typedef {import('../connectors/ws.js').Options} Options
+ * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
- * @typedef {import('../tools/ws.js').Session} Session
+ * @typedef {import('../connectors/ws.js').Session} Session
  * @typedef {import('../types/interfaces.js').Identity} Identity
  */
 /**
  * @template T
- * @typedef {import('../tools/ws.js').WSMessageCli<any>} WsMessage<T>
+ * @typedef {import('../connectors/ws.js').WSMessageCli<any>} WsMessage<T>
  */
 
 const inquirer = new Inquirer();

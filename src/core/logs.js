@@ -1,5 +1,5 @@
 import Console from 'console';
-import WS from '../tools/ws.js';
+import WS from '../connectors/ws.js';
 import { parseMessageCli } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
@@ -7,7 +7,7 @@ import chalk from 'chalk';
 import Inquirer from '../utils/inquirer.js';
 
 /**
- * @typedef {import("../tools/ws.js").Options} Options
+ * @typedef {import("../connectors/ws.js").Options} Options
  */
 
 /**

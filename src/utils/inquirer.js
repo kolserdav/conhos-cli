@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import { console } from './lib.js';
 
 /**
  * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
@@ -10,7 +11,7 @@ export default class Inquirer {
    * @returns {Promise<string>}
    */
   async promptPassword(name) {
-    const prompt = (await inquirer).createPromptModule();
+    const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'password', name, mask: '*' }).then((d) => {
         resolve(d[name]);
@@ -25,7 +26,7 @@ export default class Inquirer {
    * @returns {Promise<string>}
    */
   async list(name, choices, def, all = false) {
-    const prompt = (await inquirer).createPromptModule();
+    const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'list', name, choices, default: def }).then((d) => {
         let result = d[name];
@@ -44,7 +45,7 @@ export default class Inquirer {
    * @returns {Promise<string>}
    */
   async promptServiceCommand(name, choices) {
-    const prompt = (await inquirer).createPromptModule();
+    const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'list', name, choices, default: 'd' }).then((d) => {
         resolve(d[name]);
@@ -59,9 +60,26 @@ export default class Inquirer {
    * @returns {Promise<string>}
    */
   async input(name, def, validate = () => true) {
-    const prompt = (await inquirer).createPromptModule();
+    const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'input', name, default: def, validate }).then((d) => {
+        resolve(d[name]);
+      });
+    });
+  }
+
+  /**
+   * @param {string} name
+   * @param {string | number} def
+   * @param {{key: string; value: string}[]} choices
+   * @param {(d: any) => boolean | string} validate
+   * @returns {Promise<string>}
+   */
+  async expand(name, def, choices, validate = () => true) {
+    console.info('\nList all options', 'H');
+    const prompt = inquirer.createPromptModule();
+    return new Promise((resolve) => {
+      prompt({ type: 'expand', name, default: def, choices, validate }).then((d) => {
         resolve(d[name]);
       });
     });
@@ -73,7 +91,7 @@ export default class Inquirer {
    * @returns {Promise<string>}
    */
   async confirm(name, def) {
-    const prompt = (await inquirer).createPromptModule();
+    const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'confirm', name, default: def }).then((d) => {
         resolve(d[name]);

@@ -1,6 +1,6 @@
 /**
  * @typedef {'node' | 'rust'} ServiceTypeCustom
- * @typedef {'redis' | 'postgres'} ServiceTypeCommon
+ * @typedef {'redis' | 'postgres' | 'adminer'} ServiceTypeCommon
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
 
@@ -17,6 +17,7 @@ export const ENVIRONMENT_SWITCH = {
 export const ENVIRONMENT_EXCLUDED_CUSTOM = {
   redis: 'REDIS_HOST',
   postgres: 'POSTGRES_HOST',
+  adminer: 'ADMINER_DEFAULT_SERVER',
 };
 /**
  * @type {Record<ServiceTypeCommon, string[]>}
@@ -24,6 +25,7 @@ export const ENVIRONMENT_EXCLUDED_CUSTOM = {
 export const ENVIRONMENT_REQUIRED_COMMON = {
   redis: [ENVIRONMENT_SWITCH.redis.password],
   postgres: ['POSTGRES_PASSWORD', 'POSTGRES_USER', 'POSTGRES_DB'],
+  adminer: [],
 };
 
 /**
@@ -43,7 +45,7 @@ export const SERVICES_CUSTOM = ['node', 'rust'];
 /**
  * @type {ServiceTypeCommon[]}
  */
-export const SERVICES_COMMON = ['redis', 'postgres'];
+export const SERVICES_COMMON = ['redis', 'postgres', 'adminer'];
 
 /**
  * @type {any[]}

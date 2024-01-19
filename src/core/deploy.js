@@ -1,4 +1,4 @@
-import WS from '../tools/ws.js';
+import WS from '../connectors/ws.js';
 import Tar from '../utils/tar.js';
 import { console, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
 import { createReadStream, statSync, readdirSync } from 'fs';
@@ -6,14 +6,14 @@ import { CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
 import { isCommonService, parseMessageCli } from '../types/interfaces.js';
 
 /**
- * @typedef {import('../tools/ws.js').Options} Options
- * @typedef {import('../tools/ws.js').CommandOptions} CommandOptions
+ * @typedef {import('../connectors/ws.js').Options} Options
+ * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('../tools/ws.js').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../connectors/ws.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 export default class Deploy extends WS {
