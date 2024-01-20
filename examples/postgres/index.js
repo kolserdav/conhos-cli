@@ -12,7 +12,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const client = new Client({
       host: process.env.POSTGRES_HOST,
-      port: process.env.POSTGRES_PORT,
+      port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,

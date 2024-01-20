@@ -1,6 +1,7 @@
 /**
  * @typedef {'node' | 'rust'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'adminer'} ServiceTypeCommon
+ * @typedef {'adminer'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
 
@@ -12,12 +13,12 @@ export const ENVIRONMENT_SWITCH = {
 
 // Switch services
 /**
- * @type {Record<ServiceTypeCommon, string>}
+ * @type {Record<ServiceTypeCommon, string | null>}
  */
 export const ENVIRONMENT_EXCLUDED_CUSTOM = {
   redis: 'REDIS_HOST',
   postgres: 'POSTGRES_HOST',
-  adminer: 'ADMINER_DEFAULT_SERVER',
+  adminer: null,
 };
 /**
  * @type {Record<ServiceTypeCommon, string[]>}
@@ -48,6 +49,11 @@ export const SERVICES_CUSTOM = ['node', 'rust'];
 export const SERVICES_COMMON = ['redis', 'postgres', 'adminer'];
 
 /**
+ * @type {ServiceTypeCommonPublic[]}
+ */
+export const SERVICES_COMMON_PUBLIC = ['adminer'];
+
+/**
  * @type {any[]}
  */
 const _SERVICES_COMMON = SERVICES_COMMON;
@@ -64,6 +70,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * @typedef {{
  *  service: string;
  *  domains: Record<string, string>;
+ *  public: boolean;
  * }} NewDomains
  * @typedef {{
  *  port: number;
@@ -99,6 +106,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *    type: ServiceType;
  *    size: string;
  *    version: string;
+ *    public: boolean;
  *    command?: string;
  *    ports?: Port[];
  *    depends_on?: string[];
@@ -297,7 +305,7 @@ export const findEnvironmentValue = (environment, name) => {
 
 /**
  *
- * @param {Record<string, string>} record
+ * @param {Record<string, string | null>} record
  * @param {string} name
  * @returns
  */
@@ -305,8 +313,10 @@ export const checkRecord = (record, name) => {
   let check = false;
   const keys = Object.keys(record);
   keys.forEach((t) => {
-    if (record[/** @type {typeof as<ServiceType>} */ (as)(t)] === name) {
-      check = true;
+    if (name) {
+      if (record[/** @type {typeof as<ServiceType>} */ (as)(t)] === name) {
+        check = true;
+      }
     }
   });
   return check;
@@ -350,6 +360,16 @@ export const checkEnvironmentRequired = (name) => {
 };
 
 /**
+ * @param {ServiceType} type
+ */
+export const isCommonServicePublic = (type) => {
+  return (
+    SERVICES_COMMON_PUBLIC.indexOf(/** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type)) !==
+    -1
+  );
+};
+
+/**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
  * @returns {CheckConfigResult | null}
@@ -383,7 +403,15 @@ export function checkConfig(config) {
   }
 
   serviceKeys.every((item) => {
-    const { domains, ports, type, environment, version, command } = config.services[item];
+    const {
+      domains,
+      ports,
+      type,
+      environment,
+      version,
+      command,
+      public: _public,
+    } = config.services[item];
 
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {
@@ -392,17 +420,31 @@ export function checkConfig(config) {
         data: `Allowed service types: [${SERVICE_TYPES.join('|')}]`,
         exit: true,
       };
-      return res;
+      return false;
     }
 
-    // Check service version
+    // Check service public
+    if (_public) {
+      if (isCommonService(type) && !isCommonServicePublic(type)) {
+        res = {
+          msg: `Service "${item}" can not be public`,
+          data: `Only services can be public: [${SERVICES_CUSTOM.concat(
+            /** @type {typeof as<typeof SERVICES_CUSTOM>} */ (as)(SERVICES_COMMON_PUBLIC)
+          ).join('|')}]`,
+          exit: true,
+        };
+        return false;
+      }
+    }
+
     if (!version) {
+      // Check service version
       res = {
         msg: `Version doesn't exists in service "${item}"`,
         data: 'Try to add the field version to the config file',
         exit: true,
       };
-      return res;
+      return false;
     }
 
     // Check custom services
@@ -420,7 +462,7 @@ export function checkConfig(config) {
         return true;
       });
       if (res) {
-        return res;
+        return false;
       }
 
       // Check domains
@@ -437,7 +479,7 @@ export function checkConfig(config) {
           }
           return true;
         });
-        if (res !== null) {
+        if (res) {
           return false;
         }
       }
@@ -454,7 +496,7 @@ export function checkConfig(config) {
         }
       });
       if (res) {
-        return res;
+        return false;
       }
 
       // Check environment exclude
@@ -481,7 +523,7 @@ export function checkConfig(config) {
         }
       });
       if (res) {
-        return res;
+        return false;
       }
     }
 
@@ -489,11 +531,12 @@ export function checkConfig(config) {
     if (isCommonService(type)) {
       // Check command
       if (command) {
-        return {
+        let res = {
           msg: `Field "command" is not allowed for service "${item}"`,
           data: `Command is only allowed for services [${SERVICES_CUSTOM.join('|')}]`,
           exit: false,
         };
+        return false;
       }
 
       // Check depends on
@@ -511,13 +554,13 @@ export function checkConfig(config) {
         }
         return true;
       });
-      if (!check) {
+      if (!check && !_public) {
         res = {
           msg: `You have ${type} service with name ${item}, bun noone another service depends on it`,
           data: `Add "depends_on" field with item ${item} to any custom service`,
           exit: false,
         };
-        return res;
+        return false;
       }
 
       const commonVaribles =
@@ -549,7 +592,7 @@ export function checkConfig(config) {
         return true;
       });
       if (res) {
-        return res;
+        return false;
       }
 
       // Check depends on
@@ -600,10 +643,9 @@ export function checkConfig(config) {
         }
       });
       if (res) {
-        return res;
+        return false;
       }
     }
-
     return true;
   });
   return res;

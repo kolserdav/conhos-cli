@@ -15,6 +15,7 @@ import {
   PORT_DEFAULT,
   PORT_TYPES,
   isCustomService,
+  isCommonServicePublic,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
@@ -170,6 +171,7 @@ export default class Init extends WS {
           node1: {
             type: 'node',
             active: true,
+            public: true,
             version: this.getService('node', services)?.tags[0] || 'latest',
             size: sizes[SIZE_INDEX_DEFAULT].name,
             command: COMMAND_DEFAULT,
@@ -249,6 +251,7 @@ export default class Init extends WS {
       type: service,
       size,
       active: true,
+      public: isCustomService(service) || isCommonServicePublic(service) || false,
       version,
       command,
       ports: ports?.length ? ports : undefined,

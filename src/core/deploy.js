@@ -59,8 +59,7 @@ export default class Deploy extends WS {
     }
     const _configFile = structuredClone(configFile);
     Object.keys(configFile.services).forEach((item) => {
-      // Group services
-      if (isCommonService(configFile.services[item].type)) {
+      if (!configFile.services[item].active) {
         return;
       }
       const dataDomains = data.find((_item) => _item.service === item);
