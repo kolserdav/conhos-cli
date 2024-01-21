@@ -75,6 +75,10 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * @typedef {{
  *  port: number;
  *  type: PortType;
+ *  static?: {
+ *    location: string;
+ *    root: string;
+ *  }[];
  *  timeout?: string;
  * }} Port
  */
@@ -379,14 +383,14 @@ export const isCommonServicePublic = (type) => {
  * @param {ConfigFile} config
  * @returns {CheckConfigResult | null}
  */
-export function checkConfig(config) {
+export function checkConfig({ services }) {
   /**
    * @type {CheckConfigResult | null}
    */
   let res = null;
 
   // Check services field
-  if (!config.services) {
+  if (!services) {
     res = {
       msg: 'Required field is missing',
       data: 'services',
@@ -395,7 +399,7 @@ export function checkConfig(config) {
     return res;
   }
 
-  const serviceKeys = Object.keys(config.services);
+  const serviceKeys = Object.keys(services);
 
   // Check services lenght
   if (serviceKeys.length === 0) {
@@ -416,7 +420,8 @@ export function checkConfig(config) {
       version,
       command,
       public: _public,
-    } = config.services[item];
+      depends_on,
+    } = services[item];
 
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {
@@ -504,8 +509,21 @@ export function checkConfig(config) {
         return false;
       }
 
+      // Check depends on
+      (depends_on || []).every((_item) => {
+        if (!(services[_item] || {}).active) {
+          res = {
+            msg: `Service "${item}" depends on of missing service "${_item}"`,
+            data: `Try remove 'depends_on' item "${_item}" from service "${item}", or set service "${_item}" active`,
+            exit: true,
+          };
+          return false;
+        }
+        return true;
+      });
+
       // Check environment exclude
-      (environment || []).forEach((_item) => {
+      (environment || []).every((_item) => {
         const variable = parseEnvironmentVariable(_item);
         if (!variable) {
           return;
@@ -518,6 +536,7 @@ export function checkConfig(config) {
               data: _item,
               exit: true,
             };
+            return false;
           }
         } else {
           res = {
@@ -525,7 +544,9 @@ export function checkConfig(config) {
             data: 'Try use NAME=value instead',
             exit: true,
           };
+          return false;
         }
+        return true;
       });
       if (res) {
         return false;
@@ -547,11 +568,12 @@ export function checkConfig(config) {
       // Check depends on
       let check = false;
       serviceKeys.every((_item) => {
-        const { type: _type, depends_on } = config.services[_item];
+        const { type: _type, depends_on } = services[_item];
         if (isCustomService(_type)) {
           if (!depends_on) {
             return true;
           }
+
           if (depends_on.indexOf(item) !== -1) {
             check = true;
             return false;
@@ -611,7 +633,7 @@ export function checkConfig(config) {
         const index = commonVaribles.indexOf(name);
         if (index !== -1) {
           serviceKeys.every((__item) => {
-            const { type: _type, environment: _environment } = config.services[__item];
+            const { type: _type, environment: _environment } = services[__item];
             if (isCustomService(_type)) {
               if (_environment) {
                 let check = false;
