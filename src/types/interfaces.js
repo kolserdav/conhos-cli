@@ -146,6 +146,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  last: boolean;
  *  chunk: Uint8Array;
  *  config: ConfigFile | null;
+ *  projectChanged: boolean;
  *  nodeName?: string;
  * }} deploy
  * @property {null} getDeployData

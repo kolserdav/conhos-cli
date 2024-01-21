@@ -13,7 +13,7 @@ if (!fs.existsSync(packageHomeDir)) {
   fs.mkdirSync(packageHomeDir);
 }
 
-console.info(`Starting "${PACKAGE_NAME}" v${PACKAGE_VERSION} ...`);
+console.info(`Starting "${PACKAGE_NAME}" v${PACKAGE_VERSION} ...`, '');
 console.info('Package data dir:', packageHomeDir);
 
 const program = new Command();
