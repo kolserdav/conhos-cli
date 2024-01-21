@@ -28,7 +28,6 @@ const crypto = new Crypto();
 
 export default class Login extends WS {
   /**
-   *
    * @param {Options} options
    */
   constructor(options) {
@@ -37,6 +36,10 @@ export default class Login extends WS {
     super(_options);
   }
 
+  /**
+   * @public
+   * @returns
+   */
   listener() {
     if (!this.conn) {
       console.warn('Connection ID is missing', 'Need to update the program version');
@@ -60,6 +63,7 @@ export default class Login extends WS {
   }
 
   /**
+   * @public
    * @type {WS['handler']}
    */
   async handler({ failedLogin, sessionExists }) {
@@ -83,7 +87,7 @@ export default class Login extends WS {
   }
 
   /**
-   *
+   * @private
    * @param {WsMessage<WSMessageDataCli['login']>} param0
    * @returns
    */
@@ -118,6 +122,9 @@ export default class Login extends WS {
     process.exit(0);
   }
 
+  /**
+   * @private
+   */
   openNewSession() {
     console.info('Trying to create a new session...');
     /** @type {typeof this.sendMessage<'login'>} */ (this.sendMessage)({

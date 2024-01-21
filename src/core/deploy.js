@@ -1,11 +1,20 @@
+import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
 import Tar from '../utils/tar.js';
-import { console, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
-import { createReadStream, statSync, readdirSync } from 'fs';
-import { CWD, EXPLICIT_EXCLUDE, PACKAGE_NAME } from '../utils/constants.js';
-import { isCommonService, parseMessageCli } from '../types/interfaces.js';
+import { console, getPackagePath, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
+import { createReadStream, statSync, readdirSync, existsSync, mkdirSync } from 'fs';
+import {
+  CACHE_FILE_NAME,
+  CONFIG_FILE_NAME,
+  CONFIG_FILE_NAME_A,
+  CWD,
+  EXPLICIT_EXCLUDE,
+  PACKAGE_NAME,
+} from '../utils/constants.js';
+import { parseMessageCli } from '../types/interfaces.js';
 
 /**
+ * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
@@ -18,6 +27,25 @@ import { isCommonService, parseMessageCli } from '../types/interfaces.js';
 
 export default class Deploy extends WS {
   /**
+   * @private
+   * @type {boolean}
+   */
+  cacheWorked = false;
+
+  /**
+   * @private
+   * @type {boolean}
+   */
+  needUpload = false;
+
+  /**
+   * @private
+   * @type {string}
+   */
+  cacheFilePath = '';
+
+  /**
+   * @public
    * @param {Options} options
    */
   constructor(options) {
@@ -25,6 +53,7 @@ export default class Deploy extends WS {
   }
 
   /**
+   * @public
    * @type {WS['listener']}
    */
   listener() {
@@ -50,6 +79,7 @@ export default class Deploy extends WS {
   }
 
   /**
+   * @private
    * @param {WSMessageCli<'setDomains'>} param0
    */
   setDomainsHandler({ data }) {
@@ -69,10 +99,14 @@ export default class Deploy extends WS {
       }
       const { domains } = dataDomains;
       _configFile.services[item].domains = domains;
+
       console.info(
         `Service "${item}" links:\n`,
         Object.keys(domains)
-          .map((dK) => `${dK}: http://${domains[parseInt(dK, 10)]}`)
+          .map((dK) => {
+            const domain = domains[parseInt(dK, 10)];
+            return `${dK}: ${/\./.test(domain) ? 'http://' : ''}${domain}`;
+          })
           .join('\n ')
       );
     });
@@ -80,7 +114,7 @@ export default class Deploy extends WS {
   }
 
   /**
-   *
+   * @private
    * @param {number} size
    * @param {number} curSize
    * @returns {number}
@@ -91,9 +125,10 @@ export default class Deploy extends WS {
   }
 
   /**
+   * @public
    * @type {WS['handler']}
    */
-  async handler() {
+  async handler(_, msg) {
     const config = this.getConfig();
     if (!config) {
       return;
@@ -101,29 +136,47 @@ export default class Deploy extends WS {
 
     const { exclude, project, services } = config;
 
-    if (!Object.keys(services).find((item) => services[item].active)) {
-      /** @type {typeof this.sendMessage<'deploy'>} */ (this.sendMessage)({
-        token: this.token,
-        message: '',
-        type: 'deploy',
-        userId: this.userId,
-        packageName: PACKAGE_NAME,
-        data: {
-          num: 0,
-          project,
-          last: true,
-          chunk: new Uint8Array(),
-          config,
-          nodeName: this.options.node,
-        },
-        status: 'info',
-        connId: this.connId,
-      });
+    const packageProjectPath = getPackagePath(project);
+    if (!existsSync(packageProjectPath)) {
+      mkdirSync(packageProjectPath, { recursive: true });
+    }
+
+    await this.checkCache({ msg, project, exclude });
+
+    const needToRemoveProject =
+      typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
+    if (needToRemoveProject) {
       console.info('Starting remove project', project);
+    } else {
+      console.info('Starting deploy project', project);
+    }
+
+    if (needToRemoveProject || (!this.needUpload && this.cacheWorked)) {
+      if (!this.needUpload) {
+        console.info('No changed files', 'Upload skipping');
+      }
+
+      this
+        /** @type {typeof this.sendMessage<'deploy'>} */ .sendMessage({
+          token: this.token,
+          message: '',
+          type: 'deploy',
+          userId: this.userId,
+          packageName: PACKAGE_NAME,
+          data: {
+            num: 0,
+            project,
+            last: true,
+            chunk: new Uint8Array(),
+            config,
+            nodeName: this.options.node,
+          },
+          status: 'info',
+          connId: this.connId,
+        });
       return;
     }
 
-    console.info('Starting deploy project', project);
     const fileTar = getTmpArchive(project);
     const tar = new Tar();
     await tar.create({
@@ -183,5 +236,68 @@ export default class Deploy extends WS {
       const percent = this.calculatePercents(size, curSize);
       console.info(`Project files uploaded to the cloud: ${percent}%`);
     });
+  }
+
+  /**
+   * @private
+   * @param {{
+   *  msg: WSMessageCli<'checkToken'> | undefined;
+   *  project: string;
+   *  exclude: ConfigFile['exclude']
+   * }} param0
+   */
+  async checkCache({ msg, project, exclude }) {
+    let projectExists = false;
+    if (msg) {
+      projectExists = msg.data.projectExists;
+      this.needUpload = !projectExists;
+    }
+
+    this.cacheFilePath = getPackagePath(`${project}/${CACHE_FILE_NAME}`);
+    const cacheChanged = new CacheChanged({
+      cacheFilePath: this.cacheFilePath,
+      exclude: exclude
+        ? exclude.concat([CONFIG_FILE_NAME, CONFIG_FILE_NAME_A])
+        : [CONFIG_FILE_NAME, CONFIG_FILE_NAME_A],
+    });
+
+    if (!existsSync(this.cacheFilePath)) {
+      this.needUpload = true;
+      const cacheRes = await cacheChanged.create().catch((err) => {
+        console.error('Failed to create cache', err, new Error().stack);
+        console.warn('Cache skipping');
+      });
+      if (typeof cacheRes !== 'undefined') {
+        this.cacheWorked = true;
+        await this.createCache(cacheChanged);
+      }
+    } else if (projectExists) {
+      const cacheRes = await cacheChanged.compare().catch((err) => {
+        console.error('Failed to compare cache', err, new Error().stack);
+        console.warn('Cache skipping');
+      });
+
+      this.cacheWorked = typeof cacheRes !== 'undefined';
+      if (this.cacheWorked && typeof cacheRes !== 'undefined') {
+        this.needUpload = cacheRes.isChanged;
+        if (this.needUpload) {
+          await this.createCache(cacheChanged);
+        }
+      }
+    }
+  }
+
+  /**
+   * @private
+   * @param {CacheChanged} cacheChanged
+   */
+  async createCache(cacheChanged) {
+    const cacheRes = await cacheChanged.create().catch((err) => {
+      console.error('Failed to create cache', err, new Error().stack);
+      console.warn('Cache skipping');
+    });
+    if (typeof cacheRes !== 'undefined') {
+      this.cacheWorked = true;
+    }
   }
 }

@@ -4,7 +4,7 @@ const ALGORITHM = 'aes-256-cbc';
 
 export default class Crypto {
   /**
-   *
+   * @public
    * @param {string} text
    * @param {string | Buffer} password
    * @returns
@@ -23,7 +23,7 @@ export default class Crypto {
   }
 
   /**
-   *
+   * @public
    * @param {{
    *  iv: string;
    *  content: string;
@@ -51,7 +51,7 @@ export default class Crypto {
   }
 
   /**
-   *
+   * @public
    * @param {string} secret
    * @returns
    */

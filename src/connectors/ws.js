@@ -69,8 +69,10 @@ export class WSInterface {
 
   /**
    * @param {CommandOptions} options
+   * @param {WSMessageCli<'checkToken'> | undefined} [msg=null]
    */
-  handler(options) {
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  handler(options, msg) {
     console.warn('Handler must be impelemented');
   }
 }
@@ -81,6 +83,13 @@ export class WSInterface {
  */
 export default class WS {
   /**
+   * @protected
+   * @type {string | null}
+   */
+  project = null;
+
+  /**
+   * @protected
    * @type {string}
    */
   userId;
@@ -155,6 +164,14 @@ export default class WS {
     this.conn.send(JSON.stringify(data));
   }
 
+  /**
+   * @private
+   * @param {WS['project']} project
+   */
+  setProject(project) {
+    this.project = project;
+  }
+
   start() {
     if (!this.conn) {
       console.warn('WebSocket is missing');
@@ -181,10 +198,11 @@ export default class WS {
 
   /**
    *
-   * @param {WSMessageCli<'checkToken'>} param0
+   * @param {WSMessageCli<'checkToken'>} msg
    * @returns
    */
-  async listenCheckToken({ data, token, userId }) {
+  async listenCheckToken(msg) {
+    const { data, token, userId } = msg;
     if ((!data && !this.options.isLogin) || !token) {
       console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
       process.exit(2);
@@ -193,10 +211,13 @@ export default class WS {
     this.setToken(token);
     this.setUserId(userId);
 
-    this.handler({
-      failedLogin: !data,
-      sessionExists: true,
-    });
+    this.handler(
+      {
+        failedLogin: !data,
+        sessionExists: true,
+      },
+      msg
+    );
   }
 
   /**
@@ -251,7 +272,12 @@ export default class WS {
   /**
    * @param {WSMessageCli<'test'>} msg
    */
-  async listenTest({ connId }) {
+  async listenTest(msg) {
+    const { connId } = msg;
+    const config = this.getConfig();
+    if (config) {
+      this.setProject(config.project);
+    }
     this.setConnId(connId);
 
     const authData = this.readSessionFile();
@@ -273,7 +299,11 @@ export default class WS {
           token,
           type: 'checkToken',
           packageName: PACKAGE_NAME,
-          data: false,
+          data: {
+            checked: false,
+            projectExists: false,
+            project: this.project,
+          },
           message: '',
           status: 'info',
           userId: this.userId,
@@ -286,7 +316,11 @@ export default class WS {
           token: authData.content,
           type: 'checkToken',
           packageName: PACKAGE_NAME,
-          data: false,
+          data: {
+            checked: false,
+            projectExists: false,
+            project: this.project,
+          },
           message: '',
           status: 'info',
           userId: this.userId,

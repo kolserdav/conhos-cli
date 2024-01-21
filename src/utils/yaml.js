@@ -6,6 +6,7 @@ import { parse, stringify } from 'yaml';
 
 export default class Yaml {
   /**
+   * @public
    * @param {string} data
    * @returns {ConfigFile}
    */
@@ -14,6 +15,7 @@ export default class Yaml {
   }
 
   /**
+   * @public
    * @param {ConfigFile} data
    * @return {string}
    */

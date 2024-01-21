@@ -2,7 +2,7 @@ import { tmpdir } from 'os';
 import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';
-import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD } from './constants.js';
+import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
 import { existsSync, readFileSync } from 'fs';
 
 /**
@@ -20,7 +20,7 @@ import { existsSync, readFileSync } from 'fs';
  */
 const getBrightUnderline = (arg) => {
   let _arg = arg;
-  if (arg && typeof arg === 'object') {
+  if (typeof arg !== 'undefined' && typeof arg === 'object') {
     try {
       const copyArg = { ...arg };
       if (arg.token) {
@@ -31,7 +31,11 @@ const getBrightUnderline = (arg) => {
       Console.error('Failed stringify log argument', arg);
     }
   }
-  return _arg ? (/https?:\/\//.test(_arg) ? chalk.blue(_arg) : chalk.white(_arg)) : '';
+  return typeof _arg !== 'undefined'
+    ? /https?:\/\//.test(_arg)
+      ? chalk.blue(_arg)
+      : chalk.white(_arg)
+    : undefined;
 };
 
 export const console = {
@@ -90,7 +94,6 @@ export function getPackagePath(postfix = '') {
 }
 
 /**
- *
  * @param {string} title
  */
 export function stdoutWriteStart(title) {
@@ -100,7 +103,6 @@ export function stdoutWriteStart(title) {
 }
 
 /**
- *
  * @returns {string}
  */
 export function getPackageName() {
@@ -125,7 +127,6 @@ export function getPackageName() {
 }
 
 /**
- *
  * @param {string} packageName
  * @returns {string}
  */
@@ -134,11 +135,10 @@ export function getTmpArchive(packageName) {
 }
 
 /**
- *
  * @returns {string}
  */
 export function getConfigFilePath() {
-  let fileYml = path.resolve(CWD, `${PACKAGE_NAME}.yaml`);
+  let fileYml = path.resolve(CWD, CONFIG_FILE_NAME);
   if (!existsSync(fileYml)) {
     fileYml = fileYml.replace(/yaml$/, 'yml');
   }

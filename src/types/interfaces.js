@@ -131,7 +131,11 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {string} setSocket
  * @property {string} test
  * @property {string} login
- * @property {boolean} checkToken
+ * @property {{
+ *  checked: boolean;
+ *  projectExists: boolean;
+ *  project: string | null;
+ * }} checkToken
  * @property {{
  *  msg: string | number;
  *  end: boolean;

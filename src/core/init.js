@@ -39,34 +39,41 @@ const inquirer = new Inquirer();
 
 export default class Init extends WS {
   /**
+   * @public
    * @type {string}
    */
   configFile;
 
   /**
+   * @private
    * @type {ConfigFile['services']}
    */
   services;
 
+  /**
+   * @private
+   */
   overwrite = false;
 
   /**
+   * @public
    * @type {Options}
    */
   options;
 
   /**
+   * @private
    * @type {number}
    */
   index;
 
   /**
+   * @public
    * @type {string}
    */
   project = getPackageName();
 
   /**
-   *
    * @param {Options} options
    */
   constructor(options) {
@@ -86,6 +93,9 @@ export default class Init extends WS {
     this.index = 0;
   }
 
+  /**
+   * @public
+   */
   listener() {
     if (!this.conn) {
       return;
@@ -114,6 +124,7 @@ export default class Init extends WS {
   }
 
   /**
+   * @private
    * @param {WSMessageDataCli['deployData']['sizes'][0]} item
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
    * @returns
@@ -133,6 +144,7 @@ export default class Init extends WS {
   }
 
   /**
+   * @private
    * @param {ServiceType} service
    * @param {WSMessageDataCli['deployData']['services']} services
    */
@@ -148,7 +160,7 @@ export default class Init extends WS {
   }
 
   /**
-   *
+   * @private
    * @param {WSMessageCli<'deployData'>} param0
    */
   async handleDeployData(param0) {
@@ -281,6 +293,7 @@ export default class Init extends WS {
   }
 
   /**
+   * @private
    * @param {string} service
    * @returns {string}
    */
@@ -294,7 +307,7 @@ export default class Init extends WS {
   }
 
   /**
-   *
+   * @private
    * @param {ConfigFile['services'][0]['ports']} ports
    * @returns {Promise<ConfigFile['services'][0]['ports']>}
    */
@@ -339,7 +352,7 @@ export default class Init extends WS {
   }
 
   /**
-   *
+   * @private
    * @returns {Promise<string>}
    */
   async getProject() {
@@ -354,6 +367,7 @@ export default class Init extends WS {
   }
 
   /**
+   * @public
    * @type {WS['handler']}
    */
   async handler() {

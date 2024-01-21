@@ -5,7 +5,7 @@ import { CWD } from './constants.js';
 
 export default class Tar {
   /**
-   *
+   * @public
    * @param {{
    *  file: string;
    *  fileList: string[];

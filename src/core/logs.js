@@ -20,10 +20,12 @@ const inquirer = new Inquirer();
 export default class Logs extends WS {
   num = 0;
   /**
+   * @private
    * @type {string}
    */
   serviceName;
   /**
+   * @public
    * @param {Options} options
    * @param {string} serviceName
    */
@@ -55,7 +57,7 @@ export default class Logs extends WS {
   }
 
   /**
-   *
+   * @private
    * @param {WSMessageCli<'logs'>} msg
    */
   async handleLogs({ data: { text, last, num }, status }) {
@@ -68,6 +70,7 @@ export default class Logs extends WS {
   }
 
   /**
+   * @private
    * @param {number} num
    */
   async waitQueue(num) {
@@ -82,6 +85,7 @@ export default class Logs extends WS {
   }
 
   /**
+   * @public
    * @type {WS['handler']}
    */
   async handler() {

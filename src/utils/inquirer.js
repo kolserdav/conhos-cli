@@ -7,6 +7,7 @@ import { console } from './lib.js';
 
 export default class Inquirer {
   /**
+   * @public
    * @param {string} name
    * @returns {Promise<string>}
    */
@@ -20,6 +21,7 @@ export default class Inquirer {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {string[]} choices
    * @param {number} def
@@ -40,6 +42,7 @@ export default class Inquirer {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {{key: string; name: string;  value: 'overwrite' | 'default' | 'none'}[]} choices
    * @returns {Promise<string>}
@@ -54,6 +57,7 @@ export default class Inquirer {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {string | number} def
    * @param {(d: any) => boolean | string} validate
@@ -69,6 +73,7 @@ export default class Inquirer {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {string | number} def
    * @param {{key: string; value: string}[]} choices
@@ -86,6 +91,7 @@ export default class Inquirer {
   }
 
   /**
+   * @public
    * @param {string} name
    * @param {boolean} def
    * @returns {Promise<string>}
