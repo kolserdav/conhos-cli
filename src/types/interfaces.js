@@ -78,6 +78,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  static?: {
  *    location: string;
  *    root: string;
+ *    index?: string;
  *  }[];
  *  timeout?: string;
  * }} Port
@@ -421,6 +422,7 @@ export function checkConfig({ services }) {
       command,
       public: _public,
       depends_on,
+      active,
     } = services[item];
 
     // Check service type
@@ -510,17 +512,19 @@ export function checkConfig({ services }) {
       }
 
       // Check depends on
-      (depends_on || []).every((_item) => {
-        if (!(services[_item] || {}).active) {
-          res = {
-            msg: `Service "${item}" depends on of missing service "${_item}"`,
-            data: `Try remove 'depends_on' item "${_item}" from service "${item}", or set service "${_item}" active`,
-            exit: true,
-          };
-          return false;
-        }
-        return true;
-      });
+      if (active) {
+        (depends_on || []).every((_item) => {
+          if (!(services[_item] || {}).active) {
+            res = {
+              msg: `Service "${item}" depends on of missing service "${_item}"`,
+              data: `Try remove 'depends_on' item "${_item}" from service "${item}", or set service "${_item}" active`,
+              exit: true,
+            };
+            return false;
+          }
+          return true;
+        });
+      }
 
       // Check environment exclude
       (environment || []).every((_item) => {
@@ -565,29 +569,31 @@ export function checkConfig({ services }) {
         return false;
       }
 
-      // Check depends on
-      let check = false;
-      serviceKeys.every((_item) => {
-        const { type: _type, depends_on } = services[_item];
-        if (isCustomService(_type)) {
-          if (!depends_on) {
-            return true;
-          }
+      if (active) {
+        // Check depends on
+        let check = false;
+        serviceKeys.every((_item) => {
+          const { type: _type, depends_on } = services[_item];
+          if (isCustomService(_type)) {
+            if (!depends_on) {
+              return true;
+            }
 
-          if (depends_on.indexOf(item) !== -1) {
-            check = true;
-            return false;
+            if (depends_on.indexOf(item) !== -1) {
+              check = true;
+              return false;
+            }
           }
+          return true;
+        });
+        if (!check && !_public) {
+          res = {
+            msg: `You have ${type} service with name ${item}, bun noone another service depends on it`,
+            data: `Add "depends_on" field with item ${item} to any custom service`,
+            exit: false,
+          };
+          return false;
         }
-        return true;
-      });
-      if (!check && !_public) {
-        res = {
-          msg: `You have ${type} service with name ${item}, bun noone another service depends on it`,
-          data: `Add "depends_on" field with item ${item} to any custom service`,
-          exit: false,
-        };
-        return false;
       }
 
       const commonVaribles =
@@ -633,7 +639,15 @@ export function checkConfig({ services }) {
         const index = commonVaribles.indexOf(name);
         if (index !== -1) {
           serviceKeys.every((__item) => {
-            const { type: _type, environment: _environment } = services[__item];
+            const { type: _type, environment: _environment, depends_on } = services[__item];
+
+            if (!depends_on) {
+              return true;
+            }
+            if (depends_on.indexOf(item) === -1) {
+              return true;
+            }
+
             if (isCustomService(_type)) {
               if (_environment) {
                 let check = false;
