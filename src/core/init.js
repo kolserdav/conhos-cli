@@ -238,17 +238,17 @@ export default class Init extends WS {
     /**
      * @type {ConfigFile['exclude']}
      */
-    let exclude = undefined;
+    let exclude = this.config?.exclude || [];
     const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
     switch (service) {
       case 'node':
         command = await inquirer.input(GET_SERVICE_MESSAGE, command || COMMAND_DEFAULT);
-        exclude = EXCLUDE_NODE;
+        exclude = EXCLUDE_NODE.concat(exclude);
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
-        exclude = EXCLUDE_RUST;
+        exclude = EXCLUDE_RUST.concat(exclude);
         break;
     }
     // Group services

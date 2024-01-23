@@ -68,7 +68,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
  *  'deca' | 'hecto' | 'kilo' | 'mega' | 'giga' | 'tera'} ServiceSize
  * @typedef {{
- *  service: string;
+ *  serviceName: string;
  *  domains: Record<string, string>;
  *  public: boolean;
  * }} NewDomains

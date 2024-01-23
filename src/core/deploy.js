@@ -92,7 +92,7 @@ export default class Deploy extends WS {
       if (!configFile.services[item].active) {
         return;
       }
-      const dataDomains = data.find((_item) => _item.service === item);
+      const dataDomains = data.find((_item) => _item.serviceName === item);
       if (!dataDomains) {
         console.warn(`Failed to find domains for service "${item}"`, data);
         return;
@@ -180,12 +180,21 @@ export default class Deploy extends WS {
 
     const fileTar = getTmpArchive(project);
     const tar = new Tar();
-    await tar.create({
-      fileList: readdirSync(CWD)
-        .filter((item) => (exclude || []).indexOf(item) === -1)
-        .filter((item) => EXPLICIT_EXCLUDE.indexOf(item) === -1),
-      file: fileTar,
-    });
+    console.info('Creating tarball ...', fileTar);
+    const tarRes = await tar
+      .create({
+        fileList: readdirSync(CWD)
+          .filter((item) => (exclude || []).indexOf(item) === -1)
+          .filter((item) => EXPLICIT_EXCLUDE.indexOf(item) === -1),
+        file: fileTar,
+      })
+      .catch((err) => {
+        console.error('Failed create tarball', err);
+      });
+    if (typeof tarRes === 'undefined') {
+      process.exit(1);
+    }
+    console.info('Tarball created', fileTar);
     const stats = statSync(fileTar);
     const { size } = stats;
     let curSize = 0;
@@ -237,7 +246,7 @@ export default class Deploy extends WS {
       });
       stdoutWriteStart('');
       const percent = this.calculatePercents(size, curSize);
-      console.info(`Project files uploaded to the cloud: ${percent}%`);
+      console.info('Project files uploaded to the cloud', `${percent}%`);
     });
   }
 
