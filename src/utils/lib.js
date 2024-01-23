@@ -152,3 +152,14 @@ export function getConfigFilePath() {
 export function getRustCommandDefault(packageName) {
   return `cargo build --release && ./target/release/${packageName}`;
 }
+
+/**
+ *
+ * @param {string} value
+ * @param {number} index
+ * @param {string[]} array
+ * @returns
+ */
+export const filterUnique = (value, index, array) => {
+  return array.indexOf(value) === index;
+};

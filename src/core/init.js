@@ -18,7 +18,13 @@ import {
   isCommonServicePublic,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
-import { getConfigFilePath, console, getPackageName, getRustCommandDefault } from '../utils/lib.js';
+import {
+  getConfigFilePath,
+  console,
+  getPackageName,
+  getRustCommandDefault,
+  filterUnique,
+} from '../utils/lib.js';
 
 /**
  * @typedef {import('../connectors/ws.js').Options} Options
@@ -244,11 +250,11 @@ export default class Init extends WS {
     switch (service) {
       case 'node':
         command = await inquirer.input(GET_SERVICE_MESSAGE, command || COMMAND_DEFAULT);
-        exclude = EXCLUDE_NODE.concat(exclude);
+        exclude = EXCLUDE_NODE.concat(exclude).filter(filterUnique);
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
-        exclude = EXCLUDE_RUST.concat(exclude);
+        exclude = EXCLUDE_RUST.concat(exclude).filter(filterUnique);
         break;
     }
     // Group services

@@ -238,13 +238,19 @@ export default class WS {
     }
     const data = readFileSync(this.configFile).toString();
     const config = yaml.parse(data);
+
     const checkErr = checkConfig(config);
-    if (checkErr) {
-      console.warn(checkErr.msg, checkErr.data);
-      if (checkErr.exit) {
-        process.exit(2);
+    let checkExit = false;
+    checkErr.forEach((item) => {
+      console[item.exit ? 'error' : 'warn'](item.msg, item.data);
+      if (item.exit) {
+        checkExit = true;
       }
+    });
+    if (checkExit) {
+      process.exit(2);
     }
+
     return config;
   }
 

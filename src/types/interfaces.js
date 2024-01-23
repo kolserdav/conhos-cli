@@ -1,6 +1,6 @@
 /**
  * @typedef {'node' | 'rust'} ServiceTypeCustom
- * @typedef {'redis' | 'postgres' | 'adminer'} ServiceTypeCommon
+ * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
@@ -8,6 +8,9 @@
 export const ENVIRONMENT_SWITCH = {
   redis: {
     password: 'REDIS_PASSWORD',
+  },
+  mysql: {
+    rootPassword: 'MYSQL_ROOT_PASSWORD',
   },
 };
 
@@ -18,6 +21,7 @@ export const ENVIRONMENT_SWITCH = {
 export const ENVIRONMENT_EXCLUDED_CUSTOM = {
   redis: 'REDIS_HOST',
   postgres: 'POSTGRES_HOST',
+  mysql: 'MYSQL_ROOT_HOST',
   adminer: null,
 };
 /**
@@ -27,6 +31,7 @@ export const ENVIRONMENT_REQUIRED_COMMON = {
   redis: [ENVIRONMENT_SWITCH.redis.password],
   postgres: ['POSTGRES_PASSWORD', 'POSTGRES_USER', 'POSTGRES_DB'],
   adminer: [],
+  mysql: [ENVIRONMENT_SWITCH.mysql.rootPassword, 'MYSQL_USER', 'MYSQL_PASSWORD', 'MYSQL_DATABASE'],
 };
 
 /**
@@ -46,7 +51,7 @@ export const SERVICES_CUSTOM = ['node', 'rust'];
 /**
  * @type {ServiceTypeCommon[]}
  */
-export const SERVICES_COMMON = ['redis', 'postgres', 'adminer'];
+export const SERVICES_COMMON = ['redis', 'postgres', 'adminer', 'mysql'];
 
 /**
  * @type {ServiceTypeCommonPublic[]}
@@ -75,11 +80,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * @typedef {{
  *  port: number;
  *  type: PortType;
- *  static?: {
- *    location: string;
- *    root: string;
- *    index?: string;
- *  }[];
+ *  location?: string;
  *  timeout?: string;
  * }} Port
  */
@@ -382,21 +383,21 @@ export const isCommonServicePublic = (type) => {
 /**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
- * @returns {CheckConfigResult | null}
+ * @returns {CheckConfigResult[]}
  */
 export function checkConfig({ services }) {
   /**
-   * @type {CheckConfigResult | null}
+   * @type {CheckConfigResult[]}
    */
-  let res = null;
+  let res = [];
 
   // Check services field
   if (!services) {
-    res = {
+    res.push({
       msg: 'Required field is missing',
       data: 'services',
       exit: true,
-    };
+    });
     return res;
   }
 
@@ -404,15 +405,15 @@ export function checkConfig({ services }) {
 
   // Check services lenght
   if (serviceKeys.length === 0) {
-    res = {
+    res.push({
       msg: 'Services list can not be empty',
       data: 'Add at least one service',
       exit: true,
-    };
+    });
     return res;
   }
 
-  serviceKeys.every((item) => {
+  serviceKeys.forEach((item) => {
     const {
       domains,
       ports,
@@ -427,36 +428,33 @@ export function checkConfig({ services }) {
 
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {
-      res = {
+      res.push({
         msg: `Service type "${type}" is not allowed`,
         data: `Allowed service types: [${SERVICE_TYPES.join('|')}]`,
         exit: true,
-      };
-      return false;
+      });
     }
 
     // Check service public
     if (_public) {
       if (isCommonService(type) && !isCommonServicePublic(type)) {
-        res = {
+        res.push({
           msg: `Service "${item}" can not be public`,
           data: `Only services can be public: [${SERVICES_CUSTOM.concat(
             /** @type {typeof as<typeof SERVICES_CUSTOM>} */ (as)(SERVICES_COMMON_PUBLIC)
           ).join('|')}]`,
           exit: true,
-        };
-        return false;
+        });
       }
     }
 
     if (!version) {
       // Check service version
-      res = {
+      res.push({
         msg: `Version doesn't exists in service "${item}"`,
         data: 'Try to add the field version to the config file',
         exit: true,
-      };
-      return false;
+      });
     }
 
     // Check custom services
@@ -464,70 +462,55 @@ export function checkConfig({ services }) {
       // Check ports
       (ports || []).forEach((item) => {
         if (PORT_TYPES.indexOf(item.type) === -1) {
-          res = {
+          res.push({
             msg: `Port type "${item.type}" is not allowed`,
             data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
             exit: true,
-          };
-          return false;
+          });
         }
-        return true;
       });
-      if (res) {
-        return false;
-      }
 
       // Check domains
       if (domains) {
-        Object.keys(domains).every((_item) => {
+        Object.keys(domains).forEach((_item) => {
           const domain = domains[_item];
           if (domain.length > DOMAIN_MAX_LENGTH) {
-            res = {
+            res.push({
               msg: `Maximum allowed domain length is ${DOMAIN_MAX_LENGTH}. Passed domain is too long: ${domain.length}`,
               data: domain,
               exit: true,
-            };
-            return false;
+            });
           }
-          return true;
         });
-        if (res) {
-          return false;
-        }
       }
 
       // Check environment format
       (environment || []).forEach((_item) => {
         const variable = parseEnvironmentVariable(_item);
         if (!variable) {
-          res = {
+          res.push({
             msg: `Environment variable ${_item} has wrong format`,
             data: `Try use NAME=value instead of ${_item}`,
             exit: true,
-          };
+          });
         }
       });
-      if (res) {
-        return false;
-      }
 
       // Check depends on
       if (active) {
-        (depends_on || []).every((_item) => {
+        (depends_on || []).forEach((_item) => {
           if (!(services[_item] || {}).active) {
-            res = {
+            res.push({
               msg: `Service "${item}" depends on of missing service "${_item}"`,
               data: `Try remove 'depends_on' item "${_item}" from service "${item}", or set service "${_item}" active`,
               exit: true,
-            };
-            return false;
+            });
           }
-          return true;
         });
       }
 
       // Check environment exclude
-      (environment || []).every((_item) => {
+      (environment || []).forEach((_item) => {
         const variable = parseEnvironmentVariable(_item);
         if (!variable) {
           return;
@@ -535,44 +518,46 @@ export function checkConfig({ services }) {
         const { name } = variable;
         if (name) {
           if (checkRecord(ENVIRONMENT_EXCLUDED_CUSTOM, name)) {
-            res = {
+            res.push({
               msg: `Environment variable ${_item} is not allowed here`,
               data: _item,
               exit: true,
-            };
-            return false;
+            });
           }
         } else {
-          res = {
+          res.push({
             msg: `Environment variable ${_item} has wrong format`,
             data: 'Try use NAME=value instead',
             exit: true,
-          };
-          return false;
+          });
         }
-        return true;
       });
-      if (res) {
-        return false;
-      }
     }
 
     // Check common services
     if (isCommonService(type)) {
+      // Check ports
+      if (ports) {
+        res.push({
+          msg: `Field "ports" is not allowed for service "${item}"`,
+          data: `Ports is only allowed for services [${SERVICES_CUSTOM.join('|')}]`,
+          exit: true,
+        });
+      }
+
       // Check command
       if (command) {
-        let res = {
+        res.push({
           msg: `Field "command" is not allowed for service "${item}"`,
           data: `Command is only allowed for services [${SERVICES_CUSTOM.join('|')}]`,
-          exit: false,
-        };
-        return false;
+          exit: true,
+        });
       }
 
       if (active) {
         // Check depends on
         let check = false;
-        serviceKeys.every((_item) => {
+        serviceKeys.forEach((_item) => {
           const { type: _type, depends_on } = services[_item];
           if (isCustomService(_type)) {
             if (!depends_on) {
@@ -587,12 +572,11 @@ export function checkConfig({ services }) {
           return true;
         });
         if (!check && !_public) {
-          res = {
-            msg: `You have ${type} service with name ${item}, bun noone another service depends on it`,
-            data: `Add "depends_on" field with item ${item} to any custom service`,
+          res.push({
+            msg: `You have ${type} service with name "${item}", bun none another service depends on it`,
+            data: `Add "depends_on" field with item "${item}" to any custom service`,
             exit: false,
-          };
-          return false;
+          });
         }
       }
 
@@ -601,7 +585,7 @@ export function checkConfig({ services }) {
 
       const _commonVariables = structuredClone(commonVaribles);
       // Check required environment
-      commonVaribles.every((_item, index) => {
+      commonVaribles.forEach((_item, index) => {
         let check = false;
         (environment || []).forEach((__item) => {
           const variable = parseEnvironmentVariable(__item);
@@ -615,18 +599,13 @@ export function checkConfig({ services }) {
           }
         });
         if (!check) {
-          res = {
+          res.push({
             msg: `One or more required environment variables for service "${item}" is missing`,
             data: `Required [${_commonVariables.join(' & ')}]`,
             exit: true,
-          };
-          return false;
+          });
         }
-        return true;
       });
-      if (res) {
-        return false;
-      }
 
       // Check depends on
       (environment || []).forEach((_item) => {
@@ -638,14 +617,14 @@ export function checkConfig({ services }) {
 
         const index = commonVaribles.indexOf(name);
         if (index !== -1) {
-          serviceKeys.every((__item) => {
+          serviceKeys.forEach((__item) => {
             const { type: _type, environment: _environment, depends_on } = services[__item];
 
             if (!depends_on) {
-              return true;
+              return;
             }
             if (depends_on.indexOf(item) === -1) {
-              return true;
+              return;
             }
 
             if (isCustomService(_type)) {
@@ -662,32 +641,32 @@ export function checkConfig({ services }) {
                     _envVal = getEnvironmentValue(___item);
                   }
                 });
-                if (!check) {
-                  res = {
+
+                if (!check && name !== ENVIRONMENT_SWITCH.mysql.rootPassword) {
+                  res.push({
                     msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it is not provided`,
                     data: `Try to add environment variable ${name} to the service ${__item}`,
-                    exit: true,
-                  };
-                  return false;
+                    exit: false,
+                  });
                 }
-                if (value !== _envVal) {
-                  res = {
+                if (value !== _envVal && check) {
+                  res.push({
                     msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it this variable value is not the same`,
                     data: `Your service ${__item} will not be able to connect to service ${item}`,
                     exit: false,
-                  };
+                  });
                 }
               }
             }
-            return true;
           });
         }
       });
-      if (res) {
-        return false;
-      }
     }
-    return true;
   });
-  return res;
+  return res.sort((a, b) => {
+    if (!a.exit && b.exit) {
+      return -1;
+    }
+    return 1;
+  });
 }
