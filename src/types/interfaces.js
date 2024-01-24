@@ -193,6 +193,15 @@ export const PORT_TYPES = ['http', 'ws'];
  *  @property {{
  *  project: string;
  * }} remove
+ * @property {{
+ *  containerName: string;
+ *  serviceName: string;
+ *  serviceType: ServiceTypeCommon;
+ * }} acceptDeleteCli
+ * @property {{
+ *  containerName: string;
+ *  accept: boolean;
+ * }} acceptDeleteServer
  * @property {NewDomains[]} setDomains
  */
 
@@ -258,9 +267,14 @@ export const isCustomService = (type) => {
 
 /**
  * @param {ServiceType} type
+ * @returns {ServiceTypeCommon | null}
  */
 export const isCommonService = (type) => {
-  return SERVICES_COMMON.indexOf(/** @type {typeof as<ServiceTypeCommon>} */ (as)(type)) !== -1;
+  const _type = /** @type {typeof as<ServiceTypeCommon>} */ (as)(type);
+  if (SERVICES_COMMON.indexOf(_type) !== -1) {
+    return _type;
+  }
+  return null;
 };
 
 /**

@@ -12,6 +12,7 @@ import {
   PACKAGE_NAME,
 } from '../utils/constants.js';
 import { parseMessageCli } from '../types/interfaces.js';
+import Inquirer from '../utils/inquirer.js';
 
 /**
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
@@ -24,6 +25,8 @@ import { parseMessageCli } from '../types/interfaces.js';
  * @template {keyof WSMessageDataCli} T
  * @typedef {import('../connectors/ws.js').WSMessageCli<T>} WSMessageCli<T>
  */
+
+const inquirer = new Inquirer();
 
 export default class Deploy extends WS {
   /**
@@ -68,14 +71,55 @@ export default class Deploy extends WS {
         return;
       }
       const { type } = rawMessage;
-      switch (type) {
+      /**
+       * @type {keyof WSMessageDataCli}
+       */
+      const _type = type;
+      switch (_type) {
         case 'setDomains':
           this.setDomainsHandler(rawMessage);
+          break;
+        case 'acceptDeleteCli':
+          this.acceptDelete(rawMessage);
           break;
         default:
           await this.handleCommonMessages(rawMessage);
       }
     });
+  }
+
+  /**
+   * @private
+   * @param {WSMessageCli<'acceptDeleteCli'>} param0
+   */
+  async acceptDelete({ data: { serviceName, serviceType, containerName } }) {
+    console.warn(
+      `You want to delete service "${serviceName}" with type "${serviceType}"`,
+      'If you have a needed data of it save it before'
+    );
+    const accDel = await inquirer.confirm(
+      `Do you want to delete service "${serviceName}" with all data?`,
+      false
+    );
+    if (accDel) {
+      this
+        /** @type {typeof this.sendMessage<'acceptDeleteServer'>} */ .sendMessage({
+          token: this.token,
+          message: '',
+          type: 'acceptDeleteServer',
+          userId: this.userId,
+          packageName: PACKAGE_NAME,
+          data: {
+            containerName,
+            accept: true,
+          },
+          status: 'info',
+          connId: this.connId,
+        });
+    } else {
+      console.info('Operation exited', 'Deleteon canceled by user');
+      process.exit(2);
+    }
   }
 
   /**
