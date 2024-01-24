@@ -113,7 +113,11 @@ export default class Init extends WS {
         return;
       }
       const { type } = rawMessage;
-      switch (type) {
+      /**
+       * @type {keyof WSMessageDataCli}
+       */
+      const _type = type;
+      switch (_type) {
         case 'deployData':
           if (this.overwrite) {
             this.project = await this.getProject();

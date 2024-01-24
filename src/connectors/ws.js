@@ -69,7 +69,7 @@ export class WSInterface {
 
   /**
    * @param {CommandOptions} options
-   * @param {WSMessageCli<'checkToken'> | undefined} [msg=null]
+   * @param {WSMessageCli<'checkTokenCli'> | undefined} [msg=null]
    */
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   handler(options, msg) {
@@ -157,7 +157,7 @@ export default class WS {
       return;
     }
     let _data = structuredClone(data);
-    if (data.type === 'deploy') {
+    if (data.type === 'deployServer') {
       _data.data.chunk = ['[...]'];
     }
     console.log('Send message', _data);
@@ -183,9 +183,9 @@ export default class WS {
     const ws = this;
     this.conn.on('open', function open() {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
-      /** @type {typeof ws.sendMessage<'setSocket'>} */ (ws.sendMessage)({
+      /** @type {typeof ws.sendMessage<'setSocketServer'>} */ (ws.sendMessage)({
         status: 'info',
-        type: 'setSocket',
+        type: 'setSocketServer',
         packageName: PACKAGE_NAME,
         message: '',
         data: '',
@@ -198,7 +198,7 @@ export default class WS {
 
   /**
    *
-   * @param {WSMessageCli<'checkToken'>} msg
+   * @param {WSMessageCli<'checkTokenCli'>} msg
    * @returns
    */
   async listenCheckToken(msg) {
@@ -276,9 +276,9 @@ export default class WS {
   }
 
   /**
-   * @param {WSMessageCli<'test'>} msg
+   * @param {WSMessageCli<'setSocketCli'>} msg
    */
-  async listenTest(msg) {
+  async listenSetSocket(msg) {
     const { connId } = msg;
     const config = this.getConfig();
     if (config) {
@@ -301,13 +301,11 @@ export default class WS {
           return;
         }
 
-        /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<'checkTokenServer'>} */ (this.sendMessage)({
           token,
-          type: 'checkToken',
+          type: 'checkTokenServer',
           packageName: PACKAGE_NAME,
           data: {
-            checked: false,
-            projectExists: false,
             project: this.project,
           },
           message: '',
@@ -318,13 +316,11 @@ export default class WS {
       } else {
         const authPath = getPackagePath(SESSION_FILE_NAME);
         console.info("Now it's using the saved session token:", authPath);
-        /** @type {typeof this.sendMessage<'checkToken'>} */ (this.sendMessage)({
+        /** @type {typeof this.sendMessage<'checkTokenServer'>} */ (this.sendMessage)({
           token: authData.content,
-          type: 'checkToken',
+          type: 'checkTokenServer',
           packageName: PACKAGE_NAME,
           data: {
-            checked: false,
-            projectExists: false,
             project: this.project,
           },
           message: '',
@@ -346,12 +342,17 @@ export default class WS {
    * @param {WSMessageCli<WSMessageDataCli['any']>} msg
    */
   async handleCommonMessages(msg) {
-    const { type, status, message, data } = msg;
-    switch (type) {
-      case 'test':
-        await this.listenTest(msg);
+    const { type, status, message, data, token } = msg;
+    /**
+     * @type {keyof WSMessageDataCli}
+     */
+    const _type = type;
+    console.log('On message', { type, status, message, token });
+    switch (_type) {
+      case 'setSocketCli':
+        await this.listenSetSocket(msg);
         break;
-      case 'checkToken':
+      case 'checkTokenCli':
         await this.listenCheckToken(msg);
         break;
       case 'message':

@@ -117,7 +117,7 @@ export default class Deploy extends WS {
           connId: this.connId,
         });
     } else {
-      console.info('Operation exited', 'Deleteon canceled by user');
+      console.info('Operation exited', 'Deletion canceled by user');
       process.exit(2);
     }
   }
@@ -201,10 +201,10 @@ export default class Deploy extends WS {
       }
 
       this
-        /** @type {typeof this.sendMessage<'deploy'>} */ .sendMessage({
+        /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
           token: this.token,
           message: '',
-          type: 'deploy',
+          type: 'deployServer',
           userId: this.userId,
           packageName: PACKAGE_NAME,
           data: {
@@ -246,10 +246,10 @@ export default class Deploy extends WS {
     const rStream = createReadStream(fileTar);
     let num = 0;
     rStream.on('data', (chunk) => {
-      /** @type {typeof this.sendMessage<'deploy'>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<'deployServer'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
-        type: 'deploy',
+        type: 'deployServer',
         userId: this.userId,
         packageName: PACKAGE_NAME,
         data: {
@@ -271,10 +271,10 @@ export default class Deploy extends WS {
       );
     });
     rStream.on('close', () => {
-      /** @type {typeof this.sendMessage<'deploy'>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<'deployServer'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
-        type: 'deploy',
+        type: 'deployServer',
         userId: this.userId,
         packageName: PACKAGE_NAME,
         data: {
@@ -297,7 +297,7 @@ export default class Deploy extends WS {
   /**
    * @private
    * @param {{
-   *  msg: WSMessageCli<'checkToken'> | undefined;
+   *  msg: WSMessageCli<'checkTokenCli'> | undefined;
    *  project: string;
    *  exclude: ConfigFile['exclude']
    * }} param0

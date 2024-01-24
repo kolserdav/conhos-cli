@@ -52,8 +52,12 @@ export default class Login extends WS {
         return;
       }
       const { type } = rawMessage;
-      switch (type) {
-        case 'login':
+      /**
+       * @type {keyof WSMessageDataCli}
+       */
+      const _type = type;
+      switch (_type) {
+        case 'loginCli':
           await this.listenLogin(rawMessage);
           break;
         default:
@@ -88,7 +92,7 @@ export default class Login extends WS {
 
   /**
    * @private
-   * @param {WsMessage<WSMessageDataCli['login']>} param0
+   * @param {WsMessage<WSMessageDataCli['loginCli']>} param0
    * @returns
    */
   async listenLogin({ token, message }) {
@@ -127,9 +131,9 @@ export default class Login extends WS {
    */
   openNewSession() {
     console.info('Trying to create a new session...');
-    /** @type {typeof this.sendMessage<'login'>} */ (this.sendMessage)({
+    /** @type {typeof this.sendMessage<'loginServer'>} */ (this.sendMessage)({
       status: 'info',
-      type: 'login',
+      type: 'loginServer',
       message: '',
       packageName: PACKAGE_NAME,
       data: this.connId,

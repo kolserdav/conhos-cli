@@ -8,10 +8,11 @@ import Inquirer from '../utils/inquirer.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 
 /**
- * @template {keyof import('../types/interfaces.js').WSMessageDataCli} T
+ * @template {keyof WSMessageDataCli} T
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
@@ -46,7 +47,11 @@ export default class Logs extends WS {
         return;
       }
       const { type } = rawMessage;
-      switch (type) {
+      /**
+       * @type {keyof WSMessageDataCli}
+       */
+      const _type = type;
+      switch (_type) {
         case 'logs':
           await this.handleLogs(rawMessage);
           break;

@@ -134,14 +134,18 @@ export const PORT_TYPES = ['http', 'ws'];
 /**
  * @typedef {object} WSMessageDataCli
  * @property {any} any
- * @property {string} setSocket
- * @property {string} test
- * @property {string} login
+ * @property {string} setSocketCli
+ * @property {string} setSocketServer
+ * @property {string} loginCli
+ * @property {string} loginServer
  * @property {{
  *  checked: boolean;
  *  projectExists: boolean;
  *  project: string | null;
- * }} checkToken
+ * }} checkTokenCli
+ * @property {{
+ *  project: string | null
+ * }} checkTokenServer
  * @property {{
  *  msg: string | number;
  *  end: boolean;
@@ -154,7 +158,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  config: ConfigFile | null;
  *  projectChanged: boolean;
  *  nodeName?: string;
- * }} deploy
+ * }} deployServer
  * @property {null} getDeployData
  * @property {{
  *  services: {
@@ -474,10 +478,42 @@ export function checkConfig({ services }) {
     // Check custom services
     if (isCustomService(type)) {
       // Check ports
-      (ports || []).forEach((item) => {
-        if (PORT_TYPES.indexOf(item.type) === -1) {
+      (ports || []).forEach(({ port, type, location }) => {
+        if (Number.isNaN(parseInt(port.toString(), 10)) || /\./.test(port.toString())) {
           res.push({
-            msg: `Port type "${item.type}" is not allowed`,
+            msg: `Port "${port}" of service "${item}" must be an integer`,
+            data: '',
+            exit: true,
+          });
+        }
+        if (location) {
+          const allowedRegexp = /^[\\//0-9A-Za-z\\-_/]+$/;
+          if (!allowedRegexp.test(location)) {
+            res.push({
+              msg: `Location "${location}" of service "${item}" has unallowed symbols`,
+              data: `Allowed regexp ${allowedRegexp}`,
+              exit: true,
+            });
+          }
+          const startRegexp = /^\/[a-zA-Z0-9]{1}/;
+          if (!startRegexp.test(location)) {
+            res.push({
+              msg: `Location "${location}" of service "${item}" have wrong start`,
+              data: `It must starts with "/", Allowed start regexp ${startRegexp}`,
+              exit: true,
+            });
+          }
+          if (/\/{2,}/.test(location)) {
+            res.push({
+              msg: `Location "${location}" of service "${item}" have two or more slushes together`,
+              data: 'Do not use two and more slushes together in location',
+              exit: true,
+            });
+          }
+        }
+        if (PORT_TYPES.indexOf(type) === -1) {
+          res.push({
+            msg: `Port type "${type}" of service "${item}" is not allowed`,
             data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
             exit: true,
           });
