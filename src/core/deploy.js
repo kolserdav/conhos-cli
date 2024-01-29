@@ -11,7 +11,7 @@ import {
   EXPLICIT_EXCLUDE,
   PACKAGE_NAME,
 } from '../utils/constants.js';
-import { parseMessageCli } from '../types/interfaces.js';
+import { as, parseMessageCli } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
 
 /**
@@ -19,6 +19,7 @@ import Inquirer from '../utils/inquirer.js';
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('cache-changed').CacheItem} CacheItem
  */
 
 /**
@@ -185,12 +186,12 @@ export default class Deploy extends WS {
       mkdirSync(packageProjectPath, { recursive: true });
     }
 
-    await this.checkCache({ msg, project, exclude });
+    const files = await this.checkCache({ msg, project, exclude });
 
     const needToRemoveProject =
       typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
     if (needToRemoveProject) {
-      console.info('Starting remove project', project);
+      console.info('Starting remove project ', project);
     } else {
       console.info('Starting deploy project', project);
     }
@@ -227,9 +228,9 @@ export default class Deploy extends WS {
     console.info('Creating tarball ...', fileTar);
     const tarRes = await tar
       .create({
-        fileList: readdirSync(CWD)
-          .filter((item) => (exclude || []).indexOf(item) === -1)
-          .filter((item) => EXPLICIT_EXCLUDE.indexOf(item) === -1),
+        fileList: (files || [])
+          .filter((item) => !item.isDir)
+          .map((item) => item.pathAbs.replace(`${CWD}/`, '')),
         file: fileTar,
       })
       .catch((err) => {
@@ -303,6 +304,11 @@ export default class Deploy extends WS {
    * }} param0
    */
   async checkCache({ msg, project, exclude }) {
+    /**
+     * @type {CacheItem[] | null}
+     */
+    let cache = [];
+
     let projectExists = false;
     if (msg) {
       projectExists = msg.data.projectExists;
@@ -319,14 +325,7 @@ export default class Deploy extends WS {
 
     if (!existsSync(this.cacheFilePath)) {
       this.needUpload = true;
-      const cacheRes = await cacheChanged.create().catch((err) => {
-        console.error('Failed to create cache', err, new Error().stack);
-        console.warn('Cache skipping');
-      });
-      if (typeof cacheRes !== 'undefined') {
-        this.cacheWorked = true;
-        await this.createCache(cacheChanged);
-      }
+      cache = await this.createCache(cacheChanged);
     } else if (projectExists) {
       const cacheRes = await cacheChanged.compare().catch((err) => {
         console.error('Failed to compare cache', err, new Error().stack);
@@ -336,24 +335,27 @@ export default class Deploy extends WS {
       this.cacheWorked = typeof cacheRes !== 'undefined';
       if (this.cacheWorked && typeof cacheRes !== 'undefined') {
         this.needUpload = cacheRes.isChanged;
-        if (this.needUpload) {
-          await this.createCache(cacheChanged);
-        }
+        cache = await this.createCache(cacheChanged);
       }
     }
+    return cache;
   }
 
   /**
    * @private
    * @param {CacheChanged} cacheChanged
+   * @returns {Promise<CacheItem[] | null>}
    */
   async createCache(cacheChanged) {
-    const cacheRes = await cacheChanged.create().catch((err) => {
+    let cacheRes = await cacheChanged.create().catch((err) => {
       console.error('Failed to create cache', err, new Error().stack);
       console.warn('Cache skipping');
     });
-    if (typeof cacheRes !== 'undefined') {
-      this.cacheWorked = true;
+    if (typeof cacheRes === 'undefined') {
+      this.cacheWorked = false;
+      return null;
     }
+    this.cacheWorked = true;
+    return /** @type {typeof as<CacheItem[]>} */ (as)(cacheRes);
   }
 }

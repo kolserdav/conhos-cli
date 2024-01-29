@@ -76,6 +76,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  serviceName: string;
  *  domains: Record<string, string>;
  *  public: boolean;
+ *  serviceType: ServiceType;
  * }} NewDomains
  * @typedef {{
  *  port: number;
@@ -110,7 +111,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  services: Record<string, {
  *    active: boolean;
  *    type: ServiceType;
- *    size: string;
+ *    size: ServiceSize;
  *    version: string;
  *    public: boolean;
  *    command?: string;
