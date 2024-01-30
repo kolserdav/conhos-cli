@@ -228,10 +228,12 @@ export default class WS {
   }
 
   /**
-   *
+   * @param {{
+   *  withoutWarns: boolean;
+   * }} [param0={ withoutWarns: false }]
    * @returns {ConfigFile}
    */
-  getConfig() {
+  getConfig({ withoutWarns } = { withoutWarns: false }) {
     if (!existsSync(this.configFile)) {
       console.warn('Config file is not exists, run', `"${PACKAGE_NAME} init" first`);
       process.exit(2);
@@ -242,7 +244,11 @@ export default class WS {
     const checkErr = checkConfig(config);
     let checkExit = false;
     checkErr.forEach((item) => {
-      console[item.exit ? 'error' : 'warn'](item.msg, item.data);
+      if (!withoutWarns) {
+        console[item.exit ? 'error' : 'warn'](item.msg, item.data);
+      } else if (item.exit) {
+        console['error'](item.msg, item.data);
+      }
       if (item.exit) {
         checkExit = true;
       }

@@ -128,7 +128,7 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'setDomains'>} param0
    */
   setDomainsHandler({ data }) {
-    const configFile = this.getConfig();
+    const configFile = this.getConfig({ withoutWarns: true });
     if (!configFile) {
       return;
     }
@@ -174,7 +174,7 @@ export default class Deploy extends WS {
    * @type {WS['handler']}
    */
   async handler(_, msg) {
-    const config = this.getConfig();
+    const config = this.getConfig({ withoutWarns: true });
     if (!config) {
       return;
     }

@@ -432,6 +432,10 @@ export function checkConfig({ services }) {
     return res;
   }
 
+  const CHECKS = {
+    noOne: false,
+  };
+
   serviceKeys.forEach((item) => {
     const {
       domains,
@@ -622,7 +626,8 @@ export function checkConfig({ services }) {
           }
           return true;
         });
-        if (!check && !_public) {
+        if (!check && !_public && !CHECKS.noOne) {
+          CHECKS.noOne = true;
           res.push({
             msg: `You have ${type} service with name "${item}", bun none another service depends on it`,
             data: `Add "depends_on" field with item "${item}" to any custom service`,
