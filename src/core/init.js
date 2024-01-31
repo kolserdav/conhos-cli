@@ -16,6 +16,7 @@ import {
   PORT_TYPES,
   isCustomService,
   isCommonServicePublic,
+  as,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import {
@@ -35,6 +36,7 @@ import {
  * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
  * @typedef {import('../types/interfaces.js').ServiceTypeCustom} ServiceTypeCustom
  * @typedef {import('../types/interfaces.js').PortType} PortType
+ * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -140,7 +142,7 @@ export default class Init extends WS {
    * @returns
    */
   getCostString(item, { sizes, baseCost, baseValue }) {
-    const cost = computeCostService(item.name, {
+    const cost = computeCostService(/** @type {typeof as<ServiceSize>} */ (as)(item.name), {
       sizes,
       baseCost,
       baseValue,
@@ -150,7 +152,9 @@ export default class Init extends WS {
       process.exit(1);
     }
     const { month, hour } = cost;
-    return `${item.name} (${item.memory.name} RAM, ${item.storage} SSD): ${month} ${CURRENCY}/month, ${hour} ${CURRENCY}/hour`;
+    return `${item.name} (${item.memory.name} RAM, ${item.storage} SSD): ${parseFloat(
+      (month / 100).toFixed(2)
+    )} ${CURRENCY}/month, ${parseFloat((hour / 100).toFixed(2))} ${CURRENCY}/hour`;
   }
 
   /**
@@ -178,7 +182,7 @@ export default class Init extends WS {
       data: { sizes, baseCost, baseValue, services },
     } = param0;
 
-    console.info("It's adding service to the config file...");
+    console.info("It's adding service to the config file...", this.configFile);
 
     /**
      * @type {string | undefined}
@@ -195,7 +199,7 @@ export default class Init extends WS {
             active: true,
             public: true,
             version: this.getService('node', services)?.tags[0] || 'latest',
-            size: sizes[SIZE_INDEX_DEFAULT].name,
+            size: /** @type {typeof as<ServiceSize>} */ (as)(sizes[SIZE_INDEX_DEFAULT].name),
             command: COMMAND_DEFAULT,
             ports: [PORT_DEFAULT],
             environment: [`PORT=${PORT_DEFAULT.port}`],
@@ -271,7 +275,7 @@ export default class Init extends WS {
     );
     this.services[this.getServiceName(service)] = {
       type: service,
-      size,
+      size: /** @type {typeof as<ServiceSize>} */ (as)(size),
       active: true,
       public: isCustomService(service) || isCommonServicePublic(service) || false,
       version,

@@ -230,7 +230,7 @@ export const DOMAIN_MAX_LENGTH = 77;
 
 /**
  *
- * @param {string} serviceSize
+ * @param {ServiceSize} serviceSize
  * @param {Omit<WSMessageDataCli['deployData'], 'services'>} options
  */
 export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) {
@@ -242,10 +242,10 @@ export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) 
   const {
     memory: { value },
   } = currValueItem;
-  const month = parseFloat((value / (baseValue / baseCost)).toFixed(2));
-  const rub = month / 30 / 24;
-  const hour = parseFloat(rub.toFixed(rub > 1 ? 2 : 3));
-  return { month, hour };
+  const month = parseInt((value / (baseValue / (baseCost * 100))).toFixed(0));
+  const hour = month / 30 / 24;
+  const minute = hour / 60;
+  return { month, hour, minute };
 }
 
 /**
