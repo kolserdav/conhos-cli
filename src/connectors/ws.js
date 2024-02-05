@@ -84,9 +84,9 @@ export class WSInterface {
 export default class WS {
   /**
    * @protected
-   * @type {string | null}
+   * @type {string}
    */
-  project = null;
+  project = '';
 
   /**
    * @protected

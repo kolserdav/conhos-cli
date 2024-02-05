@@ -152,13 +152,15 @@ export const PORT_TYPES = ['http', 'ws'];
  *  end: boolean;
  * }} message
  * @property {{
+ *  projectChanged: boolean;
+ *  config: ConfigFile | null;
+ *  nodeName?: string;
+ * }} prepareDeployServer
+ * @property {null} prepareDeployCli
+ * @property {{
  *  num: number;
- *  project: string;
  *  last: boolean;
  *  chunk: Uint8Array;
- *  config: ConfigFile | null;
- *  projectChanged: boolean;
- *  nodeName?: string;
  * }} deployServer
  * @property {null} getDeployData
  * @property {{

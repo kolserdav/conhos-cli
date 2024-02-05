@@ -2,13 +2,12 @@ import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
 import Tar from '../utils/tar.js';
 import { console, getPackagePath, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
-import { createReadStream, statSync, readdirSync, existsSync, mkdirSync } from 'fs';
+import { createReadStream, statSync, existsSync, mkdirSync } from 'fs';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
   CONFIG_FILE_NAME_A,
   CWD,
-  EXPLICIT_EXCLUDE,
   PACKAGE_NAME,
 } from '../utils/constants.js';
 import { as, parseMessageCli } from '../types/interfaces.js';
@@ -49,6 +48,12 @@ export default class Deploy extends WS {
   cacheFilePath = '';
 
   /**
+   * @private
+   * @type {CacheItem[]}
+   */
+  files = [];
+
+  /**
    * @public
    * @param {Options} options
    */
@@ -82,6 +87,9 @@ export default class Deploy extends WS {
           break;
         case 'acceptDeleteCli':
           this.acceptDelete(rawMessage);
+          break;
+        case 'prepareDeployCli':
+          this.prepareUpload(rawMessage);
           break;
         default:
           await this.handleCommonMessages(rawMessage);
@@ -171,64 +179,15 @@ export default class Deploy extends WS {
 
   /**
    * @public
-   * @type {WS['handler']}
+   * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async handler(_, msg) {
-    const config = this.getConfig({ withoutWarns: true });
-    if (!config) {
-      return;
-    }
-
-    const { exclude, project, services } = config;
-
-    const packageProjectPath = getPackagePath(project);
-    if (!existsSync(packageProjectPath)) {
-      mkdirSync(packageProjectPath, { recursive: true });
-    }
-
-    const files = await this.checkCache({ msg, project, exclude });
-
-    const needToRemoveProject =
-      typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
-    if (needToRemoveProject) {
-      console.info('Starting remove project ', project);
-    } else {
-      console.info('Starting deploy project', project);
-    }
-
-    if (needToRemoveProject || (!this.needUpload && this.cacheWorked)) {
-      if (!this.needUpload) {
-        console.info('No changed files', 'Upload skipping');
-      }
-
-      this
-        /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
-          token: this.token,
-          message: '',
-          type: 'deployServer',
-          userId: this.userId,
-          packageName: PACKAGE_NAME,
-          data: {
-            num: 0,
-            project,
-            last: true,
-            chunk: new Uint8Array(),
-            config,
-            nodeName: this.options.node,
-            projectChanged: false,
-          },
-          status: 'info',
-          connId: this.connId,
-        });
-      return;
-    }
-
-    const fileTar = getTmpArchive(project);
+  async prepareUpload({ data }) {
+    const fileTar = getTmpArchive(this.project);
     const tar = new Tar();
     console.info('Creating tarball ...', fileTar);
     const tarRes = await tar
       .create({
-        fileList: (files || [])
+        fileList: this.files
           .filter((item) => !item.isDir)
           .map((item) => item.pathAbs.replace(`${CWD}/`, '')),
         file: fileTar,
@@ -255,12 +214,8 @@ export default class Deploy extends WS {
         packageName: PACKAGE_NAME,
         data: {
           num,
-          project,
           last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
-          config: num === 0 ? config : null,
-          nodeName: this.options.node,
-          projectChanged: true,
         },
         status: 'info',
         connId: this.connId,
@@ -280,11 +235,8 @@ export default class Deploy extends WS {
         packageName: PACKAGE_NAME,
         data: {
           num,
-          project,
           last: true,
           chunk: new Uint8Array(),
-          config: null,
-          projectChanged: true,
         },
         status: 'info',
         connId: this.connId,
@@ -293,6 +245,58 @@ export default class Deploy extends WS {
       const percent = this.calculatePercents(size, curSize);
       console.info('Project files uploaded to the cloud', `${percent}%`);
     });
+  }
+
+  /**
+   * @public
+   * @type {WS['handler']}
+   */
+  async handler(_, msg) {
+    const config = this.getConfig({ withoutWarns: true });
+    if (!config) {
+      return;
+    }
+
+    const { exclude, project, services } = config;
+
+    const packageProjectPath = getPackagePath(project);
+    if (!existsSync(packageProjectPath)) {
+      mkdirSync(packageProjectPath, { recursive: true });
+    }
+
+    this.files = (await this.checkCache({ msg, project, exclude })) || [];
+
+    const needToRemoveProject =
+      typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
+    if (needToRemoveProject) {
+      console.info('Starting remove project ', project);
+    } else {
+      console.info('Starting deploy project', project);
+    }
+
+    let projectChanged = true;
+    if (needToRemoveProject || (!this.needUpload && this.cacheWorked)) {
+      if (!this.needUpload) {
+        console.info('No changed files', 'Upload skipping');
+      }
+
+      projectChanged = false;
+    }
+
+    this
+      /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
+        token: this.token,
+        message: '',
+        type: 'prepareDeployServer',
+        userId: this.userId,
+        packageName: PACKAGE_NAME,
+        data: {
+          projectChanged,
+          config,
+        },
+        status: 'info',
+        connId: this.connId,
+      });
   }
 
   /**
