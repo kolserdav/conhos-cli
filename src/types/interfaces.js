@@ -141,7 +141,6 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {string} loginServer
  * @property {{
  *  checked: boolean;
- *  projectExists: boolean;
  *  project: string | null;
  * }} checkTokenCli
  * @property {{
@@ -159,9 +158,9 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {null} prepareDeployCli
  * @property {{
  *  num: number;
- *  last: boolean;
  *  chunk: Uint8Array;
  * }} deployServer
+ * @property {null} deployEndServer
  * @property {null} getDeployData
  * @property {{
  *  services: {

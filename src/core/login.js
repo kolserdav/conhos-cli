@@ -1,5 +1,5 @@
 import WS from '../connectors/ws.js';
-import { getPackagePath, openBrowser } from '../utils/lib.js';
+import { console, getPackagePath, openBrowser } from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
   LOGIN_PAGE,
@@ -70,13 +70,21 @@ export default class Login extends WS {
    * @public
    * @type {WS['handler']}
    */
-  async handler({ failedLogin, sessionExists }) {
+  async handler({ failedLogin, sessionExists }, rawMessage) {
+    if (!rawMessage) {
+      console.warn('Server message is', rawMessage);
+      process.exit(1);
+    }
+    const {
+      data: { checked },
+    } = rawMessage;
+
     const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
-      if (failedLogin || !sessionExists) {
+      if (failedLogin || !sessionExists || !checked) {
         this.openNewSession();
       } else {
-        console.info('You have already signed in');
+        console.info('You have already signed in', '');
         process.exit(0);
       }
     } else {
@@ -122,7 +130,7 @@ export default class Login extends WS {
     }
     const authPath = getPackagePath(SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
-    console.info('Successfully logged in');
+    console.info('Successfully logged in', '');
     process.exit(0);
   }
 

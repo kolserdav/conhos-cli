@@ -185,15 +185,17 @@ export default class Deploy extends WS {
     const fileTar = getTmpArchive(this.project);
     const tar = new Tar();
     console.info('Creating tarball ...', fileTar);
+
+    const fileList = this.files
+      .filter((item) => !item.isDir)
+      .map((item) => item.pathAbs.replace(`${CWD}/`, ''));
     const tarRes = await tar
       .create({
-        fileList: this.files
-          .filter((item) => !item.isDir)
-          .map((item) => item.pathAbs.replace(`${CWD}/`, '')),
+        fileList,
         file: fileTar,
       })
-      .catch((err) => {
-        console.error('Failed create tarball', err);
+      .catch((error) => {
+        console.error('Failed to create tarball', { error, fileList });
       });
     if (typeof tarRes === 'undefined') {
       process.exit(1);
@@ -214,7 +216,6 @@ export default class Deploy extends WS {
         packageName: PACKAGE_NAME,
         data: {
           num,
-          last: false,
           chunk: new Uint8Array(Buffer.from(chunk)),
         },
         status: 'info',
@@ -227,17 +228,13 @@ export default class Deploy extends WS {
       );
     });
     rStream.on('close', () => {
-      /** @type {typeof this.sendMessage<'deployServer'>} */ (this.sendMessage)({
+      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
-        type: 'deployServer',
+        type: 'deployEndServer',
         userId: this.userId,
         packageName: PACKAGE_NAME,
-        data: {
-          num,
-          last: true,
-          chunk: new Uint8Array(),
-        },
+        data: null,
         status: 'info',
         connId: this.connId,
       });
@@ -307,19 +304,14 @@ export default class Deploy extends WS {
    *  exclude: ConfigFile['exclude']
    * }} param0
    */
-  async checkCache({ msg, project, exclude }) {
+  async checkCache({ project, exclude }) {
     /**
      * @type {CacheItem[] | null}
      */
     let cache = [];
 
-    let projectExists = false;
-    if (msg) {
-      projectExists = msg.data.projectExists;
-      this.needUpload = !projectExists;
-    }
-
     this.cacheFilePath = getPackagePath(`${project}/${CACHE_FILE_NAME}`);
+
     const cacheChanged = new CacheChanged({
       cacheFilePath: this.cacheFilePath,
       exclude: exclude
@@ -330,7 +322,7 @@ export default class Deploy extends WS {
     if (!existsSync(this.cacheFilePath)) {
       this.needUpload = true;
       cache = await this.createCache(cacheChanged);
-    } else if (projectExists) {
+    } else {
       const cacheRes = await cacheChanged.compare().catch((err) => {
         console.error('Failed to compare cache', err, new Error().stack);
         console.warn('Cache skipping');
