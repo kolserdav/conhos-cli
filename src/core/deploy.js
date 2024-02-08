@@ -12,6 +12,7 @@ import {
 } from '../utils/constants.js';
 import { as, parseMessageCli } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
+import path, { normalize } from 'path';
 
 /**
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
@@ -185,10 +186,9 @@ export default class Deploy extends WS {
     const fileTar = getTmpArchive(this.project);
     const tar = new Tar();
     console.info('Creating tarball ...', fileTar);
-
     const fileList = this.files
       .filter((item) => !item.isDir)
-      .map((item) => item.pathAbs.replace(`${CWD}/`, ''));
+      .map((item) => normalize(item.pathAbs).replace(`${CWD}/`, ''));
     const tarRes = await tar
       .create({
         fileList,
