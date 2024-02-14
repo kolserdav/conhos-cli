@@ -1,4 +1,5 @@
 /**
+ * @typedef {'%'} NotPermitedServiceNameSymbols // TODO implement
  * @typedef {'node' | 'rust'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
