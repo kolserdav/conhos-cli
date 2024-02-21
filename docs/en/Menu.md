@@ -1,13 +1,13 @@
 ## Menu
 
-<details open="">
+<details>
   <summary>Знакомство en</summary>
 
 - [Введение](docs/GettingStarted.md#знакомство)
 - [Установка](docs/GettingStarted.md#установка)
 </details>
 
-<details open="">
+<details>
   <summary>Настройка en</summary>
 
 - [Настройка](docs/Settings.md)

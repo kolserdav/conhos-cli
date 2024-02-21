@@ -1,15 +1,22 @@
 {
-  "name": "hosting-cli",
+  "name": "conhos",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "type": "module",
+  "repository": "https://github.com/kolserdav/conhos.git",
+  "files": [
+    "bin",
+    "src"
+  ],
+  "bin": {
+    "conhos": "./bin/cli.js"
+  },
   "scripts": {
     "build": "tsc -p ./jsconfig.json"
   },
   "keywords": [],
   "author": "kolserdav",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "archiver": "^6.0.1",
     "cache-changed": "^1.1.0",

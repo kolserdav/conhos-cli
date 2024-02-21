@@ -3,3 +3,4 @@ node_modules
 dist
 tmp
 hosting-cli.yml
+conhos.yml
