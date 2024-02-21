@@ -41,3 +41,7 @@
 -
 
 ## Установка
+
+```typescript
+const d: string;
+```
