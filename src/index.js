@@ -18,12 +18,6 @@ console.info('Package data dir:', packageHomeDir);
 
 const program = new Command();
 
-program.configureOutput({
-  writeErr: (str) => {
-    console.warn(str.replace(/error:\s+/, ''));
-  },
-});
-
 program
   .enablePositionalOptions()
   .usage(`[options] <command> [options]`)
