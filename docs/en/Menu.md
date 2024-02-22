@@ -7,7 +7,7 @@
 - [System requirements](docs/GettingStarted.md#system_requirements)
 - [Installation](docs/GettingStarted.md#installation)
 - [Login](docs/GettingStarted.md#login)
-- [Project initialization](docs/GettingStarted.md#project_initialization)
+- [Initializing the Project](docs/GettingStarted.md#initializing_the_project)
 </details>
 
 <details>

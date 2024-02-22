@@ -44,7 +44,7 @@ conhos login -c
 
 Additionally, you will need to enter the token encryption password, and in the future, each time you use the token, you will need to enter the encryption password.
 
-## Initializing the project
+## Initializing the Project
 
 To do this, in the console, go to the folder of the project that you want to run in the cloud:
 
