@@ -1,5 +1,7 @@
 # Configuration file
 
+The project configuration file is a mandatory file that is used to configure the services of the project, it must be located in the root of the project and its contents must comply with strict rules, which are described below.
+
 > To automatically create a basic configuration file, you can refer to [Project Initialization](./GettingStarted.md#project_initialization)
 
 ## Example configuration file
