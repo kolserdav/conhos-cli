@@ -69,3 +69,10 @@ conhos init -y
 > More information about the configuration file can be found in [Configuration File](./ConfigFile.md)
 
 ## Launching a project in the cloud
+
+After the configuration file is configured, you can upload the project files to the cloud and launch all the necessary services.
+To do this, run the command:
+
+```sh
+conhos deploy
+```

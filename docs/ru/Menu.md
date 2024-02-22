@@ -8,6 +8,7 @@
 - [Установка](docs/GettingStarted.md#установка)
 - [Вход в систему](docs/GettingStarted.md#вход_в_систему)
 - [Инициализация проекта](docs/GettingStarted.md#инициализация_проекта)
+- [Запуск проекта в облаке](docs/GettingStarted.md#запуск_проекта_в_облаке)
 </details>
 
 <details>
