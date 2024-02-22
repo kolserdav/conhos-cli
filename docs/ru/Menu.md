@@ -11,6 +11,12 @@
 </details>
 
 <details>
+  <summary>Файл конфигурации</summary>
+
+- [Пример файла конфигурации](docs/ConfigFile.md#пример_файла_конфигурации)
+</details>
+
+<details>
   <summary>Настройка</summary>
 
 - [Настройка](docs/Settings.md)

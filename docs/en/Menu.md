@@ -11,6 +11,12 @@
 </details>
 
 <details>
+  <summary>Configuration file</summary>
+
+- [Example configuration file](docs/ConfigFile.md#example_configuration_file)
+</details>
+
+<details>
   <summary>Настройка en</summary>
 
 - [Настройка](docs/Settings.md)
