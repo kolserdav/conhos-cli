@@ -6,6 +6,8 @@
 - [Introduction](docs/GettingStarted.md#introduction)
 - [System requirements](docs/GettingStarted.md#system_requirements)
 - [Installation](docs/GettingStarted.md#installation)
+- [Login](docs/GettingStarted.md#login)
+- [Project initialization](docs/GettingStarted.md#project_initialization)
 </details>
 
 <details>
