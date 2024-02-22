@@ -1,10 +1,11 @@
 ## Menu
 
 <details>
-  <summary>Знакомство en</summary>
+  <summary>Getting started</summary>
 
-- [Введение](docs/GettingStarted.md#знакомство)
-- [Установка](docs/GettingStarted.md#установка)
+- [Introduction](docs/GettingStarted.md#introduction)
+- [System requirements](docs/GettingStarted.md#system_requirements)
+- [Installation](docs/GettingStarted.md#installation)
 </details>
 
 <details>

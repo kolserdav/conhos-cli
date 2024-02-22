@@ -1,9 +1,10 @@
 ## Меню
 
 <details>
-  <summary>Знакомство</summary>
+  <summary>Начало</summary>
 
-- [Введение](docs/GettingStarted.md#знакомство)
+- [Введение](docs/GettingStarted.md#введение)
+- [Системные требования](docs/GettingStarted.md#системные_требования)
 - [Установка](docs/GettingStarted.md#установка)
 </details>
 
