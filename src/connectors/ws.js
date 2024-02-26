@@ -210,7 +210,6 @@ export default class WS {
 
     this.setToken(token);
     this.setUserId(userId);
-
     this.handler(
       {
         failedLogin: !data,

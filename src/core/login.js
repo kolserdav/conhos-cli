@@ -70,18 +70,10 @@ export default class Login extends WS {
    * @public
    * @type {WS['handler']}
    */
-  async handler({ failedLogin, sessionExists }, rawMessage) {
-    if (!rawMessage) {
-      console.warn('Server message is', rawMessage);
-      process.exit(1);
-    }
-    const {
-      data: { checked },
-    } = rawMessage;
-
+  async handler({ failedLogin, sessionExists }) {
     const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
-      if (failedLogin || !sessionExists || !checked) {
+      if (failedLogin || !sessionExists) {
         this.openNewSession();
       } else {
         console.info('You have already signed in', '');
