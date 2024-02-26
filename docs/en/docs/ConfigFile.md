@@ -103,7 +103,7 @@ Indicates whether the service should be open to the Internet by domain name or w
 public: true
 ```
 
-###Service version
+### Service version
 
 Service version taken from the official DockerHub repository. For example, for Node.js one of the currently supported tags https://hub.docker.com/_/node will be valid
 

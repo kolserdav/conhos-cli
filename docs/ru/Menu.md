@@ -18,9 +18,3 @@
 - [Поля конфигурации верхнего уровня](docs/ConfigFile.md#поля_конфигурации_верхнего_уровня)
 - [Поля конфигурации сервиса](docs/ConfigFile.md#поля_конфигурации_сервиса)
 </details>
-
-<details>
-  <summary>Настройка</summary>
-
-- [Настройка](docs/Settings.md)
-</details>
