@@ -239,6 +239,9 @@ export default class WS {
     }
     const data = readFileSync(this.configFile).toString();
     const config = yaml.parse(data);
+    if (!config) {
+      process.exit(1);
+    }
 
     const checkErr = checkConfig(config);
     let checkExit = false;

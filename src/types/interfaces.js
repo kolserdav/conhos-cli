@@ -602,6 +602,17 @@ export function checkConfig({ services }) {
         });
       }
 
+      // Check duplicate service type
+      serviceKeys.forEach((_item) => {
+        if (services[_item].type === type && _item !== item) {
+          res.push({
+            msg: `Duplicate service "${_item}" with type "${type}"`,
+            data: `Only one service in project can have type "${type}"`,
+            exit: true,
+          });
+        }
+      });
+
       // Check command
       if (command) {
         res.push({

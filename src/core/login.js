@@ -70,10 +70,14 @@ export default class Login extends WS {
    * @public
    * @type {WS['handler']}
    */
-  async handler({ failedLogin, sessionExists }) {
+  async handler({ failedLogin, sessionExists }, rawMessage) {
     const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
-      if (failedLogin || !sessionExists) {
+      let checked = false;
+      if (rawMessage) {
+        checked = rawMessage.data.checked;
+      }
+      if (failedLogin || !sessionExists || !checked) {
         this.openNewSession();
       } else {
         console.info('You have already signed in', '');
@@ -130,7 +134,7 @@ export default class Login extends WS {
    * @private
    */
   openNewSession() {
-    console.info('Trying to create a new session...');
+    console.info('Trying to create a new session', '...');
     /** @type {typeof this.sendMessage<'loginServer'>} */ (this.sendMessage)({
       status: 'info',
       type: 'loginServer',
