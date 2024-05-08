@@ -88,6 +88,13 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  */
 
 export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'wss://ws.conhos.ru';
+if (process.env.WEBSOCKET_ADDRESS) {
+  console.warn(
+    'warn',
+    'Default websocket address have changed by WEBSOCKET_ADDRESS to:',
+    process.env.WEBSOCKET_ADDRESS
+  );
+}
 
 /**
  * @type {Port}

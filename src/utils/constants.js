@@ -16,8 +16,22 @@ const pack = JSON.parse(packStr);
 
 dotenv.config();
 export const LOGIN_PAGE = process.env.LOGIN_PAGE || 'https://conhos.ru/account/sign-in';
+if (process.env.LOGIN_PAGE) {
+  console.warn(
+    'warn',
+    'Default login page address have changed by LOGIN_PAGE to:',
+    process.env.LOGIN_PAGE
+  );
+}
 
 export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'https://server.conhos.ru';
+if (process.env.SERVER_ADDRESS) {
+  console.warn(
+    'warn',
+    'Default server address have changed by SERVER_ADDRESS to:',
+    process.env.SERVER_ADDRESS
+  );
+}
 
 export const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || 'strong-string';
 
