@@ -288,13 +288,18 @@ export default class WS {
    */
   async listenSetSocket(msg) {
     const { connId } = msg;
-    const config = this.getConfig();
-    if (config) {
-      this.setProject(config.project);
-    }
+
     this.setConnId(connId);
 
     const authData = this.readSessionFile();
+
+    if (!this.options.isLogin) {
+      const config = this.getConfig();
+      if (config) {
+        this.setProject(config.project);
+      }
+    }
+
     if (authData) {
       if (authData.iv !== '') {
         console.info('Session token was encrypted');

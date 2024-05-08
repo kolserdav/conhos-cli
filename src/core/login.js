@@ -101,8 +101,8 @@ export default class Login extends WS {
    */
   async listenLogin({ token, message }) {
     if (!token) {
-      console.warn("Session token wasn't get from the server");
-      console.warn(message);
+      console.warn("Session token wasn't get from the server", '');
+      console.warn(message, '');
       process.exit(1);
       return;
     }
