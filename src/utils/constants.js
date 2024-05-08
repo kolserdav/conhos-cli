@@ -15,9 +15,9 @@ const packStr = readFileSync(path.resolve(__dirname, '../../package.json')).toSt
 const pack = JSON.parse(packStr);
 
 dotenv.config();
-export const LOGIN_PAGE = process.env.LOGIN_PAGE || 'http://localhost:3000/account/sign-in';
+export const LOGIN_PAGE = process.env.LOGIN_PAGE || 'https://conhos.ru/account/sign-in';
 
-export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'http://localhost:3001';
+export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'https://server.conhos.ru';
 
 export const CRYPTO_PASSWORD = process.env.CRYPTO_PASSWORD || 'strong-string';
 

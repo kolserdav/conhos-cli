@@ -87,7 +87,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * }} Port
  */
 
-export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'http://localhost:3002';
+export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'wss://ws.conhos.ru';
 
 /**
  * @type {Port}
