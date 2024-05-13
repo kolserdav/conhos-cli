@@ -12,7 +12,7 @@ import {
 } from '../utils/constants.js';
 import { as, parseMessageCli } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
-import path, { normalize } from 'path';
+import { normalize } from 'path';
 
 /**
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile

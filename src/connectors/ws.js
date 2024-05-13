@@ -286,14 +286,15 @@ export default class WS {
   /**
    * @param {WSMessageCli<'setSocketCli'>} msg
    */
-  async listenSetSocket(msg) {
+  async listenSetSocket(msg, skipSetProject = false) {
     const { connId } = msg;
 
     this.setConnId(connId);
 
     const authData = this.readSessionFile();
 
-    if (!this.options.isLogin) {
+    console.log('', msg);
+    if (!skipSetProject) {
       const config = this.getConfig();
       if (config) {
         this.setProject(config.project);
@@ -354,7 +355,7 @@ export default class WS {
    *
    * @param {WSMessageCli<WSMessageDataCli['any']>} msg
    */
-  async handleCommonMessages(msg) {
+  async handleCommonMessages(msg, skipSetProject = false) {
     const { type, status, message, data, token } = msg;
     /**
      * @type {keyof WSMessageDataCli}
@@ -363,7 +364,7 @@ export default class WS {
     console.log('On message', { type, status, message, token });
     switch (_type) {
       case 'setSocketCli':
-        await this.listenSetSocket(msg);
+        await this.listenSetSocket(msg, skipSetProject);
         break;
       case 'checkTokenCli':
         await this.listenCheckToken(msg);

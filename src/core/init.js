@@ -121,7 +121,7 @@ export default class Init extends WS {
       const _type = type;
       switch (_type) {
         case 'deployData':
-          if (this.overwrite) {
+          if (this.overwrite || !existsSync(this.configFile)) {
             this.project = await this.getProject();
           } else {
             this.config = this.getConfig();
@@ -130,7 +130,7 @@ export default class Init extends WS {
           await this.handleDeployData(rawMessage);
           break;
         default:
-          await this.handleCommonMessages(rawMessage);
+          await this.handleCommonMessages(rawMessage, true);
       }
     });
   }
@@ -385,7 +385,7 @@ export default class Init extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    console.info('Starting init service script...');
+    console.info('Starting init service script...', '');
     if (!existsSync(this.configFile)) {
       console.info('Config file is not found, creating...', this.configFile);
       /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({

@@ -61,7 +61,7 @@ export default class Login extends WS {
           await this.listenLogin(rawMessage);
           break;
         default:
-          await this.handleCommonMessages(rawMessage);
+          await this.handleCommonMessages(rawMessage, true);
       }
     });
   }
