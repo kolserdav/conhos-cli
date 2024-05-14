@@ -116,6 +116,10 @@ export const PORT_TYPES = ['http', 'ws'];
 /**
  * @typedef {{
  *  project: string;
+ *  server?: {
+ *    node_name: string;
+ *    api_key: string;
+ *  }
  *  services: Record<string, {
  *    active: boolean;
  *    type: ServiceType;
@@ -161,7 +165,6 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {{
  *  projectChanged: boolean;
  *  config: ConfigFile | null;
- *  nodeName?: string;
  * }} prepareDeployServer
  * @property {null} prepareDeployCli
  * @property {{
@@ -413,11 +416,23 @@ export const isCommonServicePublic = (type) => {
  * @param {ConfigFile} config
  * @returns {CheckConfigResult[]}
  */
-export function checkConfig({ services }) {
+export function checkConfig({ services, server }) {
   /**
    * @type {CheckConfigResult[]}
    */
   let res = [];
+
+  // Check server
+  if (server) {
+    if (!server.node_name) {
+      res.push({
+        msg: 'Property is required for parameter "server"',
+        data: 'node_name',
+        exit: true,
+      });
+      return res;
+    }
+  }
 
   // Check services field
   if (!services) {

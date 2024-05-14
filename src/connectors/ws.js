@@ -41,7 +41,6 @@ const yaml = new Yaml();
  *  since?: string;
  *  until?: string;
  *  tail?: number
- *  node?: string
  *  clear?: boolean;
  * }} Options
  */

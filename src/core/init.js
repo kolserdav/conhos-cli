@@ -60,6 +60,12 @@ export default class Init extends WS {
 
   /**
    * @private
+   * @type {ConfigFile['server']}
+   */
+  server;
+
+  /**
+   * @private
    */
   overwrite = false;
 
@@ -115,14 +121,22 @@ export default class Init extends WS {
         return;
       }
       const { type } = rawMessage;
+
+      const configExists = existsSync(this.configFile);
+
       /**
        * @type {keyof WSMessageDataCli}
        */
       const _type = type;
       switch (_type) {
         case 'deployData':
-          if (this.overwrite || !existsSync(this.configFile)) {
+          if (this.overwrite || !configExists) {
             this.project = await this.getProject();
+            if (configExists) {
+              const config = this.getConfig();
+              this.server = config.server;
+              this.project = config.project || this.project;
+            }
           } else {
             this.config = this.getConfig();
             this.services = this.config.services;
@@ -295,7 +309,12 @@ export default class Init extends WS {
       }
     }
 
-    this.writeConfigFile({ project: this.project, services: this.services, exclude });
+    this.writeConfigFile({
+      project: this.project,
+      server: this.server,
+      services: this.services,
+      exclude,
+    });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
     if (addAnother) {

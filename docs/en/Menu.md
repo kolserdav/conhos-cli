@@ -18,3 +18,13 @@
 - [Top level configuration file fields](docs/ConfigFile.md#top_level_configuration_file_fields)
 - [Service configuration fields](docs/ConfigFile.md#service_configuration_fields)
 </details>
+
+<details>
+   <summary>Running a node on your server</summary>
+
+- [System requirements](docs/OwnNode.md#system_requirements)
+- [Download](docs/OwnNode.md#download)
+- [Installation](docs/OwnNode.md#installation)
+- [Settings](docs/OwnNode.md#settings)
+- [Launch](docs/OwnNode.md#start)
+</details>
