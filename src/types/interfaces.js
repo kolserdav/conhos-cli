@@ -164,6 +164,7 @@ export const PORT_TYPES = ['http', 'ws'];
  * }} message
  * @property {{
  *  projectChanged: boolean;
+ *  projectDeleted: boolean;
  *  config: ConfigFile | null;
  * }} prepareDeployServer
  * @property {null} prepareDeployCli

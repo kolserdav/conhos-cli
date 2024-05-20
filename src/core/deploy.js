@@ -249,6 +249,7 @@ export default class Deploy extends WS {
    * @type {WS['handler']}
    */
   async handler(_, msg) {
+    console.info(1, msg);
     const config = this.getConfig({ withoutWarns: true });
     if (!config) {
       return;
@@ -290,6 +291,7 @@ export default class Deploy extends WS {
         data: {
           projectChanged,
           config,
+          projectDeleted: needToRemoveProject,
         },
         status: 'info',
         connId: this.connId,
