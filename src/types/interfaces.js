@@ -202,6 +202,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  until: string | undefined;
  *  tail: number | undefined;
  *  clear: boolean;
+ *  config: ConfigFile | null
  * }} getLogs
  * @property {{
  *  last: boolean;
