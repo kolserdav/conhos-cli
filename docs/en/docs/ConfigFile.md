@@ -40,9 +40,10 @@ project: my-awesome-project
 
 ### Server credentials
 
-This parameter is optional, used to connect to a private node
+This parameter used to connect to a private node
 
 ```yml
+# Optional
 server:
   node_name: my-node # private node name
   api_key: 30dd7745d90ba1e5c461ec8bffc3c649 # api key
