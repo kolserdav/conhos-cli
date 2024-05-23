@@ -38,6 +38,7 @@ cd conhos-node
 DATA_DIR="/home/user/data" # Path to the folder with service files [$PWD/data]
 NODE_NAME=local-node # Node name
 API_KEY=394ffd3a290dfc8a47ccdf27fef5225e # Node access token to the central server
+ADMIN_EMAIL=email@email.com # Administrator's email
 ```
 
 > To obtain an access token, follow https://conhos.ru/en-US/partner/nodes
