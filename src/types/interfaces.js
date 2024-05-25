@@ -154,6 +154,7 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {{
  *  checked: boolean;
  *  project: string | null;
+ *  errMess?: string;
  * }} checkTokenCli
  * @property {{
  *  project: string | null

@@ -99,7 +99,7 @@ export default class Login extends WS {
    * @param {WsMessage<WSMessageDataCli['loginCli']>} param0
    * @returns
    */
-  async listenLogin({ token, message }) {
+  async listenLogin({ token, message, userId }) {
     if (!token) {
       console.warn("Session token wasn't get from the server", '');
       console.warn(message, '');
@@ -112,6 +112,7 @@ export default class Login extends WS {
     let session = {
       iv: '',
       content: token,
+      uid: userId,
     };
     if (this.options.crypt) {
       /**
@@ -122,7 +123,7 @@ export default class Login extends WS {
 
       password = await inquirer.promptPassword('Enter a new password');
       const key = crypto.createHash(password);
-      session = crypto.encrypt(token, key);
+      session = crypto.encrypt(token, key, userId);
     }
     const authPath = getPackagePath(SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));

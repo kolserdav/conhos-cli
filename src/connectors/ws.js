@@ -1,5 +1,5 @@
 import WebSocket from 'ws';
-import { SESSION_FILE_NAME, PACKAGE_NAME } from '../utils/constants.js';
+import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX } from '../utils/constants.js';
 import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
@@ -27,6 +27,7 @@ const yaml = new Yaml();
  * @typedef {{
  *  iv: string;
  *  content: string;
+ *  uid: string
  * }} Session
  */
 
@@ -209,6 +210,23 @@ export default class WS {
 
     this.setToken(token);
     this.setUserId(userId);
+
+    const {
+      status,
+      message,
+      data: { checked, errMess },
+    } = msg;
+
+    if (!this.options.isLogin) {
+      if (!checked) {
+        console[status](`${CLOUD_LOG_PREFIX} ${message}`, errMess);
+        process.exit(1);
+      }
+    } else if (checked) {
+      console.info('Successfully logged in', '');
+      process.exit(0);
+    }
+
     this.handler(
       {
         failedLogin: !data,
@@ -292,7 +310,7 @@ export default class WS {
 
     const authData = this.readSessionFile();
 
-    console.log('', msg);
+    console.info('23', authData);
     if (!skipSetProject) {
       const config = this.getConfig();
       if (config) {
@@ -301,6 +319,7 @@ export default class WS {
     }
 
     if (authData) {
+      this.setUserId(authData.uid);
       if (authData.iv !== '') {
         console.info('Session token was encrypted');
 
@@ -369,7 +388,7 @@ export default class WS {
         await this.listenCheckToken(msg);
         break;
       case 'message':
-        console[status](`<cloud> ${message}`, data.msg);
+        console[status](`${CLOUD_LOG_PREFIX} ${message}`, data.msg);
         if (status === 'error' || data.end) {
           process.exit(!data ? 1 : 0);
         }

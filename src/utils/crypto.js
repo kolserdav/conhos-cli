@@ -7,9 +7,10 @@ export default class Crypto {
    * @public
    * @param {string} text
    * @param {string | Buffer} password
+   * @param {string} userId
    * @returns
    */
-  encrypt(text, password) {
+  encrypt(text, password, userId) {
     const iv = crypto.randomBytes(16);
 
     const cipher = crypto.createCipheriv(ALGORITHM, password, iv);
@@ -19,6 +20,7 @@ export default class Crypto {
     return {
       iv: iv.toString('hex'),
       content: encrypted.toString('hex'),
+      uid: userId,
     };
   }
 

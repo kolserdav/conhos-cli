@@ -66,3 +66,4 @@ export const EXCLUDE_NODE = ['node_modules'];
 export const EXCLUDE_RUST = ['target'];
 export const SIZE_INDEX_DEFAULT = 3;
 export const CACHE_FILE_NAME = '.cache.json';
+export const CLOUD_LOG_PREFIX = '<cloud>';
