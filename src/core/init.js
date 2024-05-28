@@ -133,9 +133,13 @@ export default class Init extends WS {
           if (this.overwrite || !configExists) {
             this.project = await this.getProject();
             if (configExists) {
-              const config = this.getConfig();
-              this.server = config.server;
-              this.project = config.project || this.project;
+              if (!this.config) {
+                console.warn('Config is missing', '');
+                return;
+              }
+              this.server = this.config.server;
+              this.exclude = this.config.exclude;
+              this.project = this.config.project || this.project;
             }
           } else {
             this.config = this.getConfig();
@@ -155,20 +159,24 @@ export default class Init extends WS {
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
    * @returns
    */
-  getCostString(item, { sizes, baseCost, baseValue }) {
+  getCostString(item, { sizes, baseCost, baseValue, nodePublic }) {
     const cost = computeCostService(/** @type {typeof as<ServiceSize>} */ (as)(item.name), {
       sizes,
       baseCost,
       baseValue,
+      nodePublic,
     });
     if (!cost) {
       console.error(`"${item.name}" is not allowed here`);
       process.exit(1);
     }
     const { month, hour } = cost;
-    return `${item.name} (${item.memory.name} RAM, ${item.storage} SSD): ${parseFloat(
-      (month / 100).toFixed(2)
-    )} ${CURRENCY}/month, ${parseFloat((hour / 100).toFixed(2))} ${CURRENCY}/hour`;
+    const costs = nodePublic
+      ? `: ${parseFloat((month / 100).toFixed(2))} ${CURRENCY}/month, ${parseFloat(
+          (hour / 100).toFixed(2)
+        )} ${CURRENCY}/hour`
+      : '';
+    return `${item.name} (${item.memory.name} RAM, ${item.storage} SSD)${costs}`;
   }
 
   /**
@@ -193,7 +201,7 @@ export default class Init extends WS {
    */
   async handleDeployData(param0) {
     const {
-      data: { sizes, baseCost, baseValue, services },
+      data: { sizes, baseCost, baseValue, services, nodePublic },
     } = param0;
 
     console.info("It's adding service to the config file...", this.configFile);
@@ -249,10 +257,9 @@ export default class Init extends WS {
       console.error('Unexpected error. Service is temporarily unavailable.');
       process.exit(1);
     }
-
     const size = await inquirer.list(
       'Select size of service',
-      sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue })),
+      sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue, nodePublic })),
       SIZE_INDEX_DEFAULT
     );
 
@@ -313,7 +320,7 @@ export default class Init extends WS {
       project: this.project,
       server: this.server,
       services: this.services,
-      exclude,
+      exclude: this.exclude,
     });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);
@@ -412,7 +419,9 @@ export default class Init extends WS {
         type: 'getDeployData',
         packageName: PACKAGE_NAME,
         message: '',
-        data: null,
+        data: {
+          nodeName: this.config?.server?.node_name,
+        },
         status: 'info',
         userId: this.userId,
         connId: this.connId,
@@ -438,18 +447,23 @@ export default class Init extends WS {
         false
       );
       if (overwriteConf) {
-        console.info('Config file will be overwrite');
+        console.info('Config file will be overwrite', this.configFile);
       } else {
         console.info('This project has been initialized before');
         process.exit(0);
       }
     }
+
+    this.config = this.getConfig();
+
     /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
       token: this.token,
       type: 'getDeployData',
       packageName: PACKAGE_NAME,
       message: '',
-      data: null,
+      data: {
+        nodeName: this.config?.server?.node_name,
+      },
       status: 'info',
       userId: this.userId,
       connId: this.connId,

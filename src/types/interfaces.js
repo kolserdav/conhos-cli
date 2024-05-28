@@ -174,7 +174,9 @@ export const PORT_TYPES = ['http', 'ws'];
  *  chunk: Uint8Array;
  * }} deployServer
  * @property {null} deployEndServer
- * @property {null} getDeployData
+ * @property {{
+ *  nodeName?: string;
+ * }} getDeployData
  * @property {{
  *  services: {
  *    type: ServiceType;
@@ -193,6 +195,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  }[];
  *  baseValue: number;
  *  baseCost: number;
+ *  nodePublic: boolean;
  * }} deployData
  * @property {{
  *  watch: boolean;
