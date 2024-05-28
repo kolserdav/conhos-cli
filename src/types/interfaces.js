@@ -249,7 +249,7 @@ export const DOMAIN_MAX_LENGTH = 77;
 /**
  *
  * @param {ServiceSize} serviceSize
- * @param {Omit<WSMessageDataCli['deployData'], 'services'>} options
+ * @param {Omit<WSMessageDataCli['deployData'], 'services' | 'nodePublic'>} options
  */
 export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) {
   const currValueItem = sizes.find((item) => item.name === serviceSize);

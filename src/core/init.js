@@ -164,7 +164,6 @@ export default class Init extends WS {
       sizes,
       baseCost,
       baseValue,
-      nodePublic,
     });
     if (!cost) {
       console.error(`"${item.name}" is not allowed here`);
