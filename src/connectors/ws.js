@@ -310,7 +310,6 @@ export default class WS {
 
     const authData = this.readSessionFile();
 
-    console.info('23', authData);
     if (!skipSetProject) {
       const config = this.getConfig();
       if (config) {
