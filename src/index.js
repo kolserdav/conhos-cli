@@ -18,6 +18,12 @@ console.info('Package data dir:', packageHomeDir);
 
 const program = new Command();
 
+program.configureOutput({
+  writeErr: (str) => {
+    console.error(str.replace('error: ', '').replace('\n', ''), '');
+  },
+});
+
 program
   .enablePositionalOptions()
   .usage(`[options] <command> [options]`)
@@ -46,7 +52,7 @@ program
   .command('logs')
   .usage(`[options] <service_name> [options]`)
   .description('Show logs of the service')
-  .option('-w, --watch', 'Looking forward to the next logs')
+  .option('-f, --follow', 'Looking forward to the next logs')
   .option('-t, --timestamps', 'Show timestamps')
   .option('-c, --clear', 'Clear service logs')
   .option(

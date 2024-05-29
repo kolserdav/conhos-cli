@@ -46,7 +46,7 @@ export const console = {
    */
   log: (...args) => {
     if (DEBUG) {
-      Console.log(chalk.gray(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+      Console.log('debug:', chalk.gray(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
     }
   },
   /**
@@ -55,7 +55,7 @@ export const console = {
    * @returns {void}
    */
   info: (...args) => {
-    Console.info(chalk.cyanBright(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+    Console.info('info:', chalk.cyanBright(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
   },
   /**
    *
@@ -63,7 +63,7 @@ export const console = {
    * @returns {void}
    */
   warn: (...args) => {
-    Console.warn(chalk.yellow(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+    Console.warn('warning:', chalk.yellow(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
   },
   /**
    *
@@ -71,7 +71,7 @@ export const console = {
    * @returns {void}
    */
   error: (...args) => {
-    Console.error(chalk.red(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+    Console.error('error:', chalk.red(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
   },
 };
 

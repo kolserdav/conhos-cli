@@ -6,6 +6,7 @@ import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS } from '../types/interfaces.js';
 import Yaml from '../utils/yaml.js';
+import pack from '../../package.json' with { type: 'json' };
 
 const crypto = new Crypto();
 const yaml = new Yaml();
@@ -36,7 +37,7 @@ const yaml = new Yaml();
  *  crypt?: boolean;
  *  remove?: boolean;
  *  yes?: boolean;
- *  watch?: boolean;
+ *  follow?: boolean;
  *  isLogin?: boolean;
  *  timestamps?: boolean;
  *  since?: string;
@@ -188,11 +189,17 @@ export default class WS {
         type: 'setSocketServer',
         packageName: PACKAGE_NAME,
         message: '',
-        data: '',
+        data: {
+          version: pack.version,
+        },
         connId: ws.connId,
         token: null,
         userId: ws.userId,
       });
+    });
+    this.conn.on('close', (d) => {
+      console.warn(`Connection closed with code ${d}`, 'Try again later');
+      process.exit();
     });
   }
 
@@ -320,14 +327,17 @@ export default class WS {
     if (authData) {
       this.setUserId(authData.uid);
       if (authData.iv !== '') {
-        console.info('Session token was encrypted');
+        console.info('Session token was encrypted', '');
 
         const password = await inquirer.promptPassword('Enter password');
         const key = crypto.createHash(password);
         const token = crypto.decrypt(authData, key);
 
         if (token === null) {
-          console.warn("Password is wrong, current session can't be use");
+          console.warn("Password is wrong, current session can't be use", '');
+          if (!this.options.isLogin) {
+            process.exit();
+          }
           this.handler({ failedLogin: true });
           return;
         }

@@ -148,7 +148,9 @@ export const PORT_TYPES = ['http', 'ws'];
  * @typedef {object} WSMessageDataCli
  * @property {any} any
  * @property {string} setSocketCli
- * @property {string} setSocketServer
+ * @property {{
+ *  version: string;
+ * }} setSocketServer
  * @property {string} loginCli
  * @property {string} loginServer
  * @property {{

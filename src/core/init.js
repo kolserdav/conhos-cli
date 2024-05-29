@@ -137,13 +137,15 @@ export default class Init extends WS {
                 console.warn('Config is missing', '');
                 return;
               }
-              this.server = this.config.server;
-              this.exclude = this.config.exclude;
-              this.project = this.config.project || this.project;
             }
           } else {
             this.config = this.getConfig();
             this.services = this.config.services;
+          }
+          if (this.config) {
+            this.server = this.config.server;
+            this.exclude = this.config.exclude;
+            this.project = this.config.project || this.project;
           }
           await this.handleDeployData(rawMessage);
           break;

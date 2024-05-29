@@ -39,7 +39,6 @@ export default class Logs extends WS {
     if (!this.conn) {
       return;
     }
-
     const ws = this;
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
@@ -118,7 +117,7 @@ export default class Logs extends WS {
       message: '',
       packageName: PACKAGE_NAME,
       data: {
-        watch: this.options.watch || false,
+        watch: this.options.follow || false,
         timestamps: this.options.timestamps || false,
         serviceName: this.serviceName,
         project,

@@ -1,3 +1,4 @@
+// @ts-check
 import http from 'http';
 
 // Create a local server to receive data from
@@ -11,7 +12,7 @@ const server = http.createServer((req, res) => {
   );
 });
 
-const port = 80; //process.env.PORT;
+const port = process.env.PORT || 3000;
 server.listen(port, () => {
   console.log('Server is listenning at port', port);
 });

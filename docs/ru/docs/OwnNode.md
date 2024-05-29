@@ -38,7 +38,6 @@ cd conhos-node
 DATA_DIR="/home/user/data" # Путь до папки с файлами сервисов [$PWD/data]
 NODE_NAME=local-node # Название узла
 API_KEY=394ffd3a290dfc8a47ccdf27fef5225e # Токен доступа узла к центральному серверу
-ADMIN_EMAIL=email@email.com # Почта администратора
 ```
 
 > Для получения токена доступа проследуйте https://conhos.ru/ru-RU/partner/nodes
