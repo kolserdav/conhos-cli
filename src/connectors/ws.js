@@ -6,7 +6,10 @@ import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS } from '../types/interfaces.js';
 import Yaml from '../utils/yaml.js';
-import pack from '../../package.json' with { type: 'json' };
+import path, { resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filenameNew = fileURLToPath(import.meta.url);
 
 const crypto = new Crypto();
 const yaml = new Yaml();
@@ -174,6 +177,10 @@ export default class WS {
   }
 
   start() {
+    const pack = JSON.parse(
+      readFileSync(resolve(path.dirname(__filenameNew), '../../package.json')).toString()
+    );
+
     if (!this.conn) {
       console.warn('WebSocket is missing');
       return;
