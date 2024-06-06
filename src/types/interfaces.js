@@ -78,6 +78,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  domains: Record<string, string>;
  *  public: boolean;
  *  serviceType: ServiceType;
+ *  serviceId: string | null;
  * }} NewDomains
  * @typedef {{
  *  port: number;
@@ -684,11 +685,15 @@ export function checkConfig({ services, server }) {
 
       const _commonVariables = structuredClone(commonVaribles);
       // Check required environment
+      /**
+       * @type {boolean | undefined}
+       */
+      let check;
       commonVaribles.forEach((_item, index) => {
-        let check = false;
         (environment || []).forEach((__item) => {
           const variable = parseEnvironmentVariable(__item);
           if (!variable) {
+            check = false;
             return;
           }
           const { name } = variable;
@@ -697,14 +702,14 @@ export function checkConfig({ services, server }) {
             _commonVariables.splice(index, 1);
           }
         });
-        if (!check) {
-          res.push({
-            msg: `One or more required environment variables for service "${item}" is missing`,
-            data: `Required [${_commonVariables.join(' & ')}]`,
-            exit: true,
-          });
-        }
       });
+      if (typeof check === 'boolean' && !check) {
+        res.push({
+          msg: `One or more required environment variables for service "${item}" is missing`,
+          data: `Required [${_commonVariables.join(' & ')}]`,
+          exit: true,
+        });
+      }
 
       // Check depends on
       (environment || []).forEach((_item) => {
