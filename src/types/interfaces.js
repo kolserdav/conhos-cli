@@ -1,5 +1,5 @@
 /**
- * @typedef {'%'} NotPermitedServiceNameSymbols // TODO implement
+ * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
@@ -72,7 +72,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
 /**
  * @typedef {'http' | 'ws'} PortType
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
- *  'deca' | 'hecto' | 'kilo' | 'mega' | 'giga' | 'tera'} ServiceSize
+ *  'deca' | 'hecto' | 'kilo' | 'mega' } ServiceSize
  * @typedef {{
  *  serviceName: string;
  *  domains: Record<string, string>;
@@ -481,6 +481,15 @@ export function checkConfig({ services, server }) {
       depends_on,
       active,
     } = services[item];
+
+    // Check service name
+    if (/%/.test(item)) {
+      res.push({
+        msg: "Service name contains the not allowed symbol: '%'",
+        data: `"${item}"`,
+        exit: true,
+      });
+    }
 
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {

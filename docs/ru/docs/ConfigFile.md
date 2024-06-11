@@ -96,7 +96,7 @@ type: node
 size: mili
 ```
 
-Поддерживаемые типы размеров: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo' | 'mega' | 'giga' | 'tera'_
+Поддерживаемые типы размеров: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo' | 'mega'_
 
 ### Активный сервис
 

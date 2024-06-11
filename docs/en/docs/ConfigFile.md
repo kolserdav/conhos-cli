@@ -96,7 +96,7 @@ The allocation of cloud server resources for the operation of a specific service
 size: mili
 ```
 
-Supported size types: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo' | 'mega' | 'giga' | 'tera'_
+Supported size types: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo' | 'mega'_
 
 ### Active service
 

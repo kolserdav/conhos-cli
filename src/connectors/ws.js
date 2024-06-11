@@ -188,6 +188,7 @@ export default class WS {
     this.conn.on('error', (error) => {
       console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
     });
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
     this.conn.on('open', function open() {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
@@ -234,6 +235,7 @@ export default class WS {
     if (!this.options.isLogin) {
       if (!checked) {
         console[status](`${CLOUD_LOG_PREFIX} ${message}`, errMess);
+        console.error('Failed to check session', 'Fix a warning before and try again');
         process.exit(1);
       }
     } else if (checked) {
