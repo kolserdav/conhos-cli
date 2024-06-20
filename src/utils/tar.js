@@ -16,7 +16,7 @@ export default class Tar {
    */
   async create({ file, fileList, cwd }) {
     console.info(
-      'Recursive compressing the list of files and dirs:\n',
+      'Recursive compressing the list of files:\n',
       fileList.map((item) => path.normalize(path.resolve(cwd, item))).join('\n')
     );
     return new Promise((resolve, reject) => {

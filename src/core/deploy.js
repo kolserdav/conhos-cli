@@ -2,7 +2,7 @@ import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
 import Tar from '../utils/tar.js';
 import { console, getPackagePath, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
-import { createReadStream, statSync, existsSync, mkdirSync } from 'fs';
+import { createReadStream, statSync, existsSync, mkdirSync, rmSync } from 'fs';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -35,12 +35,6 @@ export default class Deploy extends WS {
    * @type {boolean}
    */
   cacheWorked = false;
-
-  /**
-   * @private
-   * @type {boolean}
-   */
-  needUpload = false;
 
   /**
    * @private
@@ -176,12 +170,52 @@ export default class Deploy extends WS {
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data: { service, project, exclude, pwd } }) {
+  async prepareUpload({ data: { service, project, exclude, pwd, active } }) {
     const fileTar = getTmpArchive(this.project, service);
     const tar = new Tar();
-    console.info('Creating tarball ...', fileTar);
 
-    const files = (await this.checkCache({ project, exclude, pwd, service })) || [];
+    if (!active) {
+      console.info('Skipping to upload deleted service files', pwd);
+      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
+        token: this.token,
+        message: '',
+        type: 'deployEndServer',
+        userId: this.userId,
+        packageName: PACKAGE_NAME,
+        data: {
+          service,
+          skip: true,
+        },
+        status: 'info',
+        connId: this.connId,
+      });
+      if (existsSync(this.cacheFilePath[pwd])) {
+        rmSync(this.cacheFilePath[pwd]);
+      }
+      return;
+    }
+
+    const { files, needUpload } = (await this.checkCache({ project, exclude, pwd, service })) || [];
+
+    if (!needUpload) {
+      console.info('Skipping to upload service files', pwd);
+      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
+        token: this.token,
+        message: '',
+        type: 'deployEndServer',
+        userId: this.userId,
+        packageName: PACKAGE_NAME,
+        data: {
+          service,
+          skip: true,
+        },
+        status: 'info',
+        connId: this.connId,
+      });
+      return;
+    }
+
+    console.info('Creating tarball ...', fileTar);
 
     const cwd = `${resolve(CWD, pwd)}/`;
     const fileList = files
@@ -237,6 +271,7 @@ export default class Deploy extends WS {
         packageName: PACKAGE_NAME,
         data: {
           service,
+          skip: false,
         },
         status: 'info',
         connId: this.connId,
@@ -272,15 +307,6 @@ export default class Deploy extends WS {
       console.info('Starting deploy project', project);
     }
 
-    let projectChanged = true;
-    if (needToRemoveProject || (!this.needUpload && this.cacheWorked)) {
-      if (!this.needUpload) {
-        console.info('No changed files', 'Upload skipping');
-      }
-
-      projectChanged = false;
-    }
-
     this
       /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
         token: this.token,
@@ -289,7 +315,6 @@ export default class Deploy extends WS {
         userId: this.userId,
         packageName: PACKAGE_NAME,
         data: {
-          projectChanged,
           config,
           projectDeleted: needToRemoveProject,
         },
@@ -309,9 +334,9 @@ export default class Deploy extends WS {
    */
   async checkCache({ project, exclude, pwd, service }) {
     /**
-     * @type {CacheItem[] | null}
+     * @type {CacheItem[]}
      */
-    let cache = [];
+    let files = [];
 
     const packagePath = getPackagePath(`${project}/${service}`);
     if (!existsSync(packagePath)) {
@@ -320,17 +345,24 @@ export default class Deploy extends WS {
 
     this.cacheFilePath[pwd] = resolve(packagePath, CACHE_FILE_NAME);
 
+    const targetDirPath = resolve(CWD, pwd);
+    if (!existsSync(targetDirPath)) {
+      console.warn('Target dir is missing', targetDirPath);
+      console.error('Exited with code 2', 'Fix warning before and try again');
+      process.exit(2);
+    }
+
     const cacheChanged = new CacheChanged({
       cacheFilePath: this.cacheFilePath[pwd],
       exclude: exclude
         ? exclude.concat([CONFIG_FILE_NAME, CONFIG_FILE_NAME_A])
         : [CONFIG_FILE_NAME, CONFIG_FILE_NAME_A],
-      targetDirPath: resolve(CWD, pwd),
+      targetDirPath,
     });
-
+    let needUpload = false;
     if (!existsSync(this.cacheFilePath[pwd])) {
-      this.needUpload = true;
-      cache = await this.createCache(cacheChanged);
+      needUpload = true;
+      files = (await this.createCache(cacheChanged)) || [];
     } else {
       const cacheRes = await cacheChanged.compare().catch((err) => {
         console.error('Failed to compare cache', err, new Error().stack);
@@ -339,11 +371,11 @@ export default class Deploy extends WS {
 
       this.cacheWorked = typeof cacheRes !== 'undefined';
       if (this.cacheWorked && typeof cacheRes !== 'undefined') {
-        this.needUpload = cacheRes.isChanged;
-        cache = await this.createCache(cacheChanged);
+        needUpload = cacheRes.isChanged;
+        files = (await this.createCache(cacheChanged)) || [];
       }
     }
-    return cache;
+    return { files, needUpload };
   }
 
   /**

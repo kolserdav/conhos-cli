@@ -168,7 +168,6 @@ export const PORT_TYPES = ['http', 'ws'];
  *  end: boolean;
  * }} message
  * @property {{
- *  projectChanged: boolean;
  *  projectDeleted: boolean;
  *  config: ConfigFile;
  * }} prepareDeployServer
@@ -177,13 +176,14 @@ export const PORT_TYPES = ['http', 'ws'];
  *  exclude: string[] | undefined;
  *  pwd: string;
  *  service: string;
+ *  active: boolean;
  * }} prepareDeployCli
  * @property {{
  *  num: number;
  *  chunk: Uint8Array;
  *  service: string;
  * }} deployServer
- * @property {{ service: string }} deployEndServer
+ * @property {{ service: string; skip: boolean; }} deployEndServer
  * @property {{
  *  nodeName?: string;
  * }} getDeployData
@@ -487,6 +487,7 @@ export function checkConfig({ services, server }) {
       public: _public,
       depends_on,
       active,
+      pwd,
     } = services[item];
 
     // Check service name
@@ -531,6 +532,15 @@ export function checkConfig({ services, server }) {
 
     // Check custom services
     if (isCustomService(type)) {
+      // Check pwd
+      if (!pwd) {
+        res.push({
+          msg: "Required parameter 'pwd' is missing",
+          data: `"${item}"`,
+          exit: true,
+        });
+      }
+
       // Check ports
       (ports || []).forEach(({ port, type, location }) => {
         if (Number.isNaN(parseInt(port.toString(), 10)) || /\./.test(port.toString())) {
