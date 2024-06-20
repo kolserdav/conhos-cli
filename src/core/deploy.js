@@ -12,7 +12,7 @@ import {
 } from '../utils/constants.js';
 import { as, parseMessageCli } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
-import { normalize } from 'path';
+import { normalize, resolve } from 'path';
 
 /**
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
@@ -44,15 +44,9 @@ export default class Deploy extends WS {
 
   /**
    * @private
-   * @type {string}
+   * @type {Record<string, string>}
    */
-  cacheFilePath = '';
-
-  /**
-   * @private
-   * @type {CacheItem[]}
-   */
-  files = [];
+  cacheFilePath = {};
 
   /**
    * @public
@@ -182,17 +176,23 @@ export default class Deploy extends WS {
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data }) {
-    const fileTar = getTmpArchive(this.project);
+  async prepareUpload({ data: { service, project, exclude, pwd } }) {
+    const fileTar = getTmpArchive(this.project, service);
     const tar = new Tar();
     console.info('Creating tarball ...', fileTar);
-    const fileList = this.files
+
+    const files = (await this.checkCache({ project, exclude, pwd, service })) || [];
+
+    const cwd = `${resolve(CWD, pwd)}/`;
+    const fileList = files
       .filter((item) => !item.isDir)
-      .map((item) => normalize(item.pathAbs).replace(`${CWD}/`, ''));
+      .map((item) => normalize(item.pathAbs).replace(cwd, ''));
+
     const tarRes = await tar
       .create({
         fileList,
         file: fileTar,
+        cwd,
       })
       .catch((error) => {
         console.error('Failed to create tarball', { error, fileList });
@@ -217,6 +217,7 @@ export default class Deploy extends WS {
         data: {
           num,
           chunk: new Uint8Array(Buffer.from(chunk)),
+          service,
         },
         status: 'info',
         connId: this.connId,
@@ -234,13 +235,15 @@ export default class Deploy extends WS {
         type: 'deployEndServer',
         userId: this.userId,
         packageName: PACKAGE_NAME,
-        data: null,
+        data: {
+          service,
+        },
         status: 'info',
         connId: this.connId,
       });
       stdoutWriteStart('');
       const percent = this.calculatePercents(size, curSize);
-      console.info('Project files uploaded to the cloud', `${percent}%`);
+      console.info(`Service files "${service}" uploaded to the cloud`, `${percent}%`);
     });
   }
 
@@ -254,14 +257,12 @@ export default class Deploy extends WS {
       return;
     }
 
-    const { exclude, project, services } = config;
+    const { project, services } = config;
 
     const packageProjectPath = getPackagePath(project);
     if (!existsSync(packageProjectPath)) {
       mkdirSync(packageProjectPath, { recursive: true });
     }
-
-    this.files = (await this.checkCache({ msg, project, exclude })) || [];
 
     const needToRemoveProject =
       typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
@@ -300,27 +301,34 @@ export default class Deploy extends WS {
   /**
    * @private
    * @param {{
-   *  msg: WSMessageCli<'checkTokenCli'> | undefined;
+   *  pwd: string;
    *  project: string;
-   *  exclude: ConfigFile['exclude']
+   *  service: string;
+   *  exclude: ConfigFile['services'][0]['exclude']
    * }} param0
    */
-  async checkCache({ project, exclude }) {
+  async checkCache({ project, exclude, pwd, service }) {
     /**
      * @type {CacheItem[] | null}
      */
     let cache = [];
 
-    this.cacheFilePath = getPackagePath(`${project}/${CACHE_FILE_NAME}`);
+    const packagePath = getPackagePath(`${project}/${service}`);
+    if (!existsSync(packagePath)) {
+      mkdirSync(packagePath, { recursive: true });
+    }
+
+    this.cacheFilePath[pwd] = resolve(packagePath, CACHE_FILE_NAME);
 
     const cacheChanged = new CacheChanged({
-      cacheFilePath: this.cacheFilePath,
+      cacheFilePath: this.cacheFilePath[pwd],
       exclude: exclude
         ? exclude.concat([CONFIG_FILE_NAME, CONFIG_FILE_NAME_A])
         : [CONFIG_FILE_NAME, CONFIG_FILE_NAME_A],
+      targetDirPath: resolve(CWD, pwd),
     });
 
-    if (!existsSync(this.cacheFilePath)) {
+    if (!existsSync(this.cacheFilePath[pwd])) {
       this.needUpload = true;
       cache = await this.createCache(cacheChanged);
     } else {

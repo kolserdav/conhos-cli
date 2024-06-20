@@ -13,6 +13,10 @@ services:
     type: node
     size: mili
     active: true
+    pwd: ./
+    exclude:
+      - node_modules
+      - dist
     public: true
     version: 21-alpine3.18
     command: npm i && npm run start
@@ -21,9 +25,6 @@ services:
         type: http
     environment:
       - PORT=3000
-exclude:
-  - node_modules
-  - dist
 ```
 
 ## Top level configuration file fields
@@ -61,18 +62,6 @@ services:
 ```
 
 For more information about services, see [Service configuration fields](./ConfigFile.md#service_configuration_fields)
-
-### Excludes
-
-List of child files or folders that should not be uploaded to the cloud
-
-```yml
-# Optional
-exclude:
-   - node_modules
-   -dist
-   -some/nested
-```
 
 ## Service configuration fields
 
@@ -163,3 +152,23 @@ depends_on:
 ```
 
 > When one of the connected services, for example **postgres**, is specified as an internal link, then an environment variable with the address of this link will be automatically added to the service during the operation of the **deploy** command
+
+### Work folder
+
+This directory will be uploaded to the cloud and will become the working directory of the service
+
+```yml
+pwd: ./
+```
+
+### Excludes
+
+List of child files or folders that should not be uploaded to the cloud
+
+```yml
+# Optional
+exclude:
+  - node_modules
+  - dist
+  - some/nested
+```

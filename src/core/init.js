@@ -17,6 +17,7 @@ import {
   isCustomService,
   isCommonServicePublic,
   as,
+  isCommonService,
 } from '../types/interfaces.js';
 import { existsSync } from 'fs';
 import {
@@ -144,7 +145,6 @@ export default class Init extends WS {
           }
           if (this.config) {
             this.server = this.config.server;
-            this.exclude = this.config.exclude;
             this.project = this.config.project || this.project;
           }
           await this.handleDeployData(rawMessage);
@@ -221,6 +221,8 @@ export default class Init extends WS {
             type: 'node',
             active: true,
             public: true,
+            pwd: './',
+            exclude: EXCLUDE_NODE,
             version: this.getService('node', services)?.tags[0] || 'latest',
             size: /** @type {typeof as<ServiceSize>} */ (as)(sizes[SIZE_INDEX_DEFAULT].name),
             command: COMMAND_DEFAULT,
@@ -228,7 +230,6 @@ export default class Init extends WS {
             environment: [`PORT=${PORT_DEFAULT.port}`],
           },
         },
-        exclude: EXCLUDE_NODE,
       });
 
       console.info('Project successfully initialized', this.configFile);
@@ -272,9 +273,9 @@ export default class Init extends WS {
     );
 
     /**
-     * @type {ConfigFile['exclude']}
+     * @type {ConfigFile['services'][0]['exclude']}
      */
-    let exclude = this.config?.exclude || [];
+    let exclude = [];
     const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
     switch (service) {
@@ -301,27 +302,17 @@ export default class Init extends WS {
       active: true,
       public: isCustomService(service) || isCommonServicePublic(service) || false,
       version,
+      pwd: isCommonService(service) ? undefined : './',
       command,
       ports: ports?.length ? ports : undefined,
       environment: environment?.length ? environment : undefined,
     };
     this.increaseIndex();
 
-    if (exclude) {
-      if (this.config) {
-        exclude.concat(this.config.exclude || []);
-      }
-    } else {
-      if (this.config) {
-        exclude = this.config.exclude;
-      }
-    }
-
     this.writeConfigFile({
       project: this.project,
       server: this.server,
       services: this.services,
-      exclude: this.exclude,
     });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);

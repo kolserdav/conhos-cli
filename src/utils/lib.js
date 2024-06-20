@@ -127,11 +127,12 @@ export function getPackageName() {
 }
 
 /**
- * @param {string} packageName
+ * @param {string} project
+ * @param {string} service
  * @returns {string}
  */
-export function getTmpArchive(packageName) {
-  return path.resolve(tmpdir(), `${PACKAGE_NAME}_${packageName}.tgz`);
+export function getTmpArchive(project, service) {
+  return path.resolve(tmpdir(), `${PACKAGE_NAME}_${project}_${service}.tgz`);
 }
 
 /**

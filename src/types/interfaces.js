@@ -127,13 +127,14 @@ export const PORT_TYPES = ['http', 'ws'];
  *    size: ServiceSize;
  *    version: string;
  *    public: boolean;
+ *    pwd?: string;
+ *    exclude?: string[]
  *    command?: string;
  *    ports?: Port[];
  *    depends_on?: string[];
  *    domains?: NewDomains['domains'],
  *    environment?: string[];
  *  }>
- *  exclude?: string[]
  * }} ConfigFile
  */
 
@@ -169,14 +170,20 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {{
  *  projectChanged: boolean;
  *  projectDeleted: boolean;
- *  config: ConfigFile | null;
+ *  config: ConfigFile;
  * }} prepareDeployServer
- * @property {null} prepareDeployCli
+ * @property {{
+ *  project: string;
+ *  exclude: string[] | undefined;
+ *  pwd: string;
+ *  service: string;
+ * }} prepareDeployCli
  * @property {{
  *  num: number;
  *  chunk: Uint8Array;
+ *  service: string;
  * }} deployServer
- * @property {null} deployEndServer
+ * @property {{ service: string }} deployEndServer
  * @property {{
  *  nodeName?: string;
  * }} getDeployData

@@ -17,7 +17,9 @@ const server = http.createServer(async (req, res) => {
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
     });
-    await client.connect();
+    await client.connect().catch((err) => {
+      console.error('Failed to connect to database ', err);
+    });
     result = await client.query('SELECT $1::text as connected', [
       'Connection to postgres successful!',
     ]);

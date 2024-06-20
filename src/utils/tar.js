@@ -10,13 +10,14 @@ export default class Tar {
    * @param {{
    *  file: string;
    *  fileList: string[];
+   *  cwd: string;
    * }} param0
    * @returns {Promise<0>}
    */
-  async create({ file, fileList }) {
+  async create({ file, fileList, cwd }) {
     console.info(
       'Recursive compressing the list of files and dirs:\n',
-      fileList.map((item) => path.normalize(path.resolve(CWD, item))).join('\n')
+      fileList.map((item) => path.normalize(path.resolve(cwd, item))).join('\n')
     );
     return new Promise((resolve, reject) => {
       tar
@@ -24,6 +25,7 @@ export default class Tar {
           {
             gzip: true,
             file,
+            cwd,
           },
           fileList
         )
