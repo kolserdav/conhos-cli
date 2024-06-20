@@ -172,7 +172,6 @@ export const PORT_TYPES = ['http', 'ws'];
  *  config: ConfigFile;
  * }} prepareDeployServer
  * @property {{
- *  project: string;
  *  exclude: string[] | undefined;
  *  pwd: string;
  *  service: string;

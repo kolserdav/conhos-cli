@@ -167,12 +167,26 @@ export default class Deploy extends WS {
   }
 
   /**
+   * @private
+   * @param {{pwd: string; service: string; project: string;}} param0
+   */
+  setCacheFilePath({ pwd, service, project }) {
+    const packagePath = getPackagePath(`${project}/${service}`);
+    if (!existsSync(packagePath)) {
+      mkdirSync(packagePath, { recursive: true });
+    }
+
+    this.cacheFilePath[pwd] = resolve(packagePath, CACHE_FILE_NAME);
+  }
+
+  /**
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data: { service, project, exclude, pwd, active } }) {
+  async prepareUpload({ data: { service, exclude, pwd, active } }) {
     const fileTar = getTmpArchive(this.project, service);
     const tar = new Tar();
+    this.setCacheFilePath({ project: this.project, service, pwd });
 
     if (!active) {
       console.info('Skipping to upload deleted service files', pwd);
@@ -190,12 +204,13 @@ export default class Deploy extends WS {
         connId: this.connId,
       });
       if (existsSync(this.cacheFilePath[pwd])) {
+        console.info('Remove cache file', this.cacheFilePath[pwd]);
         rmSync(this.cacheFilePath[pwd]);
       }
       return;
     }
 
-    const { files, needUpload } = (await this.checkCache({ project, exclude, pwd, service })) || [];
+    const { files, needUpload } = (await this.checkCache({ exclude, pwd })) || [];
 
     if (!needUpload) {
       console.info('Skipping to upload service files', pwd);
@@ -327,23 +342,14 @@ export default class Deploy extends WS {
    * @private
    * @param {{
    *  pwd: string;
-   *  project: string;
-   *  service: string;
    *  exclude: ConfigFile['services'][0]['exclude']
    * }} param0
    */
-  async checkCache({ project, exclude, pwd, service }) {
+  async checkCache({ exclude, pwd }) {
     /**
      * @type {CacheItem[]}
      */
     let files = [];
-
-    const packagePath = getPackagePath(`${project}/${service}`);
-    if (!existsSync(packagePath)) {
-      mkdirSync(packagePath, { recursive: true });
-    }
-
-    this.cacheFilePath[pwd] = resolve(packagePath, CACHE_FILE_NAME);
 
     const targetDirPath = resolve(CWD, pwd);
     if (!existsSync(targetDirPath)) {
