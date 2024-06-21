@@ -10,7 +10,7 @@ import {
   CWD,
   PACKAGE_NAME,
 } from '../utils/constants.js';
-import { as, parseMessageCli } from '../types/interfaces.js';
+import { as, isCustomService, parseMessageCli } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
 import { normalize, resolve } from 'path';
 
@@ -38,9 +38,21 @@ export default class Deploy extends WS {
 
   /**
    * @private
+   * @type {ConfigFile | null}
+   */
+  config = null;
+
+  /**
+   * @private
    * @type {Record<string, string>}
    */
   cacheFilePath = {};
+
+  /**
+   * @private
+   * @type {string[]}
+   */
+  uploadedServices = [];
 
   /**
    * @public
@@ -125,13 +137,15 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'setDomains'>} param0
    */
   setDomainsHandler({ data }) {
-    const configFile = this.getConfig({ withoutWarns: true });
-    if (!configFile) {
+    if (!this.config) {
       return;
     }
-    const _configFile = structuredClone(configFile);
-    Object.keys(configFile.services).forEach((item) => {
-      if (!configFile.services[item].active) {
+    const _configFile = structuredClone(this.config);
+    Object.keys(this.config.services).forEach((item) => {
+      if (!this.config) {
+        return;
+      }
+      if (!this.config.services[item].active) {
         return;
       }
       const dataDomains = data.find((_item) => _item.serviceName === item);
@@ -180,10 +194,32 @@ export default class Deploy extends WS {
   }
 
   /**
+   * @private
+   * @param {ConfigFile['services']} services
+   */
+  getActiveServices(services) {
+    return Object.keys(services)
+      .map((item) => {
+        const { active, type } = services[item];
+        return active && isCustomService(type);
+      })
+      .filter((item) => item);
+  }
+
+  /**
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
   async prepareUpload({ data: { service, exclude, pwd, active } }) {
+    if (!this.config) {
+      return;
+    }
+
+    this.uploadedServices.push(service);
+    const { services } = this.config;
+    const activeServices = this.getActiveServices(services);
+    const last = activeServices.length === this.uploadedServices.length;
+
     const fileTar = getTmpArchive(this.project, service);
     const tar = new Tar();
     this.setCacheFilePath({ project: this.project, service });
@@ -199,6 +235,7 @@ export default class Deploy extends WS {
         data: {
           service,
           skip: true,
+          last,
         },
         status: 'info',
         connId: this.connId,
@@ -223,6 +260,7 @@ export default class Deploy extends WS {
         data: {
           service,
           skip: true,
+          last,
         },
         status: 'info',
         connId: this.connId,
@@ -287,6 +325,7 @@ export default class Deploy extends WS {
         data: {
           service,
           skip: false,
+          last,
         },
         status: 'info',
         connId: this.connId,
@@ -302,12 +341,12 @@ export default class Deploy extends WS {
    * @type {WS['handler']}
    */
   async handler(_, msg) {
-    const config = this.getConfig({ withoutWarns: true });
-    if (!config) {
+    this.config = this.getConfig({ withoutWarns: true });
+    if (!this.config) {
       return;
     }
 
-    const { project, services } = config;
+    const { project, services } = this.config;
 
     const packageProjectPath = getPackagePath(project);
     if (!existsSync(packageProjectPath)) {
@@ -330,7 +369,7 @@ export default class Deploy extends WS {
         userId: this.userId,
         packageName: PACKAGE_NAME,
         data: {
-          config,
+          config: this.config,
           projectDeleted: needToRemoveProject,
         },
         status: 'info',

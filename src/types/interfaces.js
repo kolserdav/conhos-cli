@@ -89,7 +89,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  */
 
 export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'wss://ws.conhos.ru';
-if (process.env.WEBSOCKET_ADDRESS) {
+if (process.env.WEBSOCKET_ADDRESS && process.env.NODE_ENV === 'production') {
   console.warn(
     'warn',
     'Default websocket address have changed by WEBSOCKET_ADDRESS to:',
@@ -182,7 +182,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  chunk: Uint8Array;
  *  service: string;
  * }} deployServer
- * @property {{ service: string; skip: boolean; }} deployEndServer
+ * @property {{ service: string; skip: boolean; last: boolean; }} deployEndServer
  * @property {{
  *  nodeName?: string;
  * }} getDeployData
