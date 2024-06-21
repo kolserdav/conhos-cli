@@ -216,6 +216,7 @@ export default class Deploy extends WS {
     }
 
     this.uploadedServices.push(service);
+
     const { services } = this.config;
     const activeServices = this.getActiveServices(services);
     const last = activeServices.length === this.uploadedServices.length;
@@ -268,13 +269,12 @@ export default class Deploy extends WS {
       return;
     }
 
-    console.info('Creating tarball ...', fileTar);
-
     const cwd = `${resolve(CWD, pwd)}/`;
     const fileList = files
       .filter((item) => !item.isDir)
       .map((item) => normalize(item.pathAbs).replace(cwd, ''));
 
+    console.info('Creating tarball ...', fileTar);
     const tarRes = await tar
       .create({
         fileList,
@@ -295,24 +295,26 @@ export default class Deploy extends WS {
     const rStream = createReadStream(fileTar);
     let num = 0;
     rStream.on('data', (chunk) => {
-      /** @type {typeof this.sendMessage<'deployServer'>} */ (this.sendMessage)({
-        token: this.token,
-        message: '',
-        type: 'deployServer',
-        userId: this.userId,
-        packageName: PACKAGE_NAME,
-        data: {
-          num,
-          chunk: new Uint8Array(Buffer.from(chunk)),
-          service,
-        },
-        status: 'info',
-        connId: this.connId,
-      });
+      this
+        /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
+          token: this.token,
+          message: '',
+          type: 'deployServer',
+          userId: this.userId,
+          packageName: PACKAGE_NAME,
+          data: {
+            num,
+            chunk: new Uint8Array(Buffer.from(chunk)),
+            service,
+          },
+          status: 'info',
+          connId: this.connId,
+        });
       num++;
       curSize += chunk.length;
+
       stdoutWriteStart(
-        `Uploading the project to the cloud: ${this.calculatePercents(size, curSize)}%`
+        `Uploading service "${service}" to the cloud: ${this.calculatePercents(size, curSize)}%`
       );
     });
     rStream.on('close', () => {
@@ -333,6 +335,7 @@ export default class Deploy extends WS {
       stdoutWriteStart('');
       const percent = this.calculatePercents(size, curSize);
       console.info(`Service files "${service}" uploaded to the cloud`, `${percent}%`);
+      console.info('Waiting server to save tarball ...', service);
     });
   }
 
