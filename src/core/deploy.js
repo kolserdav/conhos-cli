@@ -168,15 +168,15 @@ export default class Deploy extends WS {
 
   /**
    * @private
-   * @param {{pwd: string; service: string; project: string;}} param0
+   * @param {{service: string; project: string;}} param0
    */
-  setCacheFilePath({ pwd, service, project }) {
+  setCacheFilePath({ service, project }) {
     const packagePath = getPackagePath(`${project}/${service}`);
     if (!existsSync(packagePath)) {
       mkdirSync(packagePath, { recursive: true });
     }
 
-    this.cacheFilePath[pwd] = resolve(packagePath, CACHE_FILE_NAME);
+    this.cacheFilePath[service] = resolve(packagePath, CACHE_FILE_NAME);
   }
 
   /**
@@ -186,7 +186,7 @@ export default class Deploy extends WS {
   async prepareUpload({ data: { service, exclude, pwd, active } }) {
     const fileTar = getTmpArchive(this.project, service);
     const tar = new Tar();
-    this.setCacheFilePath({ project: this.project, service, pwd });
+    this.setCacheFilePath({ project: this.project, service });
 
     if (!active) {
       console.info('Skipping to upload deleted service files', pwd);
@@ -203,14 +203,14 @@ export default class Deploy extends WS {
         status: 'info',
         connId: this.connId,
       });
-      if (existsSync(this.cacheFilePath[pwd])) {
-        console.info('Remove cache file', this.cacheFilePath[pwd]);
-        rmSync(this.cacheFilePath[pwd]);
+      if (existsSync(this.cacheFilePath[service])) {
+        console.info('Remove cache file', this.cacheFilePath[service]);
+        rmSync(this.cacheFilePath[service]);
       }
       return;
     }
 
-    const { files, needUpload } = (await this.checkCache({ exclude, pwd })) || [];
+    const { files, needUpload } = (await this.checkCache({ exclude, pwd, service })) || [];
 
     if (!needUpload) {
       console.info('Skipping to upload service files', pwd);
@@ -342,10 +342,11 @@ export default class Deploy extends WS {
    * @private
    * @param {{
    *  pwd: string;
+   *  service: string;
    *  exclude: ConfigFile['services'][0]['exclude']
    * }} param0
    */
-  async checkCache({ exclude, pwd }) {
+  async checkCache({ exclude, pwd, service }) {
     /**
      * @type {CacheItem[]}
      */
@@ -359,14 +360,14 @@ export default class Deploy extends WS {
     }
 
     const cacheChanged = new CacheChanged({
-      cacheFilePath: this.cacheFilePath[pwd],
+      cacheFilePath: this.cacheFilePath[service],
       exclude: exclude
         ? exclude.concat([CONFIG_FILE_NAME, CONFIG_FILE_NAME_A])
         : [CONFIG_FILE_NAME, CONFIG_FILE_NAME_A],
       targetDirPath,
     });
     let needUpload = false;
-    if (!existsSync(this.cacheFilePath[pwd])) {
+    if (!existsSync(this.cacheFilePath[service])) {
       needUpload = true;
       files = (await this.createCache(cacheChanged)) || [];
     } else {
