@@ -235,6 +235,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  accept: boolean;
  * }} acceptDeleteServer
  * @property {NewDomains[]} setDomains
+ * @property {{num: number; service: string;}} uploadProcess
  */
 
 /**

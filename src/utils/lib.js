@@ -85,6 +85,18 @@ export async function openBrowser(url) {
 }
 
 /**
+ * @param {number} timeout
+ * @returns
+ */
+export async function wait(timeout) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(0);
+    }, timeout);
+  });
+}
+
+/**
  *
  * @param {string} postfix
  * @returns

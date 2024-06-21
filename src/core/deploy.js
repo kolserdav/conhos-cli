@@ -1,7 +1,7 @@
 import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
 import Tar from '../utils/tar.js';
-import { console, getPackagePath, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
+import { console, getPackagePath, getTmpArchive, stdoutWriteStart, wait } from '../utils/lib.js';
 import { createReadStream, statSync, existsSync, mkdirSync, rmSync } from 'fs';
 import {
   CACHE_FILE_NAME,
@@ -55,6 +55,12 @@ export default class Deploy extends WS {
   uploadedServices = [];
 
   /**
+   * @private
+   * @type {Record<string, number>}
+   */
+  lastNums = {};
+
+  /**
    * @public
    * @param {Options} options
    */
@@ -92,10 +98,33 @@ export default class Deploy extends WS {
         case 'prepareDeployCli':
           this.prepareUpload(rawMessage);
           break;
+        case 'uploadProcess':
+          this.uploadProcess(rawMessage);
+          break;
         default:
           await this.handleCommonMessages(rawMessage);
       }
     });
+  }
+
+  /**
+   * @private
+   * @param {WSMessageCli<'uploadProcess'>} param0
+   */
+  uploadProcess({ data: { service, num } }) {
+    const lastNum = this.lastNums[service];
+    if (!lastNum) {
+      return;
+    }
+
+    const percent = parseInt(((100 * num) / lastNum).toFixed(0));
+
+    stdoutWriteStart(`Uploading service "${service}" files to the cloud: ${percent}%`);
+
+    if (num === lastNum) {
+      stdoutWriteStart('');
+      console.info(`Service files "${service}" saved in the cloud`, `${percent}%`);
+    }
   }
 
   /**
@@ -314,10 +343,15 @@ export default class Deploy extends WS {
       curSize += chunk.length;
 
       stdoutWriteStart(
-        `Uploading service "${service}" to the cloud: ${this.calculatePercents(size, curSize)}%`
+        `Sending service "${service}" files to the cloud: ${this.calculatePercents(size, curSize)}%`
       );
     });
-    rStream.on('close', () => {
+    rStream.on('close', async () => {
+      stdoutWriteStart('');
+      const percent = this.calculatePercents(size, curSize);
+      console.info(`Service files "${service}" sent to the cloud`, `${percent}%`);
+      this.lastNums[service] = num;
+      await wait(1000);
       /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
@@ -332,10 +366,6 @@ export default class Deploy extends WS {
         status: 'info',
         connId: this.connId,
       });
-      stdoutWriteStart('');
-      const percent = this.calculatePercents(size, curSize);
-      console.info(`Service files "${service}" uploaded to the cloud`, `${percent}%`);
-      console.info('Waiting server to save tarball ...', service);
     });
   }
 
