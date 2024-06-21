@@ -20,7 +20,11 @@ const program = new Command();
 
 program.configureOutput({
   writeErr: (str) => {
-    console.error(str.replace('error: ', '').replace('\n', ''), '');
+    if (/^Usage:/.test(str)) {
+      console.warn('Wrong command\n', str);
+    } else {
+      console.error(str.replace('error: ', '').replace('\n', ''), '');
+    }
   },
 });
 
