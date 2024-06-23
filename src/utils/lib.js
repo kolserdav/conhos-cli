@@ -141,10 +141,14 @@ export function getPackageName() {
 /**
  * @param {string} project
  * @param {string} service
+ * @param {string} file
  * @returns {string}
  */
-export function getTmpArchive(project, service) {
-  return path.resolve(tmpdir(), `${PACKAGE_NAME}_${project}_${service}.tgz`);
+export function getTmpArchive(project, service, file) {
+  return path.resolve(
+    tmpdir(),
+    `${PACKAGE_NAME}_${project}_${service}_${file.replaceAll(/\//g, '-')}.tgz`
+  );
 }
 
 /**

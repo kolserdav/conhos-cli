@@ -15,8 +15,8 @@ export default class Tar {
    * @returns {Promise<0>}
    */
   async create({ file, fileList, cwd }) {
-    console.info(
-      'Recursive compressing the list of files:\n',
+    console.log(
+      'Compressing:\n',
       fileList.map((item) => path.normalize(path.resolve(cwd, item))).join('\n')
     );
     return new Promise((resolve, reject) => {
@@ -26,6 +26,9 @@ export default class Tar {
             gzip: true,
             file,
             cwd,
+            onwarn: (code, message, data) => {
+              console.warn(`Create tarbal warning: ${message}, code: ${code}`, data.toString());
+            },
           },
           fileList
         )

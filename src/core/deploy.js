@@ -1,8 +1,8 @@
 import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
 import Tar from '../utils/tar.js';
-import { console, getPackagePath, getTmpArchive, stdoutWriteStart, wait } from '../utils/lib.js';
-import { createReadStream, statSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { console, getPackagePath, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
+import { createReadStream, statSync, existsSync, mkdirSync, rmSync, rm } from 'fs';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -32,6 +32,12 @@ const inquirer = new Inquirer();
 export default class Deploy extends WS {
   /**
    * @private
+   * @type {Tar}
+   */
+  tar = new Tar();
+
+  /**
+   * @private
    * @type {boolean}
    */
   cacheWorked = false;
@@ -56,7 +62,7 @@ export default class Deploy extends WS {
 
   /**
    * @private
-   * @type {Record<string, number>}
+   * @type {Record<string, Record<string, number>>}
    */
   lastNums = {};
 
@@ -111,19 +117,18 @@ export default class Deploy extends WS {
    * @private
    * @param {WSMessageCli<'uploadProcess'>} param0
    */
-  uploadProcess({ data: { service, num } }) {
-    const lastNum = this.lastNums[service];
+  uploadProcess({ data: { service, num, file } }) {
+    const lastNum = this.lastNums[service][file];
     if (!lastNum) {
       return;
     }
 
     const percent = parseInt(((100 * num) / lastNum).toFixed(0));
-
-    stdoutWriteStart(`Uploading service "${service}" files to the cloud: ${percent}%`);
+    stdoutWriteStart(`${service}|${file} uploading: ${percent}%`);
 
     if (num === lastNum) {
       stdoutWriteStart('');
-      console.info(`Service files "${service}" saved in the cloud`, `${percent}%`);
+      console.info(`${service}|${file} uploaded`, `${percent}%`);
     }
   }
 
@@ -250,8 +255,6 @@ export default class Deploy extends WS {
     const activeServices = this.getActiveServices(services);
     const last = activeServices.length === this.uploadedServices.length;
 
-    const fileTar = getTmpArchive(this.project, service);
-    const tar = new Tar();
     this.setCacheFilePath({ project: this.project, service });
 
     if (!active) {
@@ -266,6 +269,9 @@ export default class Deploy extends WS {
           service,
           skip: true,
           last,
+          file: '',
+          latest: true,
+          num: 0,
         },
         status: 'info',
         connId: this.connId,
@@ -277,7 +283,7 @@ export default class Deploy extends WS {
       return;
     }
 
-    const { files, needUpload } = (await this.checkCache({ exclude, pwd, service })) || [];
+    const { files, needUpload, deleted } = (await this.checkCache({ exclude, pwd, service })) || [];
 
     if (!needUpload) {
       console.info('Skipping to upload service files', pwd);
@@ -291,38 +297,58 @@ export default class Deploy extends WS {
           service,
           skip: true,
           last,
+          file: '',
+          latest: true,
+          num: 0,
         },
         status: 'info',
         connId: this.connId,
       });
       return;
     }
-
     const cwd = `${resolve(CWD, pwd)}/`;
     const fileList = files
       .filter((item) => !item.isDir)
       .map((item) => normalize(item.pathAbs).replace(cwd, ''));
 
-    console.info('Creating tarball ...', fileTar);
-    const tarRes = await tar
+    for (let i = 0; fileList[i]; i++) {
+      const file = fileList[i];
+      const latest = fileList[i + 1] === undefined;
+      await this.uploadFile({ service, file, cwd, last, latest });
+    }
+  }
+
+  /**
+   * @private
+   * @param {{
+   *  service: string;
+   *  file: string;
+   *  cwd: string;
+   *  last: boolean;
+   *  latest: boolean;
+   * }} param0
+   */
+  async uploadFile({ service, file, cwd, last, latest }) {
+    const fileTar = getTmpArchive(this.project, service, file);
+    const tarRes = await this.tar
       .create({
-        fileList,
+        fileList: [file],
         file: fileTar,
         cwd,
       })
       .catch((error) => {
-        console.error('Failed to create tarball', { error, fileList });
+        console.error('Failed to create tarball', { error, file });
       });
     if (typeof tarRes === 'undefined') {
       process.exit(1);
     }
-    console.info('Tarball created', fileTar);
     const stats = statSync(fileTar);
     const { size } = stats;
     let curSize = 0;
 
     const rStream = createReadStream(fileTar);
     let num = 0;
+    let percent = 0;
     rStream.on('data', (chunk) => {
       this
         /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
@@ -335,6 +361,7 @@ export default class Deploy extends WS {
             num,
             chunk: new Uint8Array(Buffer.from(chunk)),
             service,
+            file,
           },
           status: 'info',
           connId: this.connId,
@@ -342,16 +369,16 @@ export default class Deploy extends WS {
       num++;
       curSize += chunk.length;
 
-      stdoutWriteStart(
-        `Sending service "${service}" files to the cloud: ${this.calculatePercents(size, curSize)}%`
-      );
+      percent = this.calculatePercents(size, curSize);
+      stdoutWriteStart(`${service}|${file} sending: ${percent}%`);
     });
     rStream.on('close', async () => {
       stdoutWriteStart('');
-      const percent = this.calculatePercents(size, curSize);
-      console.info(`Service files "${service}" sent to the cloud`, `${percent}%`);
-      this.lastNums[service] = num;
-      await wait(1000);
+      if (!this.lastNums[service]) {
+        this.lastNums[service] = {};
+      }
+      this.lastNums[service][file] = num;
+
       /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
@@ -362,9 +389,19 @@ export default class Deploy extends WS {
           service,
           skip: false,
           last,
+          file,
+          latest,
+          num,
         },
         status: 'info',
         connId: this.connId,
+      });
+      rm(fileTar, (err) => {
+        if (err) {
+          console.error('Failed to remove tar file', err);
+          return;
+        }
+        console.log('Tar file removed', fileTar);
       });
     });
   }
@@ -424,6 +461,11 @@ export default class Deploy extends WS {
      */
     let files = [];
 
+    /**
+     * @type {CacheItem[]}
+     */
+    let deleted = [];
+
     const targetDirPath = resolve(CWD, pwd);
     if (!existsSync(targetDirPath)) {
       console.warn('Target dir is missing', targetDirPath);
@@ -451,10 +493,19 @@ export default class Deploy extends WS {
       this.cacheWorked = typeof cacheRes !== 'undefined';
       if (this.cacheWorked && typeof cacheRes !== 'undefined') {
         needUpload = cacheRes.isChanged;
-        files = (await this.createCache(cacheChanged)) || [];
+        await this.createCache(cacheChanged);
+        files = cacheRes.added.concat(cacheRes.updated);
+        deleted = cacheRes.deleted;
+      }
+      if (!this.cacheWorked) {
+        console.error(
+          'Failed cache',
+          `Remove folder ~/.${PACKAGE_NAME}/${this.project}/ and try again`
+        );
+        process.exit(1);
       }
     }
-    return { files, needUpload };
+    return { files, needUpload, deleted };
   }
 
   /**

@@ -181,8 +181,16 @@ export const PORT_TYPES = ['http', 'ws'];
  *  num: number;
  *  chunk: Uint8Array;
  *  service: string;
+ *  file: string;
  * }} deployServer
- * @property {{ service: string; skip: boolean; last: boolean; }} deployEndServer
+ * @property {{
+ *  service: string;
+ *  skip: boolean;
+ *  last: boolean; // last service
+ *  latest: boolean; // latest file of service
+ *  file: string;
+ *  num: number;
+ * }} deployEndServer
  * @property {{
  *  nodeName?: string;
  * }} getDeployData
@@ -235,7 +243,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  accept: boolean;
  * }} acceptDeleteServer
  * @property {NewDomains[]} setDomains
- * @property {{num: number; service: string;}} uploadProcess
+ * @property {{num: number; service: string; file: string;}} uploadProcess
  */
 
 /**
