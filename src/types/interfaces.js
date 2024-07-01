@@ -192,6 +192,18 @@ export const PORT_TYPES = ['http', 'ws'];
  *  num: number;
  * }} deployEndServer
  * @property {{
+ *  service: string;
+ *  files: string[];
+ *  cwd: string;
+ *  last: boolean;
+ * }} deployDeleteFilesServer
+ * @property {{
+ *  service: string;
+ *  files: string[];
+ *  cwd: string;
+ *  last: boolean;
+ * }} deployDeleteFilesCli
+ * @property {{
  *  nodeName?: string;
  * }} getDeployData
  * @property {{

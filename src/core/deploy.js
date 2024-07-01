@@ -58,6 +58,12 @@ export default class Deploy extends WS {
    * @private
    * @type {string[]}
    */
+  fileList = [];
+
+  /**
+   * @private
+   * @type {string[]}
+   */
   uploadedServices = [];
 
   /**
@@ -107,10 +113,46 @@ export default class Deploy extends WS {
         case 'uploadProcess':
           this.uploadProcess(rawMessage);
           break;
+        case 'deployDeleteFilesCli':
+          this.deleteFiles(rawMessage);
+          break;
         default:
           await this.handleCommonMessages(rawMessage);
       }
     });
+  }
+
+  /**
+   * @private
+   * @param {WSMessageCli<'deployDeleteFilesCli'>} param0
+   */
+  async deleteFiles({ data: { service, files, cwd, last }, status }) {
+    console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
+    for (let i = 0; this.fileList[i]; i++) {
+      const file = this.fileList[i];
+      const latest = this.fileList[i + 1] === undefined;
+      await this.uploadFile({ service, file, cwd, last, latest });
+    }
+
+    if (this.fileList.length === 0) {
+      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
+        token: this.token,
+        message: '',
+        type: 'deployEndServer',
+        userId: this.userId,
+        packageName: PACKAGE_NAME,
+        data: {
+          service,
+          skip: true,
+          last,
+          file: '',
+          latest: true,
+          num: 0,
+        },
+        status: 'info',
+        connId: this.connId,
+      });
+    }
   }
 
   /**
@@ -307,15 +349,25 @@ export default class Deploy extends WS {
       return;
     }
     const cwd = `${resolve(CWD, pwd)}/`;
-    const fileList = files
+    /** @type {typeof this.sendMessage<'deployDeleteFilesServer'>} */ (this.sendMessage)({
+      token: this.token,
+      message: '',
+      type: 'deployDeleteFilesServer',
+      userId: this.userId,
+      packageName: PACKAGE_NAME,
+      data: {
+        service,
+        files: deleted.map(({ pathAbs }) => pathAbs.replace(cwd, '')),
+        cwd,
+        last,
+      },
+      status: 'info',
+      connId: this.connId,
+    });
+
+    this.fileList = files
       .filter((item) => !item.isDir)
       .map((item) => normalize(item.pathAbs).replace(cwd, ''));
-
-    for (let i = 0; fileList[i]; i++) {
-      const file = fileList[i];
-      const latest = fileList[i + 1] === undefined;
-      await this.uploadFile({ service, file, cwd, last, latest });
-    }
   }
 
   /**
