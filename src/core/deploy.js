@@ -127,7 +127,9 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'deployDeleteFilesCli'>} param0
    */
   async deleteFiles({ data: { service, files, cwd, last }, status }) {
-    console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
+    if (files.length !== 0) {
+      console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
+    }
     for (let i = 0; this.fileList[i]; i++) {
       const file = this.fileList[i];
       const latest = this.fileList[i + 1] === undefined;
@@ -286,7 +288,7 @@ export default class Deploy extends WS {
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data: { service, exclude, pwd, active } }) {
+  async prepareUpload({ data: { service, exclude, pwd, active, cache, pwdServer } }) {
     if (!this.config) {
       return;
     }
@@ -325,7 +327,9 @@ export default class Deploy extends WS {
       return;
     }
 
-    const { files, needUpload, deleted } = (await this.checkCache({ exclude, pwd, service })) || [];
+    const cached = this.changePWD({ cache, pwd, pwdServer });
+    const { files, needUpload, deleted } =
+      (await this.checkCache({ exclude, pwd, service, cached })) || [];
 
     if (!needUpload) {
       console.info('Skipping to upload service files', pwd);
@@ -373,6 +377,23 @@ export default class Deploy extends WS {
   /**
    * @private
    * @param {{
+   *  cache: CacheItem[];
+   *  pwd: string;
+   *  pwdServer: string;
+   * }} param0
+   */
+  changePWD({ cache, pwd, pwdServer }) {
+    const cwd = resolve(CWD, pwd);
+    return cache.map((item) => {
+      const _item = structuredClone(item);
+      _item.pathAbs = item.pathAbs.replace(pwdServer, cwd);
+      return _item;
+    });
+  }
+
+  /**
+   * @private
+   * @param {{
    *  service: string;
    *  file: string;
    *  cwd: string;
@@ -402,6 +423,9 @@ export default class Deploy extends WS {
     let num = 0;
     let percent = 0;
     rStream.on('data', (chunk) => {
+      if (!this.lastNums[service]) {
+        this.lastNums[service] = {};
+      }
       this
         /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
           token: this.token,
@@ -504,10 +528,11 @@ export default class Deploy extends WS {
    * @param {{
    *  pwd: string;
    *  service: string;
+   *  cached: CacheItem[];
    *  exclude: ConfigFile['services'][0]['exclude']
    * }} param0
    */
-  async checkCache({ exclude, pwd, service }) {
+  async checkCache({ exclude, pwd, service, cached }) {
     /**
      * @type {CacheItem[]}
      */
@@ -532,6 +557,11 @@ export default class Deploy extends WS {
         : [CONFIG_FILE_NAME, CONFIG_FILE_NAME_A],
       targetDirPath,
     });
+
+    if (this.options.clearCache && existsSync(this.cacheFilePath[service])) {
+      rmSync(this.cacheFilePath[service]);
+    }
+
     let needUpload = false;
     if (!existsSync(this.cacheFilePath[service])) {
       needUpload = true;
@@ -557,16 +587,38 @@ export default class Deploy extends WS {
         process.exit(1);
       }
     }
+    const _files = await this.createCache(cacheChanged, true);
+
+    if (_files) {
+      _files.forEach((item) => {
+        if (!cached.find((_item) => _item.pathAbs === item.pathAbs)) {
+          if (!needUpload) {
+            needUpload = true;
+          }
+          files.push(item);
+        }
+      });
+
+      cached.forEach((item) => {
+        if (!_files.find((_item) => _item.pathAbs === item.pathAbs)) {
+          if (!needUpload) {
+            needUpload = true;
+          }
+          deleted.push(item);
+        }
+      });
+    }
     return { files, needUpload, deleted };
   }
 
   /**
    * @private
    * @param {CacheChanged} cacheChanged
+   * @param {boolean} noWrite
    * @returns {Promise<CacheItem[] | null>}
    */
-  async createCache(cacheChanged) {
-    let cacheRes = await cacheChanged.create().catch((err) => {
+  async createCache(cacheChanged, noWrite = false) {
+    let cacheRes = await cacheChanged.create({ noWrite }).catch((err) => {
       console.error('Failed to create cache', err, new Error().stack);
       console.warn('Cache skipping');
     });

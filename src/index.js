@@ -48,6 +48,7 @@ program
 program
   .command('deploy')
   .description('Upload files and run app in cloud')
+  .option('-c, --clear-cache', 'Clear cache before upload to upload all files')
   .action(async (options) => {
     new Deploy(options);
   });

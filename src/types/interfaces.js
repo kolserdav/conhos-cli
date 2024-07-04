@@ -1,4 +1,5 @@
 /**
+ * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer'} ServiceTypeCommon
@@ -88,8 +89,9 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * }} Port
  */
 
-export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || 'wss://ws.conhos.ru';
-if (process.env.WEBSOCKET_ADDRESS && process.env.NODE_ENV === 'production') {
+const DEFAULT_WS_ADDRESS = 'wss://ws.conhos.ru';
+export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || DEFAULT_WS_ADDRESS;
+if (DEFAULT_WS_ADDRESS !== WEBSOCKET_ADDRESS && process.env.NODE_ENV === 'production') {
   console.warn(
     'warn',
     'Default websocket address have changed by WEBSOCKET_ADDRESS to:',
@@ -175,6 +177,8 @@ export const PORT_TYPES = ['http', 'ws'];
  *  exclude: string[] | undefined;
  *  pwd: string;
  *  service: string;
+ *  cache: CacheItem[];
+ *  pwdServer: string;
  *  active: boolean;
  * }} prepareDeployCli
  * @property {{
