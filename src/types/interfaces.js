@@ -301,6 +301,10 @@ export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) 
 }
 
 /**
+ * @typedef {Omit<ConfigFile, 'services'> & {services: Record<string, ConfigFile['services'][0] & { serviceId: string }>}} ConfigFileBackend
+ */
+
+/**
  * @template T
  * @param {string} msg
  * @returns {WSMessageCli<T> | null}
