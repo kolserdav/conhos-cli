@@ -1,8 +1,7 @@
 import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
-import Tar from '../utils/tar.js';
-import { console, getPackagePath, getTmpArchive, stdoutWriteStart } from '../utils/lib.js';
-import { createReadStream, statSync, existsSync, mkdirSync, rmSync, rm } from 'fs';
+import { console, getPackagePath, stdoutWriteStart, uploadFile } from '../utils/lib.js';
+import { existsSync, mkdirSync, rmSync } from 'fs';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -32,12 +31,6 @@ const inquirer = new Inquirer();
 export default class Deploy extends WS {
   /**
    * @private
-   * @type {Tar}
-   */
-  tar = new Tar();
-
-  /**
-   * @private
    * @type {boolean}
    */
   cacheWorked = false;
@@ -65,12 +58,6 @@ export default class Deploy extends WS {
    * @type {string[]}
    */
   uploadedServices = [];
-
-  /**
-   * @private
-   * @type {Record<string, Record<string, number>>}
-   */
-  lastNums = {};
 
   /**
    * @public
@@ -110,9 +97,6 @@ export default class Deploy extends WS {
         case 'prepareDeployCli':
           this.prepareUpload(rawMessage);
           break;
-        case 'uploadProcess':
-          this.uploadProcess(rawMessage);
-          break;
         case 'deployDeleteFilesCli':
           this.deleteFiles(rawMessage);
           break;
@@ -126,14 +110,14 @@ export default class Deploy extends WS {
    * @private
    * @param {WSMessageCli<'deployDeleteFilesCli'>} param0
    */
-  async deleteFiles({ data: { service, files, cwd, last }, status }) {
+  async deleteFiles({ data: { service, files, cwd, last, url }, status }) {
     if (files.length !== 0) {
       console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
     }
     for (let i = 0; this.fileList[i]; i++) {
       const file = this.fileList[i];
       const latest = this.fileList[i + 1] === undefined;
-      await this.uploadFile({ service, file, cwd, last, latest });
+      await this.uploadFile({ service, file, cwd, last, latest, url });
     }
 
     if (this.fileList.length === 0) {
@@ -154,25 +138,6 @@ export default class Deploy extends WS {
         status: 'info',
         connId: this.connId,
       });
-    }
-  }
-
-  /**
-   * @private
-   * @param {WSMessageCli<'uploadProcess'>} param0
-   */
-  uploadProcess({ data: { service, num, file } }) {
-    const lastNum = this.lastNums[service][file];
-    if (!lastNum) {
-      return;
-    }
-
-    const percent = parseInt(((100 * num) / lastNum).toFixed(0));
-    stdoutWriteStart(`${service}|${file} uploading: ${percent}%`);
-
-    if (num === lastNum) {
-      stdoutWriteStart('');
-      console.info(`${service}|${file} uploaded`, `${percent}%`);
     }
   }
 
@@ -352,6 +317,7 @@ export default class Deploy extends WS {
       });
       return;
     }
+
     const cwd = `${resolve(CWD, pwd)}/`;
     /** @type {typeof this.sendMessage<'deployDeleteFilesServer'>} */ (this.sendMessage)({
       token: this.token,
@@ -399,86 +365,38 @@ export default class Deploy extends WS {
    *  cwd: string;
    *  last: boolean;
    *  latest: boolean;
+   *  url: string;
    * }} param0
    */
-  async uploadFile({ service, file, cwd, last, latest }) {
-    const fileTar = getTmpArchive(this.project, service, file);
-    const tarRes = await this.tar
-      .create({
-        fileList: [file],
-        file: fileTar,
-        cwd,
-      })
-      .catch((error) => {
-        console.error('Failed to create tarball', { error, file });
-      });
-    if (typeof tarRes === 'undefined') {
-      process.exit(1);
-    }
-    const stats = statSync(fileTar);
-    const { size } = stats;
-    let curSize = 0;
-
-    const rStream = createReadStream(fileTar);
+  async uploadFile({ service, file, cwd, last, latest, url }) {
     let num = 0;
-    let percent = 0;
-    rStream.on('data', (chunk) => {
-      if (!this.lastNums[service]) {
-        this.lastNums[service] = {};
-      }
-      this
-        /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
-          token: this.token,
-          message: '',
-          type: 'deployServer',
-          userId: this.userId,
-          packageName: PACKAGE_NAME,
-          data: {
-            num,
-            chunk: new Uint8Array(Buffer.from(chunk)),
-            service,
-            file,
-          },
-          status: 'info',
-          connId: this.connId,
-        });
-      num++;
-      curSize += chunk.length;
+    const filePath = resolve(cwd, file);
 
-      percent = this.calculatePercents(size, curSize);
-      stdoutWriteStart(`${service}|${file} sending: ${percent}%`);
+    const { message, status } = await uploadFile({
+      filePath,
+      url: `${url}/${file}`,
+      service,
+      fileName: file,
     });
-    rStream.on('close', async () => {
-      stdoutWriteStart('');
-      if (!this.lastNums[service]) {
-        this.lastNums[service] = {};
-      }
-      this.lastNums[service][file] = num;
+    stdoutWriteStart('');
+    console[status](`${message}: ${service}|${file}`, filePath);
 
-      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
-        token: this.token,
-        message: '',
-        type: 'deployEndServer',
-        userId: this.userId,
-        packageName: PACKAGE_NAME,
-        data: {
-          service,
-          skip: false,
-          last,
-          file,
-          latest,
-          num,
-        },
-        status: 'info',
-        connId: this.connId,
-      });
-      rm(fileTar, (err) => {
-        if (err) {
-          console.error('Failed to remove tar file', err);
-          return;
-        }
-        console.log('Tar file removed', fileTar);
-      });
+    /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
+      token: this.token,
+      message: '',
+      type: 'deployEndServer',
+      userId: this.userId,
+      packageName: PACKAGE_NAME,
+      data: {
+        service,
+        skip: false,
+        last,
+        file,
+        latest,
+        num,
+      },
+      status: 'info',
+      connId: this.connId,
     });
   }
 

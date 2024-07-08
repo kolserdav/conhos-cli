@@ -149,6 +149,13 @@ export const PORT_TYPES = ['http', 'ws'];
  */
 
 /**
+ * @typedef {{
+ *  num: number;
+ *  chunk: string | Buffer;
+ * }} UploadFileBody
+ */
+
+/**
  * @typedef {object} WSMessageDataCli
  * @property {any} any
  * @property {string} setSocketCli
@@ -182,12 +189,6 @@ export const PORT_TYPES = ['http', 'ws'];
  *  active: boolean;
  * }} prepareDeployCli
  * @property {{
- *  num: number;
- *  chunk: Uint8Array;
- *  service: string;
- *  file: string;
- * }} deployServer
- * @property {{
  *  service: string;
  *  skip: boolean;
  *  last: boolean; // last service
@@ -206,6 +207,7 @@ export const PORT_TYPES = ['http', 'ws'];
  *  files: string[];
  *  cwd: string;
  *  last: boolean;
+ *  url: string;
  * }} deployDeleteFilesCli
  * @property {{
  *  nodeName?: string;
@@ -259,7 +261,6 @@ export const PORT_TYPES = ['http', 'ws'];
  *  accept: boolean;
  * }} acceptDeleteServer
  * @property {NewDomains[]} setDomains
- * @property {{num: number; service: string; file: string;}} uploadProcess
  */
 
 /**

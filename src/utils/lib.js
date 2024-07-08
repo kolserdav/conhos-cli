@@ -2,11 +2,21 @@ import { tmpdir } from 'os';
 import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';
-import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
-import { existsSync, readFileSync } from 'fs';
+import {
+  HOME_DIR,
+  PACKAGE_NAME,
+  DEBUG,
+  CWD,
+  CONFIG_FILE_NAME,
+  UPLOAD_CHUNK_SIZE,
+} from './constants.js';
+import { createReadStream, existsSync, readFileSync, stat } from 'fs';
+import { request } from 'http';
 
 /**
  * @typedef {number | null} StatusCode
+ * @typedef {import('../types/interfaces.js').Status} Status
+ * @typedef {import('../types/interfaces.js').UploadFileBody} UploadFileBody
  */
 
 /**
@@ -139,19 +149,6 @@ export function getPackageName() {
 }
 
 /**
- * @param {string} project
- * @param {string} service
- * @param {string} file
- * @returns {string}
- */
-export function getTmpArchive(project, service, file) {
-  return path.resolve(
-    tmpdir(),
-    `${PACKAGE_NAME}_${project}_${service}_${file.replaceAll(/\//g, '-')}.tgz`
-  );
-}
-
-/**
  * @returns {string}
  */
 export function getConfigFilePath() {
@@ -180,3 +177,67 @@ export function getRustCommandDefault(packageName) {
 export const filterUnique = (value, index, array) => {
   return array.indexOf(value) === index;
 };
+
+/**
+ * @param {{
+ *  filePath: string
+ *  url: string;
+ *  service: string;
+ *  fileName: string;
+ * }} param0
+ * @returns {Promise<{
+ *  status: Status
+ *  message: string;
+ *  code: number | undefined;
+ * }>}
+ */
+export async function uploadFile({ filePath, url, service, fileName }) {
+  console.log(`Upload file "${service}"`, fileName);
+  const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
+
+  const allSize = await new Promise((resolve) => {
+    stat(filePath, (err, data) => {
+      if (err) {
+        console.error('Failed to get stat of file', err);
+        resolve(0);
+        return;
+      }
+      const { size } = data;
+      resolve(size);
+    });
+  });
+
+  return new Promise((resolve) => {
+    const req = request(url, { method: 'POST', headers: { 'Content-Type': 'binary' } }, (res) => {
+      let message = '';
+      let size = 0;
+      res.on('data', (chunk) => {
+        const _l = parseInt(chunk, 10);
+        if (Number.isNaN(_l)) {
+          message += chunk.toString();
+          return;
+        }
+        size += _l;
+        const percent = parseInt(((100 * size) / allSize).toFixed(0));
+        stdoutWriteStart(`${service}|${fileName} uploading: ${percent}%`);
+      });
+
+      res.on('end', () => {
+        resolve({
+          status: res.statusCode === 201 ? 'info' : 'error',
+          code: res.statusCode,
+          message,
+        });
+      });
+    });
+
+    file.on('data', (chunk) => {
+      req.write(chunk);
+    });
+
+    file.on('end', () => {
+      req.write('0');
+      file.close();
+    });
+  });
+}

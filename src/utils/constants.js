@@ -67,3 +67,5 @@ export const EXCLUDE_RUST = ['target'];
 export const SIZE_INDEX_DEFAULT = 3;
 export const CACHE_FILE_NAME = '.cache.json';
 export const CLOUD_LOG_PREFIX = '<cloud>';
+
+export const UPLOAD_CHUNK_SIZE = 64 * 1024;

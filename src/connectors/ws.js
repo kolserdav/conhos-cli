@@ -162,9 +162,6 @@ export default class WS {
       return;
     }
     let _data = structuredClone(data);
-    if (data.type === 'deployServer') {
-      _data.data.chunk = ['[...]'];
-    }
     console.log('Send message', _data);
     this.conn.send(JSON.stringify(data));
   }
