@@ -1,4 +1,3 @@
-import { tmpdir } from 'os';
 import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';
@@ -11,7 +10,9 @@ import {
   UPLOAD_CHUNK_SIZE,
 } from './constants.js';
 import { createReadStream, existsSync, readFileSync, stat } from 'fs';
+import { request as requestHttps } from 'https';
 import { request } from 'http';
+import { HEADER_CONN_ID, UPLOADED_FILE_MESSAGE } from '../types/interfaces.js';
 
 /**
  * @typedef {number | null} StatusCode
@@ -184,6 +185,7 @@ export const filterUnique = (value, index, array) => {
  *  url: string;
  *  service: string;
  *  fileName: string;
+ *  connId: string;
  * }} param0
  * @returns {Promise<{
  *  status: Status
@@ -191,7 +193,7 @@ export const filterUnique = (value, index, array) => {
  *  code: number | undefined;
  * }>}
  */
-export async function uploadFile({ filePath, url, service, fileName }) {
+export async function uploadFile({ filePath, url, service, fileName, connId }) {
   console.log(`Upload file "${service}"`, fileName);
   const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
 
@@ -208,28 +210,34 @@ export async function uploadFile({ filePath, url, service, fileName }) {
   });
 
   return new Promise((resolve) => {
-    const req = request(url, { method: 'POST', headers: { 'Content-Type': 'binary' } }, (res) => {
-      let message = '';
-      let size = 0;
-      res.on('data', (chunk) => {
-        const _l = parseInt(chunk, 10);
-        if (Number.isNaN(_l)) {
-          message += chunk.toString();
-          return;
-        }
-        size += _l;
-        const percent = parseInt(((100 * size) / allSize).toFixed(0));
-        stdoutWriteStart(`${service}|${fileName} uploading: ${percent}%`);
-      });
-
-      res.on('end', () => {
-        resolve({
-          status: res.statusCode === 201 ? 'info' : 'error',
-          code: res.statusCode,
-          message,
+    const fn = /https:/.test(url) ? requestHttps : request;
+    const req = fn(
+      url,
+      { method: 'POST', headers: { 'Content-Type': 'binary', [HEADER_CONN_ID]: connId } },
+      (res) => {
+        let message = '';
+        let size = 0;
+        res.on('data', (msg) => {
+          const chunk = msg.toString();
+          const _l = parseInt(chunk, 10);
+          if (Number.isNaN(_l)) {
+            message += chunk.toString();
+            return;
+          }
+          size += _l;
+          const percent = parseInt(((100 * size) / allSize).toFixed(0));
+          stdoutWriteStart(`${service}|${fileName} uploading: ${percent}%`);
         });
-      });
-    });
+
+        res.on('end', () => {
+          resolve({
+            status: message === UPLOADED_FILE_MESSAGE ? 'info' : 'error',
+            code: res.statusCode,
+            message,
+          });
+        });
+      }
+    );
 
     file.on('data', (chunk) => {
       req.write(chunk);

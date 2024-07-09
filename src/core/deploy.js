@@ -377,9 +377,14 @@ export default class Deploy extends WS {
       url: `${url}/${file}`,
       service,
       fileName: file,
+      connId: this.connId,
     });
     stdoutWriteStart('');
     console[status](`${message}: ${service}|${file}`, filePath);
+    if (status === 'error') {
+      this.removeCache(service);
+      process.exit(1);
+    }
 
     /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
       token: this.token,
@@ -477,7 +482,7 @@ export default class Deploy extends WS {
     });
 
     if (this.options.clearCache && existsSync(this.cacheFilePath[service])) {
-      rmSync(this.cacheFilePath[service]);
+      this.removeCache(service);
     }
 
     let needUpload = false;
@@ -494,7 +499,7 @@ export default class Deploy extends WS {
       if (this.cacheWorked && typeof cacheRes !== 'undefined') {
         needUpload = cacheRes.isChanged;
         await this.createCache(cacheChanged);
-        files = cacheRes.added.concat(cacheRes.updated);
+        files = [...new Set(cacheRes.added.concat(cacheRes.updated))];
         deleted = cacheRes.deleted;
       }
       if (!this.cacheWorked) {
@@ -527,6 +532,13 @@ export default class Deploy extends WS {
       });
     }
     return { files, needUpload, deleted };
+  }
+
+  /**
+   * @param {string} service
+   */
+  removeCache(service) {
+    rmSync(this.cacheFilePath[service]);
   }
 
   /**
