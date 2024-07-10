@@ -514,23 +514,25 @@ export default class Deploy extends WS {
 
     if (_files) {
       _files.forEach((item) => {
-        if (!cached.find((_item) => _item.pathAbs === item.pathAbs)) {
-          if (!needUpload) {
-            needUpload = true;
-          }
+        const file = cached.find((_item) => _item.pathAbs === item.pathAbs);
+        if (!file) {
+          files.push(item);
+        } else if (file.size !== item.size) {
           files.push(item);
         }
       });
 
       cached.forEach((item) => {
         if (!_files.find((_item) => _item.pathAbs === item.pathAbs)) {
-          if (!needUpload) {
-            needUpload = true;
-          }
           deleted.push(item);
         }
       });
     }
+
+    if (!needUpload) {
+      needUpload = files.length !== 0 || deleted.length !== 0;
+    }
+
     return { files, needUpload, deleted };
   }
 

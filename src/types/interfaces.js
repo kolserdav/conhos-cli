@@ -101,7 +101,7 @@ if (DEFAULT_WS_ADDRESS !== WEBSOCKET_ADDRESS && process.env.NODE_ENV === 'produc
 
 export const HEADER_CONN_ID = 'conn-id';
 
-export const UPLOADED_FILE_MESSAGE = 'Uploaded';
+export const UPLOADED_FILE_MESSAGE = ',Uploaded';
 
 /**
  * @type {Port}

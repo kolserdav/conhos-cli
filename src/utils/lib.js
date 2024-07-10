@@ -194,8 +194,7 @@ export const filterUnique = (value, index, array) => {
  * }>}
  */
 export async function uploadFile({ filePath, url, service, fileName, connId }) {
-  console.log(`Upload file "${service}"`, fileName);
-  const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
+  console.log(`Upload file "${service}"`, { fileName, url });
 
   const allSize = await new Promise((resolve) => {
     stat(filePath, (err, data) => {
@@ -213,15 +212,27 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
     const fn = /https:/.test(url) ? requestHttps : request;
     const req = fn(
       url,
-      { method: 'POST', headers: { 'Content-Type': 'binary', [HEADER_CONN_ID]: connId } },
+      {
+        method: 'POST',
+        headers: {
+          'Transfer-Encoding': 'chunked',
+          'content-type': 'application/octet-stream',
+          'user-agent': 'client',
+          host: url.replace(/https?:\/\//, '').replace(/\/.+$/, ''),
+          [HEADER_CONN_ID]: connId,
+        },
+        rejectUnauthorized: false,
+        timeout: 1000 * 60 * 20 * 100,
+      },
       (res) => {
         let message = '';
         let size = 0;
         res.on('data', (msg) => {
-          const chunk = msg.toString();
+          const chunks = msg.toString().split(',');
+          const chunk = chunks[chunks.length - 1];
           const _l = parseInt(chunk, 10);
           if (Number.isNaN(_l)) {
-            message += chunk.toString();
+            message += chunk;
             return;
           }
           size += _l;
@@ -229,9 +240,19 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
           stdoutWriteStart(`${service}|${fileName} uploading: ${percent}%`);
         });
 
+        res.on('error', (err) => {
+          stdoutWriteStart('');
+          console.error('Failed to upload file', { err, url });
+          resolve({
+            status: 'error',
+            code: res.statusCode,
+            message: err.message,
+          });
+        });
+
         res.on('end', () => {
           resolve({
-            status: message === UPLOADED_FILE_MESSAGE ? 'info' : 'error',
+            status: message === UPLOADED_FILE_MESSAGE.replace(',', '') ? 'info' : 'error',
             code: res.statusCode,
             message,
           });
@@ -239,13 +260,30 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
       }
     );
 
+    const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
     file.on('data', (chunk) => {
       req.write(chunk);
     });
 
     file.on('end', () => {
-      req.write('0');
       file.close();
+      req.end();
+    });
+
+    req.on('error', (error) => {
+      stdoutWriteStart('');
+      console.error('Request failed', { error, url });
+      process.exit(1);
+    });
+
+    req.on('timeout', () => {
+      stdoutWriteStart('');
+      console.error('Request timeout exceeded', { url });
+      process.exit(1);
+    });
+
+    req.on('close', () => {
+      req.destroy();
     });
   });
 }
