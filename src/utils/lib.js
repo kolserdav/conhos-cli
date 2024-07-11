@@ -8,11 +8,18 @@ import {
   CWD,
   CONFIG_FILE_NAME,
   UPLOAD_CHUNK_SIZE,
+  UPLOAD_PERCENT_DIFF,
 } from './constants.js';
+import { filesize } from 'filesize';
 import { createReadStream, existsSync, readFileSync, stat } from 'fs';
 import { request as requestHttps } from 'https';
 import { request } from 'http';
-import { HEADER_CONN_ID, UPLOADED_FILE_MESSAGE } from '../types/interfaces.js';
+import {
+  HEADER_CONN_ID,
+  UPLOAD_CHUNK_DELIMITER,
+  UPLOAD_REQUEST_TIMEOUT,
+  UPLOADED_FILE_MESSAGE,
+} from '../types/interfaces.js';
 
 /**
  * @typedef {number | null} StatusCode
@@ -180,6 +187,16 @@ export const filterUnique = (value, index, array) => {
 };
 
 /**
+ * @param {number} size
+ * @param {number} curSize
+ * @returns {number}
+ */
+function calculatePercents(size, curSize) {
+  const percent = (curSize / size) * 100;
+  return parseInt(percent.toFixed(0), 10);
+}
+
+/**
  * @param {{
  *  filePath: string
  *  url: string;
@@ -208,7 +225,24 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
     });
   });
 
+  let percent = 0;
+  let percentUpload = 0;
+
+  const checkNeedWait = () => percent - percentUpload <= UPLOAD_PERCENT_DIFF;
+
+  const waitRead = async () => {
+    return new Promise((resolve) => {
+      const interval = setInterval(() => {
+        if (checkNeedWait()) {
+          clearInterval(interval);
+          resolve(0);
+        }
+      }, 0);
+    });
+  };
+
   return new Promise((resolve) => {
+    let size = 0;
     const fn = /https:/.test(url) ? requestHttps : request;
     const req = fn(
       url,
@@ -222,22 +256,34 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
           [HEADER_CONN_ID]: connId,
         },
         rejectUnauthorized: false,
-        timeout: 1000 * 60 * 20 * 100,
+        timeout: UPLOAD_REQUEST_TIMEOUT,
       },
       (res) => {
         let message = '';
-        let size = 0;
+        let sizeUpload = 0;
         res.on('data', (msg) => {
-          const chunks = msg.toString().split(',');
+          const chunks = msg.toString().split(UPLOAD_CHUNK_DELIMITER);
           const chunk = chunks[chunks.length - 1];
           const _l = parseInt(chunk, 10);
           if (Number.isNaN(_l)) {
             message += chunk;
             return;
           }
-          size += _l;
-          const percent = parseInt(((100 * size) / allSize).toFixed(0));
-          stdoutWriteStart(`${service}|${fileName} uploading: ${percent}%`);
+          sizeUpload += _l;
+          percentUpload = calculatePercents(allSize, sizeUpload);
+          if (percent !== 100) {
+            percent = calculatePercents(allSize, size);
+          }
+          stdoutWriteStart(
+            `${service}|${fileName} [read: ${percent}%] [uploading: ${percentUpload}% | ${filesize(
+              sizeUpload,
+              {
+                standard: 'jedec',
+              }
+            ).replace(/\.\d+/, '')}/${filesize(allSize, {
+              standard: 'jedec',
+            })}]`
+          );
         });
 
         res.on('error', (err) => {
@@ -252,7 +298,10 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
 
         res.on('end', () => {
           resolve({
-            status: message === UPLOADED_FILE_MESSAGE.replace(',', '') ? 'info' : 'error',
+            status:
+              message === UPLOADED_FILE_MESSAGE.replace(UPLOAD_CHUNK_DELIMITER, '')
+                ? 'info'
+                : 'error',
             code: res.statusCode,
             message,
           });
@@ -261,13 +310,23 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
     );
 
     const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
-    file.on('data', (chunk) => {
+    file.on('data', async (chunk) => {
+      if (percent !== 100 && checkNeedWait()) {
+        file.pause();
+        await waitRead();
+        file.resume();
+      }
+      size += chunk.length;
       req.write(chunk);
     });
 
     file.on('end', () => {
       file.close();
       req.end();
+    });
+
+    file.on('error', (e) => {
+      console.error('Failed to read file to upload', e);
     });
 
     req.on('error', (error) => {

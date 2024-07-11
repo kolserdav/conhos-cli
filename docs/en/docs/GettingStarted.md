@@ -6,7 +6,7 @@ The **conhos** utility is an open source program that is the official client of 
 
 ## System requirements
 
-To work with the utility, you will need to install **Node.js** version **20** and higher on your computer. Official Node.js download page: https://nodejs.org
+To work with the utility, you will need to install **Node.js** version **20** and higher on your computer. Official Node.js download page: https://nodejs.org or use the **Node Version Manager** https://github.com/nvm-sh/nvm.
 
 ## Installation
 
