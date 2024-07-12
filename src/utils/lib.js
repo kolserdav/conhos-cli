@@ -228,12 +228,17 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
   let percent = 0;
   let percentUpload = 0;
 
-  const checkNeedWait = () => percent - percentUpload <= UPLOAD_PERCENT_DIFF;
+  const checkNeedWait = () => {
+    if (percentUpload === 0 && percent === 0) {
+      return false;
+    }
+    return percent - percentUpload <= UPLOAD_PERCENT_DIFF;
+  };
 
   const waitRead = async () => {
     return new Promise((resolve) => {
       const interval = setInterval(() => {
-        if (checkNeedWait()) {
+        if (!checkNeedWait()) {
           clearInterval(interval);
           resolve(0);
         }
@@ -323,7 +328,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
 
     const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
     file.on('data', async (chunk) => {
-      if (percent !== 100 && checkNeedWait()) {
+      if (checkNeedWait()) {
         file.pause();
         await waitRead();
         file.resume();
@@ -333,6 +338,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
     });
 
     file.on('end', () => {
+      console.log('End read file', filePath);
       file.close();
       req.end();
     });
@@ -343,7 +349,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
 
     req.on('error', (error) => {
       stdoutWriteStart('');
-      console.error('Request failed', { error, url });
+      console.error('Request failed', { error, url, percent, percentUpload });
       process.exit(1);
     });
 
