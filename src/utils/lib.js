@@ -9,6 +9,7 @@ import {
   CONFIG_FILE_NAME,
   UPLOAD_CHUNK_SIZE,
   UPLOAD_PERCENT_DIFF,
+  UPLOAD_SPEED_INTERVAL,
 } from './constants.js';
 import { filesize } from 'filesize';
 import { createReadStream, existsSync, readFileSync, stat } from 'fs';
@@ -248,19 +249,20 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
 
   return new Promise((resolve) => {
     let size = 0;
+    let sizeUpload = 0;
     const fn = /https:/.test(url) ? requestHttps : request;
-    let speed = '0 KB/s';
+    let speed = '-- KB/s';
     let oldSize = 0;
     let interval = setInterval(() => {
-      const _speed = size - oldSize;
+      const _speed = sizeUpload - oldSize;
       speed =
         _speed !== 0
-          ? `${filesize(_speed, {
+          ? `${filesize(_speed / (UPLOAD_SPEED_INTERVAL / 1000), {
               standard: 'jedec',
             })}/s`
           : speed;
-      oldSize = size;
-    }, 1000);
+      oldSize = sizeUpload;
+    }, UPLOAD_SPEED_INTERVAL);
     const req = fn(
       url,
       {
@@ -277,7 +279,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
       },
       (res) => {
         let message = '';
-        let sizeUpload = 0;
+
         res.on('data', (msg) => {
           const chunks = msg.toString().split(UPLOAD_CHUNK_DELIMITER);
           const chunk = chunks[chunks.length - 1];
@@ -327,6 +329,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
     );
 
     const file = createReadStream(filePath, { highWaterMark: UPLOAD_CHUNK_SIZE });
+
     file.on('data', async (chunk) => {
       if (checkNeedWait()) {
         file.pause();
@@ -338,6 +341,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
     });
 
     file.on('end', () => {
+      stdoutWriteStart('');
       console.log('End read file', filePath);
       file.close();
       req.end();
