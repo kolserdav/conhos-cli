@@ -443,9 +443,7 @@ export default class Deploy extends WS {
    *  exclude: ConfigFile['services'][0]['exclude']
    * }} param0
    */
-  async checkCache({ exclude, pwd, service, cached: _cached }) {
-    const cached = this.changeSpaces(_cached);
-
+  async checkCache({ exclude, pwd, service, cached }) {
     /**
      * @type {CacheItem[]}
      */
@@ -533,18 +531,6 @@ export default class Deploy extends WS {
     return files.filter((item, index, array) => {
       const _index = array.findIndex((_item) => item.pathAbs === _item.pathAbs);
       return index === _index;
-    });
-  }
-
-  /**
-   * @param {CacheItem[]} files
-   * @returns {CacheItem[]}
-   */
-  changeSpaces(files) {
-    return files.map((item) => {
-      const _item = structuredClone(item);
-      _item.pathAbs = item.pathAbs.replaceAll(/%20/g, ' ');
-      return _item;
     });
   }
 

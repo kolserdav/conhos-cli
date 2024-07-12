@@ -244,6 +244,18 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
   return new Promise((resolve) => {
     let size = 0;
     const fn = /https:/.test(url) ? requestHttps : request;
+    let speed = '0 KB/s';
+    let oldSize = 0;
+    let interval = setInterval(() => {
+      const _speed = size - oldSize;
+      speed =
+        _speed !== 0
+          ? `${filesize(_speed, {
+              standard: 'jedec',
+            })}/s`
+          : speed;
+      oldSize = size;
+    }, 1000);
     const req = fn(
       url,
       {
@@ -282,7 +294,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
               }
             ).replace(/\.\d+/, '')}/${filesize(allSize, {
               standard: 'jedec',
-            })}]`
+            })} | ~ ${speed}]`
           );
         });
 
@@ -343,6 +355,7 @@ export async function uploadFile({ filePath, url, service, fileName, connId }) {
 
     req.on('close', () => {
       req.destroy();
+      clearInterval(interval);
     });
   });
 }
