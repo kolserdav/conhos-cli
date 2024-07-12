@@ -125,6 +125,12 @@ export default class WS {
   configFile;
 
   /**
+   * @protected
+   * @type {Record<string, string>}
+   */
+  package = {};
+
+  /**
    * @param {Options} options
    */
   constructor(options) {
@@ -175,7 +181,7 @@ export default class WS {
   }
 
   start() {
-    const pack = JSON.parse(
+    this.package = JSON.parse(
       readFileSync(resolve(path.dirname(__filenameNew), '../../package.json')).toString()
     );
 
@@ -188,6 +194,7 @@ export default class WS {
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
+    const version = this.package.version;
     this.conn.on('open', function open() {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
       /** @type {typeof ws.sendMessage<'setSocketServer'>} */ (ws.sendMessage)({
@@ -196,7 +203,7 @@ export default class WS {
         packageName: PACKAGE_NAME,
         message: '',
         data: {
-          version: pack.version,
+          version,
         },
         connId: ws.connId,
         token: null,
