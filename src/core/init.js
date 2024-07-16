@@ -161,7 +161,7 @@ export default class Init extends WS {
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
    * @returns
    */
-  getCostString(item, { sizes, baseCost, baseValue, nodePublic }) {
+  getCostString(item, { sizes, baseCost, baseValue }) {
     const cost = computeCostService(/** @type {typeof as<ServiceSize>} */ (as)(item.name), {
       sizes,
       baseCost,
@@ -172,11 +172,9 @@ export default class Init extends WS {
       process.exit(1);
     }
     const { month, hour } = cost;
-    const costs = nodePublic
-      ? `: ${parseFloat((month / 100).toFixed(2))} ${CURRENCY}/month, ${parseFloat(
-          (hour / 100).toFixed(2)
-        )} ${CURRENCY}/hour`
-      : '';
+    const costs = `: ${parseFloat((month / 100).toFixed(2))} ${CURRENCY}/month, ${parseFloat(
+      (hour / 100).toFixed(2)
+    )} ${CURRENCY}/hour`;
     return `${item.name} (${item.memory.name} RAM, ${item.storage} SSD)${costs}`;
   }
 
@@ -202,7 +200,7 @@ export default class Init extends WS {
    */
   async handleDeployData(param0) {
     const {
-      data: { sizes, baseCost, baseValue, services, nodePublic },
+      data: { sizes, baseCost, baseValue, services },
     } = param0;
 
     console.info("It's adding service to the config file...", this.configFile);
@@ -261,7 +259,7 @@ export default class Init extends WS {
     }
     const size = await inquirer.list(
       'Select size of service',
-      sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue, nodePublic })),
+      sizes.map((item) => this.getCostString(item, { sizes, baseCost, baseValue })),
       SIZE_INDEX_DEFAULT
     );
 
@@ -303,6 +301,7 @@ export default class Init extends WS {
       public: isCustomService(service) || isCommonServicePublic(service) || false,
       version,
       pwd: isCommonService(service) ? undefined : './',
+      exclude,
       command,
       ports: ports?.length ? ports : undefined,
       environment: environment?.length ? environment : undefined,

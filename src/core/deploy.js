@@ -676,6 +676,7 @@ export default class Deploy extends WS {
       let size = 0;
       let sizeUpload = 0;
       let speed = '-- KB/s';
+      let fileSize = '-- B';
       let oldSize = 0;
       let interval = setInterval(() => {
         const _speed = sizeUpload - oldSize;
@@ -687,6 +688,11 @@ export default class Deploy extends WS {
             : speed;
         oldSize = sizeUpload;
       }, UPLOAD_SPEED_INTERVAL);
+      let interval2 = setInterval(() => {
+        fileSize = filesize(sizeUpload, {
+          standard: 'jedec',
+        });
+      }, 1000);
 
       /**
        * @param {number} size
@@ -735,9 +741,7 @@ export default class Deploy extends WS {
               .fill(' ')
               .join('')} ${speed} | read: ${percent}% | ${filesize(allSize, {
               standard: 'jedec',
-            })}/${filesize(sizeUpload, {
-              standard: 'jedec',
-            })}`;
+            })}/${fileSize}`;
             let _output = output;
             if (output.length > columns) {
               _output = output.substring(0, columns > 4 ? columns - 4 : columns);
@@ -807,6 +811,7 @@ export default class Deploy extends WS {
       req.on('close', () => {
         req.destroy();
         clearInterval(interval);
+        clearInterval(interval2);
       });
     });
   }

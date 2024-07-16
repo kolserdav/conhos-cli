@@ -39,17 +39,6 @@ project: my-awesome-project
 
 **You strictly need to ensure that this field is unique between different projects, otherwise one of your projects will overwrite another project in the cloud.**
 
-### Server credentials
-
-This parameter used to connect to a private node
-
-```yml
-# Optional
-server:
-  node_name: my-node # private node name
-  api_key: 30dd7745d90ba1e5c461ec8bffc3c649 # api key
-```
-
 ### Services:
 
 List of services that are necessary for the operation of the project application
@@ -129,9 +118,13 @@ ports:
     type: http
     # Optional
     location: /path-url
+    # Optional
+    timeout: 30s
+    # Optional
+    buffer_size: 64k
 ```
 
-Supported port types: _'http' | 'ws'_
+Supported port types: _'http' | 'ws' | 'chunked'_
 
 ### Environment Variables
 

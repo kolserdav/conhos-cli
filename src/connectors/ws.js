@@ -15,6 +15,7 @@ const crypto = new Crypto();
 const yaml = new Yaml();
 
 /**
+ * @typedef {import('../types/interfaces.js').DeployData} DeployData
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  */
@@ -131,6 +132,12 @@ export default class WS {
   package = {};
 
   /**
+   * @protected
+   * @type {DeployData | null}
+   */
+  deployData = null;
+
+  /**
    * @param {Options} options
    */
   constructor(options) {
@@ -170,6 +177,14 @@ export default class WS {
     let _data = structuredClone(data);
     console.log('Send message', _data);
     this.conn.send(JSON.stringify(data));
+  }
+
+  /**
+   * @private
+   * @param {DeployData | null} data
+   */
+  setDeployData(data) {
+    this.deployData = data;
   }
 
   /**
@@ -281,7 +296,7 @@ export default class WS {
       process.exit(1);
     }
 
-    const checkErr = checkConfig(config);
+    const checkErr = checkConfig(config, this.deployData);
     let checkExit = false;
     checkErr.forEach((item) => {
       if (!withoutWarns) {
@@ -330,6 +345,8 @@ export default class WS {
     this.setConnId(connId);
 
     const authData = this.readSessionFile();
+
+    this.setDeployData(msg.data.deployData);
 
     if (!skipSetProject) {
       const config = this.getConfig();

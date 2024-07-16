@@ -7,6 +7,8 @@
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
 
+export const BUFFER_SIZE_MAX = 512;
+
 export const ENVIRONMENT_SWITCH = {
   redis: {
     password: 'REDIS_PASSWORD',
@@ -71,7 +73,27 @@ const _SERVICES_COMMON = SERVICES_COMMON;
 const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
 
 /**
- * @typedef {'http' | 'ws'} PortType
+ * @typedef {{
+ *  services: {
+ *    type: ServiceType;
+ *    name: string;
+ *    images: string;
+ *    tags: string[]
+ * }[];
+ *  sizes: {
+ *    name: string;
+ *    memory: {
+ *     name: string;
+ *     value: number;
+ *    };
+ *    cpus: number;
+ *    storage: string;
+ *    ports: number;
+ *  }[];
+ *  baseValue: number;
+ *  baseCost: number;
+ * }} DeployData
+ * @typedef {'http' | 'ws' | 'chunked'} PortType
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
  *  'deca' | 'hecto' | 'kilo' | 'mega' } ServiceSize
  * @typedef {{
@@ -86,6 +108,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  type: PortType;
  *  location?: string;
  *  timeout?: string;
+ *  buffer_size?: string;
  * }} Port
  */
 
@@ -115,7 +138,7 @@ export const PORT_DEFAULT = {
 /**
  * @type {PortType[]}
  */
-export const PORT_TYPES = ['http', 'ws'];
+export const PORT_TYPES = ['http', 'ws', 'chunked'];
 
 /**
  * @typedef {'custom' | 'common'} ServiceKind
@@ -163,7 +186,10 @@ export const PORT_TYPES = ['http', 'ws'];
 /**
  * @typedef {object} WSMessageDataCli
  * @property {any} any
- * @property {string} setSocketCli
+ * @property {{
+ *  connId: string;
+ *  deployData: DeployData;
+ * }} setSocketCli
  * @property {{
  *  version: string;
  * }} setSocketServer
@@ -217,26 +243,7 @@ export const PORT_TYPES = ['http', 'ws'];
  * @property {{
  *  nodeName?: string;
  * }} getDeployData
- * @property {{
- *  services: {
- *    type: ServiceType;
- *    name: string;
- *    images: string;
- *    tags: string[]
- * }[];
- *  sizes: {
- *    name: string;
- *    memory: {
- *     name: string;
- *     value: number;
- *    };
- *    cpus: number;
- *    storage: string;
- *  }[];
- *  baseValue: number;
- *  baseCost: number;
- *  nodePublic: boolean;
- * }} deployData
+ * @property {DeployData} deployData
  * @property {{
  *  watch: boolean;
  *  timestamps: boolean;
@@ -461,16 +468,37 @@ export const isCommonServicePublic = (type) => {
   );
 };
 
+const PORT_TIMEOUTS = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
+
+/**
+ * @param {DeployData} deployData
+ * @param {ServiceSize} size
+ */
+export const getServiceBySize = (deployData, size) => {
+  const { sizes } = deployData;
+  return sizes.find(({ name }) => name === size);
+};
+
 /**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
+ * @param {DeployData | null} deployData
  * @returns {CheckConfigResult[]}
  */
-export function checkConfig({ services, server }) {
+export function checkConfig({ services, server }, deployData) {
   /**
    * @type {CheckConfigResult[]}
    */
   let res = [];
+
+  if (!deployData) {
+    res.push({
+      msg: 'Something went wrong',
+      data: "Deploy data didn't receive from server",
+      exit: true,
+    });
+    return res;
+  }
 
   // Check server
   if (server) {
@@ -522,6 +550,7 @@ export function checkConfig({ services, server }) {
       depends_on,
       active,
       pwd,
+      size,
     } = services[item];
 
     // Check service name
@@ -576,7 +605,80 @@ export function checkConfig({ services, server }) {
       }
 
       // Check ports
-      (ports || []).forEach(({ port, type, location }) => {
+      const portsLength = (ports || []).length;
+      const service = getServiceBySize(deployData, size);
+      if (service) {
+        if (portsLength > service.ports) {
+          res.push({
+            msg: `Maximum port length for service "${item}" with size "${size}" is ${service.ports}`,
+            data: `Decrease count of ports at least to "${service.ports}" or set up a bigger service size`,
+            exit: true,
+          });
+        }
+      }
+
+      (ports || []).forEach(({ port, type, location, timeout, buffer_size }) => {
+        // Check timeout
+        if (timeout) {
+          if (type !== 'chunked' && type !== 'ws') {
+            res.push({
+              msg: `Timeout for port "${port}" of service "${item}" doesn't have any effect`,
+              data: `Timeout property doesn't allow for port type "${type}"`,
+              exit: false,
+            });
+          } else {
+            const timeoutStr = timeout.toString();
+            if (!/^[0-9]+[a-zA-Z]{1,2}$/.test(timeoutStr)) {
+              res.push({
+                msg: `Timeout for port "${port}" of service "${item}" must be a string`,
+                data: `For example "30s", received "${timeout}"`,
+                exit: true,
+              });
+            } else {
+              const postfix = timeoutStr.match(/[a-zA-Z]{1,2}$/);
+              if (postfix) {
+                if (PORT_TIMEOUTS.indexOf(postfix[0]) === -1) {
+                  res.push({
+                    msg: `Timeout for port "${port}" of service "${item}" has wrong postfix`,
+                    data: `Allowed postfixes ${PORT_TIMEOUTS.join('|')}, received "${postfix[0]}"`,
+                    exit: true,
+                  });
+                }
+              }
+            }
+          }
+        }
+        // Check buffer_size
+        if (buffer_size) {
+          if (type !== 'chunked') {
+            res.push({
+              msg: `Buffer size for port "${port}" of service "${item}" doesn't have any effect`,
+              data: `Buffer size property doesn't allow for port type "${type}"`,
+              exit: false,
+            });
+          } else {
+            const bufferStr = buffer_size.toString();
+            if (!/^[0-9]+k$/.test(bufferStr)) {
+              res.push({
+                msg: `Buffer size for port "${port}" of service "${item}" must be a string`,
+                data: `For example "10k", received "${buffer_size}"`,
+                exit: true,
+              });
+            } else {
+              const prefix = bufferStr.match(/^[0-9]+/);
+              if (prefix) {
+                const num = parseInt(prefix[0], 10);
+                if (num > BUFFER_SIZE_MAX) {
+                  res.push({
+                    msg: `Buffer size for port "${port}" of service "${item}" is not allowed`,
+                    data: `Maximmum allowed buffer size is "${BUFFER_SIZE_MAX}k", received "${num}k"`,
+                    exit: true,
+                  });
+                }
+              }
+            }
+          }
+        }
         if (Number.isNaN(parseInt(port.toString(), 10)) || /\./.test(port.toString())) {
           res.push({
             msg: `Port "${port}" of service "${item}" must be an integer`,
