@@ -64,7 +64,7 @@ services:
 type: node
 ```
 
-Поддерживаемые типы сервисов: _'node' | 'rust' | 'redis' | 'postgres' | 'mysql' | 'adminer'_
+Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'python' | 'redis' | 'postgres' | 'mysql' | 'adminer'_
 
 ### Размер сервиса
 

@@ -64,7 +64,7 @@ The image of the operating system and the list of installed service dependencies
 type: node
 ```
 
-Supported service types: _'node' | 'rust' | 'redis' | 'postgres' | 'mysql' | 'adminer'_
+Supported service types: _'node' | 'rust' | 'golang' | 'python' | 'redis' | 'postgres' | 'mysql' | 'adminer'_
 
 ### Service size
 
