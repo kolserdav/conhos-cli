@@ -276,21 +276,21 @@ export default class Init extends WS {
     /**
      * @type {ConfigFile['services'][0]['exclude']}
      */
-    let exclude = [];
+    let exclude = undefined;
     const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
     switch (service) {
       case 'node':
         command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT);
-        exclude = EXCLUDE_NODE.concat(exclude).filter(filterUnique);
+        exclude = EXCLUDE_NODE.concat(exclude || []).filter(filterUnique);
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
-        exclude = EXCLUDE_RUST.concat(exclude).filter(filterUnique);
+        exclude = EXCLUDE_RUST.concat(exclude || []).filter(filterUnique);
         break;
       case 'python':
         command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_PYTHON_DEFAULT);
-        exclude = EXCLUDE_PYTHON.concat(exclude).filter(filterUnique);
+        exclude = EXCLUDE_PYTHON.concat(exclude || []).filter(filterUnique);
         break;
       case 'golang':
         command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_GOLANG_DEFAULT);

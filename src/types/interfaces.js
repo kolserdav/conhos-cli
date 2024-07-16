@@ -2,7 +2,7 @@
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust' | 'python' | 'golang'} ServiceTypeCustom
- * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer'} ServiceTypeCommon
+ * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
@@ -16,6 +16,9 @@ export const ENVIRONMENT_SWITCH = {
   mysql: {
     rootPassword: 'MYSQL_ROOT_PASSWORD',
   },
+  mariadb: {
+    rootPassword: 'MARIADB_ROOT_PASSWORD',
+  },
 };
 
 // Switch services
@@ -25,7 +28,8 @@ export const ENVIRONMENT_SWITCH = {
 export const ENVIRONMENT_EXCLUDED_CUSTOM = {
   redis: 'REDIS_HOST',
   postgres: 'POSTGRES_HOST',
-  mysql: 'MYSQL_ROOT_HOST',
+  mysql: 'MYSQL_HOST',
+  mariadb: 'MARIADB_HOST',
   adminer: null,
 };
 /**
@@ -36,6 +40,12 @@ export const ENVIRONMENT_REQUIRED_COMMON = {
   postgres: ['POSTGRES_PASSWORD', 'POSTGRES_USER', 'POSTGRES_DB'],
   adminer: [],
   mysql: [ENVIRONMENT_SWITCH.mysql.rootPassword, 'MYSQL_USER', 'MYSQL_PASSWORD', 'MYSQL_DATABASE'],
+  mariadb: [
+    ENVIRONMENT_SWITCH.mariadb.rootPassword,
+    'MARIADB_USER',
+    'MARIADB_PASSWORD',
+    'MARIADB_DATABASE',
+  ],
 };
 
 /**
@@ -55,7 +65,7 @@ export const SERVICES_CUSTOM = ['node', 'rust', 'python', 'golang'];
 /**
  * @type {ServiceTypeCommon[]}
  */
-export const SERVICES_COMMON = ['redis', 'postgres', 'adminer', 'mysql'];
+export const SERVICES_COMMON = ['redis', 'postgres', 'adminer', 'mysql', 'mariadb'];
 
 /**
  * @type {ServiceTypeCommonPublic[]}
@@ -534,10 +544,6 @@ export function checkConfig({ services, server }, deployData) {
     return res;
   }
 
-  const CHECKS = {
-    noOne: false,
-  };
-
   serviceKeys.forEach((item) => {
     const {
       domains,
@@ -817,7 +823,7 @@ export function checkConfig({ services, server }, deployData) {
 
       if (active) {
         // Check depends on
-        let check = false;
+        let checkDeps = false;
         serviceKeys.forEach((_item) => {
           const { type: _type, depends_on } = services[_item];
           if (isCustomService(_type)) {
@@ -826,107 +832,99 @@ export function checkConfig({ services, server }, deployData) {
             }
 
             if (depends_on.indexOf(item) !== -1) {
-              check = true;
+              checkDeps = true;
               return false;
             }
           }
           return true;
         });
-        if (!check && !_public && !CHECKS.noOne) {
-          CHECKS.noOne = true;
+        if (!checkDeps && !_public) {
           res.push({
             msg: `You have ${type} service with name "${item}", bun none another service depends on it`,
             data: `Add "depends_on" field with item "${item}" to any custom service`,
             exit: false,
           });
         }
-      }
 
-      const commonVaribles =
-        ENVIRONMENT_REQUIRED_COMMON[/** @type {typeof as<ServiceTypeCommon>} */ (as)(type)];
+        const commonVaribles =
+          ENVIRONMENT_REQUIRED_COMMON[/** @type {typeof as<ServiceTypeCommon>} */ (as)(type)];
 
-      const _commonVariables = structuredClone(commonVaribles);
-      // Check required environment
-      /**
-       * @type {boolean | undefined}
-       */
-      let check;
-      commonVaribles.forEach((_item, index) => {
-        (environment || []).forEach((__item) => {
-          const variable = parseEnvironmentVariable(__item);
+        commonVaribles.forEach((_item) => {
+          const check = (environment || []).find((__item) => {
+            const variable = parseEnvironmentVariable(__item);
+            if (!variable) {
+              return false;
+            }
+            const { name } = variable;
+            if (name === _item) {
+              return true;
+            }
+            return false;
+          });
+          if (!check) {
+            res.push({
+              msg: `Required environment variables for service "${item}" is missing:`,
+              data: _item,
+              exit: true,
+            });
+          }
+        });
+
+        // Check depends on
+        (environment || []).forEach((_item) => {
+          const variable = parseEnvironmentVariable(_item);
           if (!variable) {
-            check = false;
             return;
           }
-          const { name } = variable;
-          if (name === _item) {
-            check = true;
-            _commonVariables.splice(index, 1);
-          }
-        });
-      });
-      if (typeof check === 'boolean' && !check) {
-        res.push({
-          msg: `One or more required environment variables for service "${item}" is missing`,
-          data: `Required [${_commonVariables.join(' & ')}]`,
-          exit: true,
-        });
-      }
+          const { name, value } = variable;
 
-      // Check depends on
-      (environment || []).forEach((_item) => {
-        const variable = parseEnvironmentVariable(_item);
-        if (!variable) {
-          return;
-        }
-        const { name, value } = variable;
+          const index = commonVaribles.indexOf(name);
+          if (index !== -1) {
+            serviceKeys.forEach((__item) => {
+              const { type: _type, environment: _environment, depends_on } = services[__item];
 
-        const index = commonVaribles.indexOf(name);
-        if (index !== -1) {
-          serviceKeys.forEach((__item) => {
-            const { type: _type, environment: _environment, depends_on } = services[__item];
+              if (!depends_on) {
+                return;
+              }
+              if (depends_on.indexOf(item) === -1) {
+                return;
+              }
 
-            if (!depends_on) {
-              return;
-            }
-            if (depends_on.indexOf(item) === -1) {
-              return;
-            }
+              if (isCustomService(_type)) {
+                if (_environment) {
+                  let check = false;
+                  /**
+                   * @type {string | null}
+                   */
+                  let _envVal = null;
+                  _environment.forEach((___item) => {
+                    const _envName = getEnvironmentName(___item);
+                    if (_envName && _envName === name) {
+                      check = true;
+                      _envVal = getEnvironmentValue(___item);
+                    }
+                  });
 
-            if (isCustomService(_type)) {
-              if (_environment) {
-                let check = false;
-                /**
-                 * @type {string | null}
-                 */
-                let _envVal = null;
-                _environment.forEach((___item) => {
-                  const _envName = getEnvironmentName(___item);
-                  if (_envName && _envName === name) {
-                    check = true;
-                    _envVal = getEnvironmentValue(___item);
+                  if (!check && name !== ENVIRONMENT_SWITCH.mysql.rootPassword) {
+                    res.push({
+                      msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it is not provided`,
+                      data: `Try to add environment variable ${name} to the service ${__item}`,
+                      exit: false,
+                    });
                   }
-                });
-
-                if (!check && name !== ENVIRONMENT_SWITCH.mysql.rootPassword) {
-                  res.push({
-                    msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it is not provided`,
-                    data: `Try to add environment variable ${name} to the service ${__item}`,
-                    exit: false,
-                  });
-                }
-                if (value !== _envVal && check) {
-                  res.push({
-                    msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it this variable value is not the same`,
-                    data: `Your service ${__item} will not be able to connect to service ${item}`,
-                    exit: false,
-                  });
+                  if (value !== _envVal && check) {
+                    res.push({
+                      msg: `Service "${item}" provided ${name}, but in a service ${__item} dependent on it this variable value is not the same`,
+                      data: `Your service ${__item} will not be able to connect to service ${item}`,
+                      exit: false,
+                    });
+                  }
                 }
               }
-            }
-          });
-        }
-      });
+            });
+          }
+        });
+      }
     }
   });
   return res.sort((a, b) => {
