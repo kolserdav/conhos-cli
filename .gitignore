@@ -4,3 +4,4 @@ dist
 tmp
 hosting-cli.yml
 conhos.yml
+examples/python/venv

@@ -60,10 +60,13 @@ export const PACKAGES_DIR_NAME = 'packages';
 export const SERVICE_SIZE_DEFAULT = 'micro';
 
 export const CURRENCY = 'RUB';
-export const COMMAND_DEFAULT = 'cd examples/hello-world && npm i && npm run start';
+export const COMMAND_DEFAULT = 'npm i && npm run start';
+export const COMMAND_PYTHON_DEFAULT = 'pip install -r requirements.txt && python main.py';
+export const COMMAND_GOLANG_DEFAULT = 'go run main.go';
 export const EXPLICIT_EXCLUDE = ['.git', '.vscode'];
 export const EXCLUDE_NODE = ['node_modules'];
 export const EXCLUDE_RUST = ['target'];
+export const EXCLUDE_PYTHON = ['venv', '.venv'];
 export const SIZE_INDEX_DEFAULT = 3;
 export const CACHE_FILE_NAME = '.cache.json';
 export const CLOUD_LOG_PREFIX = '<cloud>';

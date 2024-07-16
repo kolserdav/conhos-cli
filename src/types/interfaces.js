@@ -1,7 +1,7 @@
 /**
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
- * @typedef {'node' | 'rust'} ServiceTypeCustom
+ * @typedef {'node' | 'rust' | 'python' | 'golang'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
@@ -50,7 +50,7 @@ export function as(data) {
 /**
  * @type {ServiceTypeCustom[]}
  */
-export const SERVICES_CUSTOM = ['node', 'rust'];
+export const SERVICES_CUSTOM = ['node', 'rust', 'python', 'golang'];
 
 /**
  * @type {ServiceTypeCommon[]}

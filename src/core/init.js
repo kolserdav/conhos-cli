@@ -7,6 +7,9 @@ import {
   PACKAGE_NAME,
   EXCLUDE_NODE,
   EXCLUDE_RUST,
+  COMMAND_PYTHON_DEFAULT,
+  EXCLUDE_PYTHON,
+  COMMAND_GOLANG_DEFAULT,
 } from '../utils/constants.js';
 import {
   parseMessageCli,
@@ -219,7 +222,7 @@ export default class Init extends WS {
             type: 'node',
             active: true,
             public: true,
-            pwd: './',
+            pwd: 'examples/hello-world',
             exclude: EXCLUDE_NODE,
             version: this.getService('node', services)?.tags[0] || 'latest',
             size: /** @type {typeof as<ServiceSize>} */ (as)(sizes[SIZE_INDEX_DEFAULT].name),
@@ -278,12 +281,19 @@ export default class Init extends WS {
     // Switch services
     switch (service) {
       case 'node':
-        command = await inquirer.input(GET_SERVICE_MESSAGE, command || COMMAND_DEFAULT);
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT);
         exclude = EXCLUDE_NODE.concat(exclude).filter(filterUnique);
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
         exclude = EXCLUDE_RUST.concat(exclude).filter(filterUnique);
+        break;
+      case 'python':
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_PYTHON_DEFAULT);
+        exclude = EXCLUDE_PYTHON.concat(exclude).filter(filterUnique);
+        break;
+      case 'golang':
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_GOLANG_DEFAULT);
         break;
     }
     // Group services
