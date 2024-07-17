@@ -119,6 +119,11 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  location?: string;
  *  timeout?: string;
  *  buffer_size?: string;
+ *  static?: {
+ *    location: string;
+ *    path: string;
+ *    index?: string;
+ *  }[]
  * }} Port
  */
 
@@ -489,6 +494,45 @@ export const getServiceBySize = (deployData, size) => {
   return sizes.find(({ name }) => name === size);
 };
 
+const DEFAULT_LOCATION = '/';
+
+/**
+ *
+ * @param {string} location
+ * @param {string} item
+ * @returns {CheckConfigResult[]}
+ */
+function checkLocation(location, item) {
+  /**
+   * @type {CheckConfigResult[]}
+   */
+  let res = [];
+  const allowedRegexp = /^[\\//0-9A-Za-z\\-_/]+$/;
+  if (!allowedRegexp.test(location)) {
+    res.push({
+      msg: `Location "${location}" of service "${item}" has unallowed symbols`,
+      data: `Allowed regexp ${allowedRegexp}`,
+      exit: true,
+    });
+  }
+  const startRegexp = /^\/[a-zA-Z0-9]{1}/;
+  if (!startRegexp.test(location)) {
+    res.push({
+      msg: `Location "${location}" of service "${item}" have wrong start`,
+      data: `It must starts with "/", Allowed start regexp ${startRegexp}`,
+      exit: true,
+    });
+  }
+  if (/\/{2,}/.test(location)) {
+    res.push({
+      msg: `Location "${location}" of service "${item}" have two or more slushes together`,
+      data: 'Do not use two and more slushes together in location',
+      exit: true,
+    });
+  }
+  return res;
+}
+
 /**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
@@ -623,7 +667,7 @@ export function checkConfig({ services, server }, deployData) {
         }
       }
 
-      (ports || []).forEach(({ port, type, location, timeout, buffer_size }) => {
+      (ports || []).forEach(({ port, type, location, timeout, buffer_size, static: _static }) => {
         // Check timeout
         if (timeout) {
           if (type !== 'chunked' && type !== 'ws') {
@@ -685,6 +729,7 @@ export function checkConfig({ services, server }, deployData) {
             }
           }
         }
+        // Check port
         if (Number.isNaN(parseInt(port.toString(), 10)) || /\./.test(port.toString())) {
           res.push({
             msg: `Port "${port}" of service "${item}" must be an integer`,
@@ -692,36 +737,55 @@ export function checkConfig({ services, server }, deployData) {
             exit: true,
           });
         }
+        // Check location
         if (location) {
-          const allowedRegexp = /^[\\//0-9A-Za-z\\-_/]+$/;
-          if (!allowedRegexp.test(location)) {
-            res.push({
-              msg: `Location "${location}" of service "${item}" has unallowed symbols`,
-              data: `Allowed regexp ${allowedRegexp}`,
-              exit: true,
-            });
-          }
-          const startRegexp = /^\/[a-zA-Z0-9]{1}/;
-          if (!startRegexp.test(location)) {
-            res.push({
-              msg: `Location "${location}" of service "${item}" have wrong start`,
-              data: `It must starts with "/", Allowed start regexp ${startRegexp}`,
-              exit: true,
-            });
-          }
-          if (/\/{2,}/.test(location)) {
-            res.push({
-              msg: `Location "${location}" of service "${item}" have two or more slushes together`,
-              data: 'Do not use two and more slushes together in location',
-              exit: true,
-            });
-          }
+          res = res.concat(checkLocation(location, item));
         }
+        // Check port type
         if (PORT_TYPES.indexOf(type) === -1) {
           res.push({
             msg: `Port type "${type}" of service "${item}" is not allowed`,
             data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
             exit: true,
+          });
+        }
+        // Check port static
+        if (_static) {
+          _static.forEach(({ path, location: _location, index }) => {
+            if (!_location) {
+              res.push({
+                msg: `Field "static.location" is required for port ${port}`,
+                data: item,
+                exit: true,
+              });
+            }
+            if (!path) {
+              res.push({
+                msg: `Field "static.path" is required for port ${port}`,
+                data: item,
+                exit: true,
+              });
+            }
+            if (index) {
+              const indexReg = /[a-zA-Z0-9\\.\-_]/;
+              if (!indexReg.test(index)) {
+                res.push({
+                  msg: `Field "static.index" for port ${port} in service "${item}" contains not allowed symbols`,
+                  data: `Allowed regexp ${indexReg}`,
+                  exit: true,
+                });
+              }
+            }
+            const loc = location || DEFAULT_LOCATION;
+            if (loc === _location) {
+              res.push({
+                msg: 'Fields "location" and "static.location" can not be the same',
+                data: `Check port "${port}" of service "${item}"`,
+                exit: true,
+              });
+            }
+            // Check location
+            res.concat(checkLocation(_location, item));
           });
         }
       });

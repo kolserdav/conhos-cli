@@ -122,6 +122,12 @@ ports:
     timeout: 30s
     # Оптионально
     buffer_size: 64k
+    # Оптионально
+    static:
+      - location: /static
+        path: static
+        # Опционально
+        index: index.html
 ```
 
 Поддерживаемые типы портов: _'http' | 'ws' | 'chunked'_
