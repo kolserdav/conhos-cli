@@ -159,6 +159,15 @@ export function getRustCommandDefault(packageName) {
 }
 
 /**
+ * @param {number} port
+ * @param {boolean} fpm
+ * @returns {string}
+ */
+export function getPHPCommandDefault(port, fpm) {
+  return fpm ? 'php-fpm' : `php -S 0.0.0.0:${port}`;
+}
+
+/**
  *
  * @param {string} value
  * @param {number} index

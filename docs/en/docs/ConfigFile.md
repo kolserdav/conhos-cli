@@ -130,7 +130,7 @@ ports:
         index: index.html
 ```
 
-Supported port types: _'http' | 'ws' | 'chunked'_
+Supported port types: _'http' | 'ws' | 'chunked' | 'php'_
 
 ### Environment Variables
 

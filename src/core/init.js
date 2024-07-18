@@ -10,6 +10,8 @@ import {
   COMMAND_PYTHON_DEFAULT,
   EXCLUDE_PYTHON,
   COMMAND_GOLANG_DEFAULT,
+  EXCLUDE_PHP,
+  EXCLUDE_GOLANG,
 } from '../utils/constants.js';
 import {
   parseMessageCli,
@@ -29,6 +31,7 @@ import {
   getPackageName,
   getRustCommandDefault,
   filterUnique,
+  getPHPCommandDefault,
 } from '../utils/lib.js';
 
 /**
@@ -273,6 +276,15 @@ export default class Init extends WS {
       true
     );
 
+    const fpm = service === 'php' && /fpm/.test(version);
+
+    // Group services
+    if (isCustomService(service)) {
+      ports = await this.getPorts([], fpm);
+    }
+
+    const firstPort = (ports || [])[0]?.port;
+
     /**
      * @type {ConfigFile['services'][0]['exclude']}
      */
@@ -294,11 +306,18 @@ export default class Init extends WS {
         break;
       case 'golang':
         command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_GOLANG_DEFAULT);
+        exclude = EXCLUDE_GOLANG.concat(exclude || []).filter(filterUnique);
         break;
-    }
-    // Group services
-    if (isCustomService(service)) {
-      ports = await this.getPorts();
+      case 'php':
+        command = await inquirer.input(
+          GET_SERVICE_MESSAGE,
+          getPHPCommandDefault(
+            firstPort !== undefined ? firstPort : fpm ? 9000 : PORT_DEFAULT.port,
+            fpm
+          )
+        );
+        exclude = EXCLUDE_PHP.concat(exclude || []).filter(filterUnique);
+        break;
     }
 
     const environment = (ports || []).map(
@@ -350,13 +369,14 @@ export default class Init extends WS {
   /**
    * @private
    * @param {ConfigFile['services'][0]['ports']} ports
+   * @param {boolean} fpm
    * @returns {Promise<ConfigFile['services'][0]['ports']>}
    */
-  async getPorts(ports = []) {
+  async getPorts(ports = [], fpm) {
     const _ports = ports.slice();
     const port = await inquirer.input(
       ports.length === 0 ? 'Setting up a listening port' : 'Setting up another listening port',
-      PORT_DEFAULT.port,
+      fpm ? 9000 : PORT_DEFAULT.port,
       (input) => {
         const num = parseInt(input, 10);
         if (Number.isNaN(num) || !/^\d+$/.test(input)) {
@@ -387,7 +407,7 @@ export default class Init extends WS {
 
     const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);
     if (anotherPort) {
-      return this.getPorts(_ports);
+      return this.getPorts(_ports, fpm);
     }
     return _ports;
   }

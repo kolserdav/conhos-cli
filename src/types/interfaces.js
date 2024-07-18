@@ -1,7 +1,7 @@
 /**
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
- * @typedef {'node' | 'rust' | 'python' | 'golang'} ServiceTypeCustom
+ * @typedef {'node' | 'rust' | 'python' | 'golang' | 'php'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
@@ -60,7 +60,7 @@ export function as(data) {
 /**
  * @type {ServiceTypeCustom[]}
  */
-export const SERVICES_CUSTOM = ['node', 'rust', 'python', 'golang'];
+export const SERVICES_CUSTOM = ['node', 'rust', 'python', 'golang', 'php'];
 
 /**
  * @type {ServiceTypeCommon[]}
@@ -103,7 +103,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  baseValue: number;
  *  baseCost: number;
  * }} DeployData
- * @typedef {'http' | 'ws' | 'chunked'} PortType
+ * @typedef {'http' | 'ws' | 'chunked' | 'php'} PortType
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
  *  'deca' | 'hecto' | 'kilo' | 'mega' } ServiceSize
  * @typedef {{
@@ -151,9 +151,19 @@ export const PORT_DEFAULT = {
 };
 
 /**
+ * @type {Record<PortType, PortType>}
+ */
+const _PORT_TYPES = {
+  http: 'http',
+  php: 'php',
+  chunked: 'chunked',
+  ws: 'ws',
+};
+
+/**
  * @type {PortType[]}
  */
-export const PORT_TYPES = ['http', 'ws', 'chunked'];
+export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
 
 /**
  * @typedef {'custom' | 'common'} ServiceKind
@@ -172,6 +182,7 @@ export const PORT_TYPES = ['http', 'ws', 'chunked'];
  *    size: ServiceSize;
  *    version: string;
  *    public: boolean;
+ *    no_restart?: boolean;
  *    pwd?: string;
  *    exclude?: string[]
  *    command?: string;
