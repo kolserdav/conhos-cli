@@ -497,15 +497,32 @@ export const isCommonServicePublic = (type) => {
 const PORT_TIMEOUTS = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 
 /**
- * @param {DeployData} deployData
+ * @param {DeployData['sizes']} sizes
  * @param {ServiceSize} size
  */
-export const getServiceBySize = (deployData, size) => {
-  const { sizes } = deployData;
+export const getServiceBySize = (sizes, size) => {
   return sizes.find(({ name }) => name === size);
 };
 
 const DEFAULT_LOCATION = '/';
+
+/**
+ *
+ * @param {{
+ *  services: DeployData['services'];
+ *  version: string;
+ *  type: ServiceType;
+ * }} param0
+ * @returns {boolean}
+ */
+function checkVersion({ services, version, type }) {
+  const service = services.find(({ type: _type }) => _type === type);
+  if (!service) {
+    return false;
+  }
+  const { tags } = service;
+  return tags.indexOf(version) !== -1;
+}
 
 /**
  *
@@ -652,6 +669,18 @@ export function checkConfig({ services, server }, deployData) {
         data: 'Try to add the field version to the config file',
         exit: true,
       });
+      return res;
+    }
+
+    const { sizes, services: _s } = deployData;
+
+    // Check version
+    if (!checkVersion({ services: _s, type, version })) {
+      res.push({
+        msg: `Version "${version}" of service "${item}" is not allowed`,
+        data: `Allowed versions: ${_s.find((item) => item.type === type)?.tags.join('|')}`,
+        exit: true,
+      });
     }
 
     // Check custom services
@@ -667,7 +696,7 @@ export function checkConfig({ services, server }, deployData) {
 
       // Check ports
       const portsLength = (ports || []).length;
-      const service = getServiceBySize(deployData, size);
+      const service = getServiceBySize(sizes, size);
       if (service) {
         if (portsLength > service.ports) {
           res.push({
