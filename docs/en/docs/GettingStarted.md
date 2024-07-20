@@ -1,4 +1,4 @@
-# Getting started
+# Getting started with the Container Hosting service
 
 ## Introduction
 
@@ -39,6 +39,7 @@ To restrict access to your account through the utility from your computer by oth
 To do this, run the **login** command with the **-с** flag
 
 ```sh
+# Optional
 conhos login -c
 ```
 
@@ -63,6 +64,7 @@ The program will ask you clarifying questions, allowing which it will be able to
 To speed up the initialization process and create the base **conhos.yml** file, run the **init** command with the **-y** flag:
 
 ```sh
+# Optional
 conhos init -y
 ```
 
