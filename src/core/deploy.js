@@ -482,6 +482,7 @@ export default class Deploy extends WS {
     let deleted = [];
 
     const targetDirPath = resolve(CWD, pwd);
+
     if (!existsSync(targetDirPath)) {
       console.warn('Target dir is missing', targetDirPath);
       console.error('Exited with code 2', 'Fix warning before and try again');

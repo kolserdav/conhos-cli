@@ -89,6 +89,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *    name: string;
  *    images: string;
  *    tags: string[]
+ *    hub: string;
  * }[];
  *  sizes: {
  *    name: string;
@@ -677,9 +678,9 @@ export function checkConfig({ services, server }, deployData) {
     // Check version
     if (!checkVersion({ services: _s, type, version })) {
       res.push({
-        msg: `Version "${version}" of service "${item}" is not allowed`,
-        data: `Allowed versions: ${_s.find((item) => item.type === type)?.tags.join('|')}`,
-        exit: true,
+        msg: `Version "${version}" of service "${item}" is no longer supported`,
+        data: `See allowed versions: ${_s.find((item) => item.type === type)?.hub}tags`,
+        exit: false,
       });
     }
 
