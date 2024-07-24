@@ -207,15 +207,16 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'setDomains'>} param0
    */
   setDomainsHandler({ data }) {
-    if (!this.config) {
+    const config = this.getConfig({ changeVars: false, withoutWarns: true });
+    if (!config) {
       return;
     }
-    const _configFile = structuredClone(this.config);
-    Object.keys(this.config.services).forEach((item) => {
-      if (!this.config) {
+    const _configFile = structuredClone(config);
+    Object.keys(config.services).forEach((item) => {
+      if (!config) {
         return;
       }
-      if (!this.config.services[item].active) {
+      if (!config.services[item].active) {
         return;
       }
       const dataDomains = data.find((_item) => _item.serviceName === item);
@@ -425,7 +426,7 @@ export default class Deploy extends WS {
    * @type {WS['handler']}
    */
   async handler(_, msg) {
-    this.config = this.getConfig({ withoutWarns: true });
+    this.config = this.getConfig({ withoutWarns: true, changeVars: true });
     if (!this.config) {
       return;
     }

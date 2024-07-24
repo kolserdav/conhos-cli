@@ -280,17 +280,40 @@ export default class WS {
   }
 
   /**
+   * @private
+   * @param {string} data
+   */
+  changeVariables(data) {
+    const envs = data.match(/\${?[a-zA-Z0-9_]+}?/g);
+    let res = `${data}`;
+    if (envs) {
+      envs.forEach((item) => {
+        const key = item.replace(/[\\$\\{\\}]+/g, '');
+        const val = process.env[key];
+        if (val) {
+          res = res.replace(item, val);
+        } else {
+          console.warn('Undefined environment variable', item);
+        }
+      });
+    }
+    return res;
+  }
+
+  /**
    * @param {{
-   *  withoutWarns: boolean;
-   * }} [param0={ withoutWarns: false }]
+   *  withoutWarns?: boolean;
+   *  changeVars?: boolean;
+   * }} [param0={ withoutWarns: false, changeVars: true }]
    * @returns {ConfigFile}
    */
-  getConfig({ withoutWarns } = { withoutWarns: false }) {
+  getConfig({ withoutWarns, changeVars } = { withoutWarns: false, changeVars: true }) {
     if (!existsSync(this.configFile)) {
       console.warn('Config file is not exists, run', `"${PACKAGE_NAME} init" first`);
       process.exit(2);
     }
-    const data = readFileSync(this.configFile).toString();
+    const _data = readFileSync(this.configFile).toString();
+    const data = changeVars ? this.changeVariables(_data) : _data;
     const config = yaml.parse(data);
     if (!config) {
       process.exit(1);

@@ -17,6 +17,7 @@
 - [Example configuration file](docs/ConfigFile.md#example_configuration_file)
 - [Top level configuration file fields](docs/ConfigFile.md#top_level_configuration_file_fields)
 - [Service configuration fields](docs/ConfigFile.md#service_configuration_fields)
+- [Using your own domain](docs/ConfigFile.md#using_your_own_domain)
 </details>
 
 <details>

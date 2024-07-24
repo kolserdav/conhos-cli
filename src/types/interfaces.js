@@ -299,6 +299,12 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  containerName: string;
  *  accept: boolean;
  * }} acceptDeleteServer
+ * @property {{
+ *  project: string;
+ * }} ipServer
+ * @property {{
+ *  ip: string;
+ * }} ipCli
  * @property {NewDomains[]} setDomains
  */
 

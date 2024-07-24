@@ -7,6 +7,7 @@ import Deploy from './core/deploy.js';
 import { getPackagePath, console } from './utils/lib.js';
 import Init from './core/init.js';
 import Logs from './core/logs.js';
+import IP from './core/ip.js';
 
 const packageHomeDir = getPackagePath();
 if (!fs.existsSync(packageHomeDir)) {
@@ -51,6 +52,13 @@ program
   .option('-c, --clear-cache', 'Clear cache before upload to upload all files')
   .action(async (options) => {
     new Deploy(options);
+  });
+
+program
+  .command('ip')
+  .description('Get project node IP')
+  .action(async (options) => {
+    new IP(options);
   });
 
 program
