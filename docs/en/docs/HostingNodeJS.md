@@ -7,7 +7,9 @@ To host an application on Container Hosting `Node.js`, you must complete the fol
 If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earlier, then simply proceed to the next step. If not installed, then use [Instructions](./GettingStarted.md) to install.
 
 ## 2. Create a configuration file
+
 > Check the current version of the `Node.js` container in the [official Node.js repository](https://hub.docker.com/_/node/tags)
+
 ```yml
 project: name-of-project # Project name
 services:
@@ -28,8 +30,11 @@ services:
  environment: # Environment variables
  - PORT=3000
 ```
+
 ### 3. Launching a project in the cloud
+
 To upload files to the cloud and run services in containers, run the command:
+
 ```sh
 conhos deploy
 ```
@@ -37,7 +42,9 @@ conhos deploy
 ### Database
 
 If your application needs to run in conjunction with a database server, you can also start the database server and connect to it from your application. Also, if you need a DBMS web panel to manage your database, it can also be connected as a separate service.
+
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
+
 ```yml
 project: name-of-project
 services:
@@ -81,4 +88,5 @@ services:
     public: true
     version: 4.8.1-standalone
 ```
-> The database host will be accessible in the application container by the environment variable `[CAPSOM service name]_HOST`, for example for the `postgres` database the name of the host variable will be `POSTGRES_HOST`
+
+> The database host will be accessible in the application container by the environment variable `[SERVICE_TYPE]_HOST`, for example for the `postgres` database the name of the host variable will be `POSTGRES_HOST`
