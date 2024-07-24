@@ -151,7 +151,7 @@ export default class Init extends WS {
           }
           if (this.config) {
             this.server = this.config.server;
-            this.project = this.config.project || this.project;
+            this.project = this.config.name || this.project;
           }
           await this.handleDeployData(rawMessage);
           break;
@@ -219,7 +219,7 @@ export default class Init extends WS {
 
     if (this.options.yes) {
       this.writeConfigFile({
-        project: packageName,
+        name: packageName,
         services: {
           node1: {
             type: 'node',
@@ -338,7 +338,7 @@ export default class Init extends WS {
     this.increaseIndex();
 
     this.writeConfigFile({
-      project: this.project,
+      name: this.project,
       server: this.server,
       services: this.services,
     });

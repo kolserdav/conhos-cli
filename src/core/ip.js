@@ -67,14 +67,14 @@ export default class IP extends WS {
       return;
     }
 
-    const { project } = config;
+    const { name } = config;
     this.sendMessage({
       token: this.token,
       type: 'ipServer',
       message: '',
       packageName: PACKAGE_NAME,
       data: {
-        project,
+        project: name,
       },
       connId: this.connId,
       status: 'info',

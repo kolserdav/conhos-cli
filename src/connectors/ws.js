@@ -374,7 +374,7 @@ export default class WS {
     if (!skipSetProject) {
       const config = this.getConfig();
       if (config) {
-        this.setProject(config.project);
+        this.setProject(config.name);
       }
     }
 

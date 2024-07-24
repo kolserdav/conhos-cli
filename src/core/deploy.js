@@ -431,9 +431,9 @@ export default class Deploy extends WS {
       return;
     }
 
-    const { project, services } = this.config;
+    const { name, services } = this.config;
 
-    const packageProjectPath = getPackagePath(project);
+    const packageProjectPath = getPackagePath(name);
     if (!existsSync(packageProjectPath)) {
       mkdirSync(packageProjectPath, { recursive: true });
     }
@@ -441,9 +441,9 @@ export default class Deploy extends WS {
     const needToRemoveProject =
       typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
     if (needToRemoveProject) {
-      console.info('Starting remove project ', project);
+      console.info('Starting remove project ', name);
     } else {
-      console.info('Starting deploy project', project);
+      console.info('Starting deploy project', name);
     }
 
     this

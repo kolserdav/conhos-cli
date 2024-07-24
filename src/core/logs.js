@@ -110,7 +110,7 @@ export default class Logs extends WS {
       }
     }
 
-    const { project } = config;
+    const { name } = config;
     /** @type {typeof this.sendMessage<'getLogs'>} */ (this.sendMessage)({
       token: this.token,
       type: 'getLogs',
@@ -120,7 +120,7 @@ export default class Logs extends WS {
         watch: this.options.follow || false,
         timestamps: this.options.timestamps || false,
         serviceName: this.serviceName,
-        project,
+        project: name,
         since: this.options.since,
         until: this.options.until,
         tail: this.options.tail,

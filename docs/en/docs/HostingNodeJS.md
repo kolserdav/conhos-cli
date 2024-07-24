@@ -11,7 +11,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 > Check the current version of the `Node.js` container in the [official Node.js repository](https://hub.docker.com/_/node/tags)
 
 ```yml
-project: name-of-project # Project name
+name: name-of-project # Project name
 services:
  node1:
  type: node # Node.js runtime
@@ -46,7 +46,7 @@ If your application needs to run in conjunction with a database server, you can 
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-project: name-of-project
+name: name-of-project
 services:
   node1:
     type: node

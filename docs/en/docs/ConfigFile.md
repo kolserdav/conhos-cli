@@ -7,7 +7,7 @@ The project configuration file is a mandatory file that is used to configure the
 ## Example configuration file
 
 ```yml
-project: my-awesome-project
+name: my-awesome-project
 services:
   node0:
     type: node
@@ -34,7 +34,7 @@ services:
 Cloud Project ID
 
 ```yml
-project: my-awesome-project
+name: my-awesome-project
 ```
 
 **You strictly need to ensure that this field is unique between different projects, otherwise one of your projects will overwrite another project in the cloud.**
@@ -175,24 +175,34 @@ exclude:
 ```
 
 ## Using your own domain
+
 After each launch, the program updates the configuration file by adding the `domains` field to each service:
+
 ```yml
 domains:
- '3000': unsoldered.cloud.conhos.ru
+  '3000': unsoldered.cloud.conhos.ru
 ```
+
 _Where `3000` is an external port, and `unsoldered.cloud.conhos.ru` is a domain that is generated automatically._
+
 ### Set up your domain
+
 To set up your domain, simply change this value to the one you need:
+
 ```yml
 domains:
- '3000': example.ru
+  '3000': example.ru
 ```
+
 > In order for your own domain to work, be sure to make sure that an `A` record from the IP node on which your project is located is added to the hosting zone of this domain.
-To get the IP of the project node, enter the command:
+> To get the IP of the project node, enter the command:
+
 ```sh
 conhos ip
 ```
+
 For the changes to take effect, after changing the domain, enter the command:
+
 ```sh
 conhos deploy
 ```

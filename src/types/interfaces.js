@@ -172,7 +172,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
 
 /**
  * @typedef {{
- *  project: string;
+ *  name: string;
  *  server?: {
  *    node_name: string;
  *    api_key: string;

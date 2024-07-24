@@ -11,7 +11,7 @@
 > Актуальную версию `Node.js` контейнера уточнить в [официальном репозитории Node.js](https://hub.docker.com/_/node/tags)
 
 ```yml
-project: name-of-project # Название проекта
+name: name-of-project # Название проекта
 services:
   node1:
     type: node # Среда исполнения Node.js
@@ -46,7 +46,7 @@ conhos deploy
 > Актуальную версию `Postgres` контейнера уточнить в [официальном репозитории Postgres](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-project: name-of-project
+name: name-of-project
 services:
   node1:
     type: node
