@@ -110,7 +110,6 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * @typedef {{
  *  port: number;
  *  type: PortType;
- *  public: boolean;
  *  location?: string;
  *  timeout?: string;
  *  buffer_size?: string;
@@ -142,7 +141,7 @@ export const HEADER_CONN_ID = 'conn-id';
 export const UPLOAD_CHUNK_DELIMITER = '<[rn]>';
 export const UPLOADED_FILE_MESSAGE = `${UPLOAD_CHUNK_DELIMITER}Uploaded`;
 export const UPLOAD_REQUEST_TIMEOUT = 1000 * 60 * 20 * 100;
-export const REGEXP_IS_DOMAIN = /[a-zA-Z0-9\\-]+\\.[a-zA-Z0-9]+$/;
+export const REGEXP_IS_DOMAIN = /[a-zA-Z0-9\\-]+\.[a-zA-Z0-9]+$/;
 
 /**
  * @type {Port}
@@ -150,7 +149,6 @@ export const REGEXP_IS_DOMAIN = /[a-zA-Z0-9\\-]+\\.[a-zA-Z0-9]+$/;
 export const PORT_DEFAULT = {
   port: 3000,
   type: 'http',
-  public: true,
 };
 
 /**
@@ -570,20 +568,6 @@ function checkLocation(location, item) {
 }
 
 /**
- * @param {Port[] | undefined} ports
- * @returns
- */
-export function checkIsPublic(ports) {
-  let res = false;
-  (ports || []).forEach((item) => {
-    if (item.public) {
-      res = true;
-    }
-  });
-  return res;
-}
-
-/**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
  * @param {DeployData | null} deployData
@@ -660,7 +644,7 @@ export function checkConfig({ services, server }, deployData) {
       });
     }
 
-    let _public = checkIsPublic(ports);
+    let _public = ports && ports.length > 0;
 
     // Check service public
     if (_public) {

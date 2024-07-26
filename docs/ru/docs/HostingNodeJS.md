@@ -51,7 +51,6 @@ services:
     type: node
     size: mili
     active: true
-    public: true
     version: 22-alpine3.19
     pwd: examples/postgres
     exclude:
@@ -73,7 +72,6 @@ services:
     type: postgres
     size: mili
     active: true
-    public: false
     version: 17beta2-alpine3.19
     environment:
       # Переменные для инициализации базы данных
@@ -84,7 +82,6 @@ services:
     type: adminer
     size: mili
     active: true
-    public: true
     version: 4.8.1-standalone
 ```
 

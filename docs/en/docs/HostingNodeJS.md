@@ -26,7 +26,6 @@ services:
     ports:
       - port: 3000
         type: http
-        public: true
     environment:
       - PORT=3000
 ```
@@ -61,7 +60,6 @@ services:
     ports:
     - port: 3000
       type: http
-      public: true
     depends_on: # Specify that the service should have internal links to
       - postgres0 # postgres0 service
     environment:

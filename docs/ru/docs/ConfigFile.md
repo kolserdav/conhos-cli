@@ -19,10 +19,9 @@ services:
       - tmp
       - node_modules
     command: npm i && npm run start # Команда при старте контейнера
-    ports: # Список портов
+    ports: # Список внешних портов
       - port: 3000
         type: http
-        public: true # Внешний порт
     environment: # Переменные окружения
       - PORT=3000
 ```
@@ -108,7 +107,6 @@ command: npm i && npm run start
 ports:
   - port: 3000
     type: http
-    public: true
     # Оптионально
     location: /path-url
     # Оптионально

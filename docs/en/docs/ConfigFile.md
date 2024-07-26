@@ -19,10 +19,9 @@ services:
     - tmp
     - node_modules
   command: npm i && npm run start # Command to start the container
-  ports: # List of ports
+  ports: # List of external ports
   - port: 3000
     type: http
-    public: true # External port
   environment: # Environment variables
     - PORT=3000
 ```
@@ -108,7 +107,6 @@ Ports that must be forwarded for public services to the outside; for each port, 
 ports:
   - port: 3000
     type: http
-    public: true
     # Optional
     location: /path-url
     # Optional
