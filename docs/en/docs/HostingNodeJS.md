@@ -11,24 +11,24 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 > Check the current version of the `Node.js` container in the [official Node.js repository](https://hub.docker.com/_/node/tags)
 
 ```yml
-name: name-of-project # Project name
+name: my-awesome-project
 services:
- node1:
- type: node # Node.js runtime
- size: mili # Service size (affects price)
- active: true # Service started
- public: true # Service has external ports
- version: 22-alpine3.19 # Container version [specify]
- pwd: examples/postgres # Path to the working folder (files and folders from this path will be uploaded to the cloud)
- exclude: # Exclude files and folders (path relative to root "pwd")
- - tmp
- - node_modules
- command: npm i && npm run start # Command to start the container
- ports: # List of external ports
- - port: 3000
- type: http
- environment: # Environment variables
- - PORT=3000
+  node0:
+    type: node
+    size: mili
+    active: true
+    pwd: ./
+    exclude:
+      - node_modules
+      - dist
+    version: 21-alpine3.18
+    command: npm i && npm run start
+    ports:
+      - port: 3000
+        type: http
+        public: true
+    environment:
+      - PORT=3000
 ```
 
 ### 3. Launching a project in the cloud
@@ -52,7 +52,6 @@ services:
     type: node
     size: mile
     active: true
-    public: true
     version: 22-alpine3.19
     pwd: examples/postgres
     exclude:
@@ -61,7 +60,8 @@ services:
     command: npm i && npm run start
     ports:
     - port: 3000
-    type: http
+      type: http
+      public: true
     depends_on: # Specify that the service should have internal links to
       - postgres0 # postgres0 service
     environment:
@@ -74,7 +74,6 @@ services:
     type: postgres
     size: mile
     active: true
-    public: false
     version: 17beta2-alpine3.19
     environment:
       # Variables for initializing the database
@@ -85,7 +84,6 @@ services:
     type: admin
     size: mile
     active: true
-    public: true
     version: 4.8.1-standalone
 ```
 

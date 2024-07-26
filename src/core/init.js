@@ -224,7 +224,6 @@ export default class Init extends WS {
           node1: {
             type: 'node',
             active: true,
-            public: true,
             pwd: 'examples/hello-world',
             exclude: EXCLUDE_NODE,
             version: this.getService('node', services)?.tags[0] || 'latest',
@@ -327,7 +326,6 @@ export default class Init extends WS {
       type: service,
       size: /** @type {typeof as<ServiceSize>} */ (as)(size),
       active: true,
-      public: isCustomService(service) || isCommonServicePublic(service) || false,
       version,
       pwd: isCommonService(service) ? undefined : './',
       exclude,
@@ -403,6 +401,7 @@ export default class Init extends WS {
     _ports.push({
       port: parseInt(port, 10),
       type,
+      public: isCustomService(type) || isCommonServicePublic(type) || false,
     });
 
     const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);

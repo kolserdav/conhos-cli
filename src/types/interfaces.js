@@ -108,15 +108,9 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * @typedef { 'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' |
  *  'deca' | 'hecto' | 'kilo' | 'mega' } ServiceSize
  * @typedef {{
- *  serviceName: string;
- *  domains: Record<string, string>;
- *  public: boolean;
- *  serviceType: ServiceType;
- *  serviceId: string | null;
- * }} NewDomains
- * @typedef {{
  *  port: number;
  *  type: PortType;
+ *  public: boolean;
  *  location?: string;
  *  timeout?: string;
  *  buffer_size?: string;
@@ -126,6 +120,12 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *    index?: string;
  *  }[]
  * }} Port
+ * @typedef {{
+ *  serviceName: string;
+ *  domains: Record<string, string>;
+ *  serviceType: ServiceType;
+ *  serviceId: string | null;
+ * }} NewDomains
  */
 
 const DEFAULT_WS_ADDRESS = 'wss://ws.conhos.ru';
@@ -142,6 +142,7 @@ export const HEADER_CONN_ID = 'conn-id';
 export const UPLOAD_CHUNK_DELIMITER = '<[rn]>';
 export const UPLOADED_FILE_MESSAGE = `${UPLOAD_CHUNK_DELIMITER}Uploaded`;
 export const UPLOAD_REQUEST_TIMEOUT = 1000 * 60 * 20 * 100;
+export const REGEXP_IS_DOMAIN = /[a-zA-Z0-9\\-]+\\.[a-zA-Z0-9]+$/;
 
 /**
  * @type {Port}
@@ -149,6 +150,7 @@ export const UPLOAD_REQUEST_TIMEOUT = 1000 * 60 * 20 * 100;
 export const PORT_DEFAULT = {
   port: 3000,
   type: 'http',
+  public: true,
 };
 
 /**
@@ -182,7 +184,6 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *    type: ServiceType;
  *    size: ServiceSize;
  *    version: string;
- *    public: boolean;
  *    no_restart?: boolean;
  *    pwd?: string;
  *    exclude?: string[]
@@ -569,6 +570,20 @@ function checkLocation(location, item) {
 }
 
 /**
+ * @param {Port[] | undefined} ports
+ * @returns
+ */
+export function checkIsPublic(ports) {
+  let res = false;
+  (ports || []).forEach((item) => {
+    if (item.public) {
+      res = true;
+    }
+  });
+  return res;
+}
+
+/**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
  * @param {DeployData | null} deployData
@@ -624,19 +639,8 @@ export function checkConfig({ services, server }, deployData) {
   }
 
   serviceKeys.forEach((item) => {
-    const {
-      domains,
-      ports,
-      type,
-      environment,
-      version,
-      command,
-      public: _public,
-      depends_on,
-      active,
-      pwd,
-      size,
-    } = services[item];
+    const { domains, ports, type, environment, version, command, depends_on, active, pwd, size } =
+      services[item];
 
     // Check service name
     if (/%/.test(item)) {
@@ -656,12 +660,14 @@ export function checkConfig({ services, server }, deployData) {
       });
     }
 
+    let _public = checkIsPublic(ports);
+
     // Check service public
     if (_public) {
       if (isCommonService(type) && !isCommonServicePublic(type)) {
         res.push({
-          msg: `Service "${item}" can not be public`,
-          data: `Only services can be public: [${SERVICES_CUSTOM.concat(
+          msg: `Service "${item}" can not have public ports`,
+          data: `Only services can have public ports: [${SERVICES_CUSTOM.concat(
             /** @type {typeof as<typeof SERVICES_CUSTOM>} */ (as)(SERVICES_COMMON_PUBLIC)
           ).join('|')}]`,
           exit: true,

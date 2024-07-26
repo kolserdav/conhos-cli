@@ -7,24 +7,24 @@ The project configuration file is a mandatory file that is used to configure the
 ## Example configuration file
 
 ```yml
-name: my-awesome-project
+name: name-of-project # Project name
 services:
-  node0:
-    type: node
-    size: mili
-    active: true
-    pwd: ./
-    exclude:
-      - node_modules
-      - dist
-    public: true
-    version: 21-alpine3.18
-    command: npm i && npm run start
-    ports:
-      - port: 3000
-        type: http
-    environment:
-      - PORT=3000
+  node1:
+  type: node # Node.js runtime
+  size: mili # Service size (affects price)
+  active: true # Service started
+  version: 22-alpine3.19 # Container version [specify]
+  pwd: examples/postgres # Path to the working folder (files and folders from this path will be uploaded to the cloud)
+  exclude: # Exclude files and folders (path relative to root "pwd")
+    - tmp
+    - node_modules
+  command: npm i && npm run start # Command to start the container
+  ports: # List of ports
+  - port: 3000
+    type: http
+    public: true # External port
+  environment: # Environment variables
+    - PORT=3000
 ```
 
 ## Top level configuration file fields
@@ -84,14 +84,6 @@ For a service to be added or updated, you must specify **true**. If **false** is
 active: true
 ```
 
-### Public service
-
-Indicates whether the service should be open to the Internet by domain name or whether it will be accessible only through [Internal links](./ConfigFile.md#internal_links) for other project services
-
-```yml
-public: true
-```
-
 ### Service version
 
 Service version taken from the official DockerHub repository. For example, for Node.js one of the currently supported tags https://hub.docker.com/_/node will be valid
@@ -111,11 +103,12 @@ command: npm i && npm run start
 ### Ports
 
 Ports that must be forwarded for public services to the outside; for each port, a separate network address will be used on ports 80 and 443.
-
+> `public` indicates whether the service should be open to the Internet by domain name or whether it will be accessible only through [Internal links](./ConfigFile.md#internal_links) for other project services.
 ```yml
 ports:
   - port: 3000
     type: http
+    public: true
     # Optional
     location: /path-url
     # Optional

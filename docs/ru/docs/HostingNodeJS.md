@@ -11,23 +11,22 @@
 > Актуальную версию `Node.js` контейнера уточнить в [официальном репозитории Node.js](https://hub.docker.com/_/node/tags)
 
 ```yml
-name: name-of-project # Название проекта
+name: my-awesome-project
 services:
-  node1:
-    type: node # Среда исполнения Node.js
-    size: mili # Размер сервиса (влияет на цену)
-    active: true # Сервис запущен
-    public: true # Сервис имеет внешние порты
-    version: 22-alpine3.19 # Версия контейнера [уточнить]
-    pwd: examples/postgres # Путь до рабочей папки (файлы и папки из этого пути будут загружены в облако)
-    exclude: # Файлы и папки исключения (путь относительно корня "pwd")
-      - tmp
+  node0:
+    type: node
+    size: mili
+    active: true
+    pwd: ./
+    exclude:
       - node_modules
-    command: npm i && npm run start # Команда при старте контейнера
-    ports: # Список внешних портов
+      - dist
+    version: 21-alpine3.18
+    command: npm i && npm run start
+    ports:
       - port: 3000
         type: http
-    environment: # Переменные окружения
+    environment:
       - PORT=3000
 ```
 
