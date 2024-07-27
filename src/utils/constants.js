@@ -9,6 +9,8 @@ const __dirname = path.dirname(__filename);
 
 /**
  * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
+ * @typedef {'rust' | 'php'} NoCommandDefault
+ * @typedef {Record<import('../types/interfaces.js').ServiceTypeCustom, string>} CommandDefault
  */
 
 const packStr = readFileSync(path.resolve(__dirname, '../../package.json')).toString();
@@ -60,15 +62,28 @@ export const PACKAGES_DIR_NAME = 'packages';
 export const SERVICE_SIZE_DEFAULT = 'micro';
 
 export const CURRENCY = 'RUB';
-export const COMMAND_DEFAULT = 'npm i && npm run start';
-export const COMMAND_PYTHON_DEFAULT = 'pip install -r requirements.txt && python main.py';
-export const COMMAND_GOLANG_DEFAULT = 'go build -o main && ./main';
+/**
+ * @type {CommandDefault}
+ */
+export const COMMAND_DEFAULT = {
+  node: 'npm i && npm run start',
+  python: 'pip install -r requirements.txt && python main.py',
+  golang: 'go build -o main && ./main',
+  php: 'php-fpm',
+  rust: 'cargo build --release && ./target/release/main',
+};
 export const EXPLICIT_EXCLUDE = ['.git', '.vscode'];
-export const EXCLUDE_NODE = ['node_modules'];
-export const EXCLUDE_RUST = ['target'];
-export const EXCLUDE_PYTHON = ['venv', '.venv'];
-export const EXCLUDE_GOLANG = ['vendor'];
-export const EXCLUDE_PHP = ['vendor'];
+/**
+ * @type {Record<import('../types/interfaces.js').ServiceTypeCustom, string[]>}
+ */
+export const EXCLUDE_DEFAULT = {
+  node: ['node_modules'],
+  rust: ['target'],
+  python: ['venv', '.venv'],
+  golang: ['vendor'],
+  php: ['vendor'],
+};
+
 export const SIZE_INDEX_DEFAULT = 3;
 export const CACHE_FILE_NAME = '.cache.json';
 export const CLOUD_LOG_PREFIX = '<cloud>';

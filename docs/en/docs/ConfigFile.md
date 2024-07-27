@@ -13,7 +13,7 @@ services:
   type: node # Node.js runtime
   size: mili # Service size (affects price)
   active: true # Service started
-  version: 22-alpine3.19 # Container version [specify]
+  version: latest # Container version
   pwd: examples/postgres # Path to the working folder (files and folders from this path will be uploaded to the cloud)
   exclude: # Exclude files and folders (path relative to root "pwd")
     - tmp
@@ -88,7 +88,7 @@ active: true
 Service version taken from the official DockerHub repository. For example, for Node.js one of the currently supported tags https://hub.docker.com/_/node will be valid
 
 ```yml
-version: 21-alpine3.18
+version: latest
 ```
 
 ### Starting command

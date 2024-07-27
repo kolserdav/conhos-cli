@@ -366,9 +366,11 @@ export function parseMessageCli(msg) {
 
 /**
  * @param {ServiceType} type
+ * @returns {ServiceTypeCustom | null}
  */
 export const isCustomService = (type) => {
-  return SERVICES_CUSTOM.indexOf(/** @type {typeof as<ServiceTypeCustom>} */ (as)(type)) !== -1;
+  const res = SERVICES_CUSTOM.indexOf(/** @type {typeof as<ServiceTypeCustom>} */ (as)(type));
+  return res === -1 ? null : /** @type {typeof as<ServiceTypeCustom>} */ as(type);
 };
 
 /**

@@ -5,13 +5,7 @@ import {
   SIZE_INDEX_DEFAULT,
   COMMAND_DEFAULT,
   PACKAGE_NAME,
-  EXCLUDE_NODE,
-  EXCLUDE_RUST,
-  COMMAND_PYTHON_DEFAULT,
-  EXCLUDE_PYTHON,
-  COMMAND_GOLANG_DEFAULT,
-  EXCLUDE_PHP,
-  EXCLUDE_GOLANG,
+  EXCLUDE_DEFAULT,
 } from '../utils/constants.js';
 import {
   parseMessageCli,
@@ -20,7 +14,6 @@ import {
   PORT_DEFAULT,
   PORT_TYPES,
   isCustomService,
-  isCommonServicePublic,
   as,
   isCommonService,
 } from '../types/interfaces.js';
@@ -225,10 +218,10 @@ export default class Init extends WS {
             type: 'node',
             active: true,
             pwd: 'examples/hello-world',
-            exclude: EXCLUDE_NODE,
+            exclude: EXCLUDE_DEFAULT.node,
             version: this.getService('node', services)?.tags[0] || 'latest',
             size: /** @type {typeof as<ServiceSize>} */ (as)(sizes[SIZE_INDEX_DEFAULT].name),
-            command: COMMAND_DEFAULT,
+            command: COMMAND_DEFAULT.node,
             ports: [PORT_DEFAULT],
             environment: [`PORT=${PORT_DEFAULT.port}`],
           },
@@ -277,35 +270,33 @@ export default class Init extends WS {
 
     const fpm = service === 'php' && /fpm/.test(version);
 
-    // Group services
-    if (isCustomService(service)) {
-      ports = await this.getPorts([], fpm);
-    }
-
-    const firstPort = (ports || [])[0]?.port;
-
+    const customService = isCustomService(service);
     /**
      * @type {ConfigFile['services'][0]['exclude']}
      */
     let exclude = undefined;
+    // Group services
+    if (customService) {
+      ports = await this.getPorts([], fpm);
+      exclude = EXCLUDE_DEFAULT[customService].concat(exclude || []).filter(filterUnique);
+    }
+
+    const firstPort = (ports || [])[0]?.port;
+
     const GET_SERVICE_MESSAGE = 'Specify service start command';
     // Switch services
     switch (service) {
       case 'node':
-        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT);
-        exclude = EXCLUDE_NODE.concat(exclude || []).filter(filterUnique);
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT.node);
         break;
       case 'rust':
         command = await inquirer.input(GET_SERVICE_MESSAGE, getRustCommandDefault(packageName));
-        exclude = EXCLUDE_RUST.concat(exclude || []).filter(filterUnique);
         break;
       case 'python':
-        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_PYTHON_DEFAULT);
-        exclude = EXCLUDE_PYTHON.concat(exclude || []).filter(filterUnique);
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT.python);
         break;
       case 'golang':
-        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_GOLANG_DEFAULT);
-        exclude = EXCLUDE_GOLANG.concat(exclude || []).filter(filterUnique);
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT.golang);
         break;
       case 'php':
         command = await inquirer.input(
@@ -315,7 +306,6 @@ export default class Init extends WS {
             fpm
           )
         );
-        exclude = EXCLUDE_PHP.concat(exclude || []).filter(filterUnique);
         break;
     }
 
@@ -401,7 +391,6 @@ export default class Init extends WS {
     _ports.push({
       port: parseInt(port, 10),
       type,
-      public: isCustomService(type) || isCommonServicePublic(type) || false,
     });
 
     const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);

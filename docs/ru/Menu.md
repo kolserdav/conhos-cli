@@ -23,5 +23,9 @@
 <details>
   <summary>Хостинг</summary>
 
-- [Node.js](docs/HostingNodeJS.md#хостинг-nodejs)
+- [Node.js](docs/HostingNode.md)
+- [Rust](docs/HostingRust.md)
+- [Python](docs/HostingPython.md)
+- [PHP](docs/HostingPhp.md)
+- [Golang](docs/HostingGolang.md)
 </details>

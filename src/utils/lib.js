@@ -8,6 +8,7 @@ import { existsSync, readFileSync } from 'fs';
  * @typedef {number | null} StatusCode
  * @typedef {import('../types/interfaces.js').Status} Status
  * @typedef {import('../types/interfaces.js').UploadFileBody} UploadFileBody
+ * @typedef {import('./constants.js').CommandDefault} CommandDefault
  */
 
 /**

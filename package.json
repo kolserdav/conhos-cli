@@ -12,7 +12,8 @@
     "conhos": "./bin/cli.js"
   },
   "scripts": {
-    "build": "tsc -p ./jsconfig.json"
+    "build": "tsc -p ./jsconfig.json",
+    "script:create-docs": "node src/scripts/create-docs.js"
   },
   "keywords": [],
   "author": "kolserdav",
