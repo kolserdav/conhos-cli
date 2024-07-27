@@ -18,7 +18,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Python`. Подробнее в [Файл конфигурации](./ConfigFile.md).
 
-> Актуальную версию `Python` контейнера уточнить в [официальном репозитории Node.js](https://hub.docker.com/_/python/tags)
+> Актуальную версию `Python` контейнера уточнить в [официальном репозитории Python](https://hub.docker.com/_/python/tags)
 
 ```yml
 name: my-awesome-project

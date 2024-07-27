@@ -18,7 +18,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Golang`. Подробнее в [Файл конфигурации](./ConfigFile.md).
 
-> Актуальную версию `Golang` контейнера уточнить в [официальном репозитории Node.js](https://hub.docker.com/_/golang/tags)
+> Актуальную версию `Golang` контейнера уточнить в [официальном репозитории Golang](https://hub.docker.com/_/golang/tags)
 
 ```yml
 name: my-awesome-project
