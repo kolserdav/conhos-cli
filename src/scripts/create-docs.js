@@ -9,14 +9,21 @@
  *  COMMAND: string;
  *  LINKS: string;
  * }} DocHosting
- * @typedef {Omit<DocHosting, 'LINK'> & {
+ * @typedef {DocHosting & {
  *  DATABASE: ServiceTypeCommon;
  *  DATABASE_UPPERCASE: string;
  *  DATABASE_NAME: string;
  * }} DocHostingDatabase
+ * @typedef {{
+ *  url: string;
+ *  title: string;
+ *  description: string;
+ *  keywords: string;
+ * }} Metadata
  */
 
 import { resolve } from 'path';
+import { format } from 'date-fns';
 import {
   as,
   SERVICES_COMMON,
@@ -24,11 +31,16 @@ import {
   SERVICES_CUSTOM,
 } from '../types/interfaces.js';
 import { COMMAND_DEFAULT, EXCLUDE_DEFAULT } from '../utils/constants.js';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 
 const CWD = process.cwd();
 const DOCS_PATH = resolve(CWD, 'docs');
-const TEMPLATES_PATH = resolve(CWD, 'resources/template-docs');
+const RESOURCES_PATH = resolve(CWD, 'resources');
+const TMP_PATH = resolve(CWD, 'tmp');
+const RESOURCES_GENERATED_PATH = resolve(TMP_PATH, 'generated');
+const METADATA_FILE_PREFIX = resolve(RESOURCES_GENERATED_PATH, 'metadata');
+const SITEMAP_PATH = resolve(RESOURCES_GENERATED_PATH, 'sitemap.xml');
+const TEMPLATES_PATH = resolve(RESOURCES_PATH, 'template-docs');
 
 if (!existsSync(TEMPLATES_PATH)) {
   console.error('Error: Template directory is missing', TEMPLATES_PATH);
@@ -38,6 +50,10 @@ if (!existsSync(TEMPLATES_PATH)) {
 if (!existsSync(DOCS_PATH)) {
   console.error('Error: Docs directory is missing', DOCS_PATH);
   process.exit(1);
+}
+
+if (!existsSync(RESOURCES_GENERATED_PATH)) {
+  mkdirSync(RESOURCES_GENERATED_PATH);
 }
 
 const tempDir = readdirSync(TEMPLATES_PATH);
@@ -94,6 +110,13 @@ function createTemplate(lang) {
     dataD.push(dataItem);
   });
 
+  /**
+   * @type {Metadata[]}
+   */
+  const metadata = [];
+
+  let sitemap = '';
+
   data.forEach((item) => {
     const keys = Object.keys(item);
     let result = `${templateDatabase}`;
@@ -104,12 +127,26 @@ function createTemplate(lang) {
         item[/** @type {typeof as<keyof DocHostingDatabase>} */ (as)(_item)]
       );
     });
-    const destPath = resolve(
-      DOCS_PATH,
-      lang,
-      'docs',
-      getDatabaseFileName({ name: item.NAME, databaseName: item.DATABASE_NAME })
-    );
+    const filename = getDatabaseFileName({ name: item.NAME, databaseName: item.DATABASE_NAME });
+    const destPath = resolve(DOCS_PATH, lang, 'docs', filename);
+    metadata.push({
+      url: `/docs/${filename}`,
+      title:
+        lang === 'en'
+          ? `Hosting ${item.NAME} with database ${item.DATABASE_NAME}`
+          : `Хостинг ${item.NAME} с базой данных ${item.DATABASE_NAME}`,
+      description:
+        lang === 'en'
+          ? `Deploy ${item.NAME} application on hosting and connect it to the database ${item.DATABASE_NAME}. Without the need to maintain a dedicated server.`
+          : `Развернуть ${item.NAME} приложение на хостинге и подключить его к базе данных ${item.DATABASE_NAME}. Без необходимости содержания выделенного сервера.`,
+      keywords:
+        lang === 'en'
+          ? `hosting,${item.TYPE},${item.DATABASE}`
+          : `hosting,${item.TYPE},${item.DATABASE},дешево`,
+    });
+    if (lang === 'ru') {
+      sitemap += createSitemapRecord({ filename });
+    }
     writeFileSync(destPath, result);
   });
 
@@ -120,9 +157,27 @@ function createTemplate(lang) {
       const reg = getEnvironmentRegexp(_item);
       result = result.replaceAll(reg, item[/** @type {typeof as<keyof DocHosting>} */ (as)(_item)]);
     });
-    const destPath = resolve(DOCS_PATH, lang, 'docs', `Hosting${item.NAME}.md`);
+    const filename = `Hosting${item.NAME}.md`;
+    const destPath = resolve(DOCS_PATH, lang, 'docs', filename);
     writeFileSync(destPath, result);
+
+    metadata.push({
+      url: `/docs/${filename}`,
+      title: lang === 'en' ? `Hosting ${item.NAME}` : `Хостинг ${item.NAME}`,
+      description:
+        lang === 'en'
+          ? `Deploy ${item.NAME} application on hosting. Without the need to maintain a dedicated server`
+          : `Развернуть ${item.NAME} приложение на хостинге. Без необходимости содержания выделенного сервера.`,
+      keywords: lang === 'en' ? `hosting,${item.TYPE}` : `хостинг,${item.TYPE},дешево`,
+    });
+
+    if (lang === 'ru') {
+      sitemap += createSitemapRecord({ filename });
+    }
   });
+
+  writeFileSync(`${METADATA_FILE_PREFIX}-${lang}.json`, JSON.stringify(metadata));
+  writeFileSync(SITEMAP_PATH, sitemap);
 }
 
 /**
@@ -155,4 +210,20 @@ function firstCapitalize(str) {
  */
 function getEnvironmentRegexp(name) {
   return new RegExp(`\\$\\{\\{${name}\\}\\}`, 'g');
+}
+
+/**
+ * @param {{
+ *   filename: string;
+ * }} param0
+ * @returns
+ */
+function createSitemapRecord({ filename }) {
+  return `<url>
+  <loc>https://conhos.ru/ru-RU/docs/${filename}</loc>
+  <xhtml:link rel="alternate" hreflang="en" href="https://conhos.ru/en-US/docs/${filename}" />
+  <lastmod>${format(new Date(), 'yyyy-MM-dd')}</lastmod>
+  <changefreq>weekly</changefreq>
+  <priority>0.8</priority>
+</url>\n`;
 }
