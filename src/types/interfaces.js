@@ -22,16 +22,6 @@ export const ENVIRONMENT_SWITCH = {
 };
 
 /**
- * @type {Record<ServiceTypeCommon, string | null>}
- */
-export const ENVIRONMENT_EXCLUDED_CUSTOM = {
-  redis: 'REDIS_HOST',
-  postgres: 'POSTGRES_HOST',
-  mysql: 'MYSQL_HOST',
-  mariadb: 'MARIADB_HOST',
-  adminer: null,
-};
-/**
  * @type {Record<ServiceTypeCommon, string[]>}
  */
 export const ENVIRONMENT_REQUIRED_COMMON = {
@@ -874,15 +864,7 @@ export function checkConfig({ services, server }, deployData) {
           return;
         }
         const { name } = variable;
-        if (name) {
-          if (checkRecord(ENVIRONMENT_EXCLUDED_CUSTOM, name)) {
-            res.push({
-              msg: `Environment variable ${_item} is not allowed here`,
-              data: _item,
-              exit: true,
-            });
-          }
-        } else {
+        if (!name) {
           res.push({
             msg: `Environment variable ${_item} has wrong format`,
             data: 'Try use NAME=value instead',
