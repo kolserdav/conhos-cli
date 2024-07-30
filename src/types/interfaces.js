@@ -21,7 +21,6 @@ export const ENVIRONMENT_SWITCH = {
   },
 };
 
-// Switch services
 /**
  * @type {Record<ServiceTypeCommon, string | null>}
  */

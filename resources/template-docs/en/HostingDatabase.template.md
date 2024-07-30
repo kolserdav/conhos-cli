@@ -54,7 +54,7 @@ services:
       - ${{DATABASE}}0
 ```
 
-> The database host will be accessible in the application container by the environment variable `[SERVICE_TYPE]_HOST`, for example for the `${{DATABASE}}` database the name of the host variable will be `${{DATABASE_UPPERCASE}}_HOST`
+> The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `${{DATABASE}}0` the name of the host variable inside the container that references this service via `depends_on` will be `${{DATABASE_UPPERCASE}}0_HOST`
 
 ### 3. Launching a project in the cloud
 

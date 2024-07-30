@@ -1,6 +1,14 @@
-# Hosting Php with database Postgres
+# Hosting Php with Postgres
 
-If your application needs to run in conjunction with a database server, you can also start the database server and connect to it from your application. Also, if you need a DBMS web panel to manage your database, it can also be connected as a separate service.
+To host `Php` on Container Hosting and connect to the `Postgres` database from it, you need to complete the following three steps.
+
+## 1. Installing the project management utility
+
+If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility earlier, then simply proceed to the next step. If you have not installed it, then use the [Instructions](./GettingStarted.md) to install it.
+
+## 2. Creating a configuration file
+
+Configuration file for creating a `Php` service in Container Hosting with a `Postgres` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md).
 
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
@@ -39,11 +47,19 @@ services:
       - POSTGRES_DB=db_name
   adminer0:
     type: adminer
-    size: mili
+    size: pico
     active: true
-    version: 4.8.1-standalone
+    version: latest
     depends_on:
       - postgres0
 ```
 
-> The database host will be accessible in the application container by the environment variable `[SERVICE_TYPE]_HOST`, for example for the `postgres` database the name of the host variable will be `POSTGRES_HOST`
+> The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `postgres0` the name of the host variable inside the container that references this service via `depends_on` will be `POSTGRES0_HOST`
+
+### 3. Launching a project in the cloud
+
+To upload files to the cloud and run services in containers, run the command:
+
+```sh
+conhos deploy
+```
