@@ -6,6 +6,8 @@
 - [Golang с базой данных Postgres](./HostingGolangPostgres.md)  
 - [Golang с базой данных Mysql](./HostingGolangMysql.md)  
 - [Golang с базой данных Mariadb](./HostingGolangMariadb.md)  
+- [Golang с базой данных Mongo](./HostingGolangMongo.md)  
+- [Golang с базой данных Rabbitmq](./HostingGolangRabbitmq.md)  
 
 
 Чтобы разместить на Контейнерном хостинге `Golang` приложение необходимо выполнить следующие три шага.

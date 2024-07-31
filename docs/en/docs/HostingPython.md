@@ -6,6 +6,8 @@
 - [Python with database Postgres](./HostingPythonPostgres.md)  
 - [Python with database Mysql](./HostingPythonMysql.md)  
 - [Python with database Mariadb](./HostingPythonMariadb.md)  
+- [Python with database Mongo](./HostingPythonMongo.md)  
+- [Python with database Rabbitmq](./HostingPythonRabbitmq.md)  
 
 
 To host an application on Container Hosting `Python`, you must complete the following three steps.

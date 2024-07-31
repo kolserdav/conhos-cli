@@ -6,6 +6,8 @@
 - [Node с базой данных Postgres](./HostingNodePostgres.md)  
 - [Node с базой данных Mysql](./HostingNodeMysql.md)  
 - [Node с базой данных Mariadb](./HostingNodeMariadb.md)  
+- [Node с базой данных Mongo](./HostingNodeMongo.md)  
+- [Node с базой данных Rabbitmq](./HostingNodeRabbitmq.md)  
 
 
 Чтобы разместить на Контейнерном хостинге `Node` приложение необходимо выполнить следующие три шага.

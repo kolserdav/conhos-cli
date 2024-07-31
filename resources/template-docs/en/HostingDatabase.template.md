@@ -32,9 +32,7 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - ${{DATABASE_UPPERCASE}}0_USER=user
-      - ${{DATABASE_UPPERCASE}}0_PASSWORD=password
-      - ${{DATABASE_UPPERCASE}}0_DB=db_name
+${{ENVIRONMENT}}
   postgres0:
     type: ${{DATABASE}}
     size: mili
@@ -42,9 +40,7 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - ${{DATABASE_UPPERCASE}}_USER=user
-      - ${{DATABASE_UPPERCASE}}_PASSWORD=password
-      - ${{DATABASE_UPPERCASE}}_DB=db_name
+${{ENVIRONMENT}}
   adminer0:
     type: adminer
     size: pico

@@ -6,6 +6,8 @@
 - [Rust with database Postgres](./HostingRustPostgres.md)  
 - [Rust with database Mysql](./HostingRustMysql.md)  
 - [Rust with database Mariadb](./HostingRustMariadb.md)  
+- [Rust with database Mongo](./HostingRustMongo.md)  
+- [Rust with database Rabbitmq](./HostingRustRabbitmq.md)  
 
 
 To host an application on Container Hosting `Rust`, you must complete the following three steps.

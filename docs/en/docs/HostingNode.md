@@ -6,6 +6,8 @@
 - [Node with database Postgres](./HostingNodePostgres.md)  
 - [Node with database Mysql](./HostingNodeMysql.md)  
 - [Node with database Mariadb](./HostingNodeMariadb.md)  
+- [Node with database Mongo](./HostingNodeMongo.md)  
+- [Node with database Rabbitmq](./HostingNodeRabbitmq.md)  
 
 
 To host an application on Container Hosting `Node`, you must complete the following three steps.

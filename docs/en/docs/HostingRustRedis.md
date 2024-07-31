@@ -32,9 +32,7 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - REDIS0_USER=user
-      - REDIS0_PASSWORD=password
-      - REDIS0_DB=db_name
+			- REDIS_PASSWORD=value0
   postgres0:
     type: redis
     size: mili
@@ -42,9 +40,7 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - REDIS_USER=user
-      - REDIS_PASSWORD=password
-      - REDIS_DB=db_name
+			- REDIS_PASSWORD=value0
   adminer0:
     type: adminer
     size: pico

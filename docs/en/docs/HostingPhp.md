@@ -6,6 +6,8 @@
 - [Php with database Postgres](./HostingPhpPostgres.md)  
 - [Php with database Mysql](./HostingPhpMysql.md)  
 - [Php with database Mariadb](./HostingPhpMariadb.md)  
+- [Php with database Mongo](./HostingPhpMongo.md)  
+- [Php with database Rabbitmq](./HostingPhpRabbitmq.md)  
 
 
 To host an application on Container Hosting `Php`, you must complete the following three steps.

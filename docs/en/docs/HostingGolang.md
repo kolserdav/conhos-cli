@@ -6,6 +6,8 @@
 - [Golang with database Postgres](./HostingGolangPostgres.md)  
 - [Golang with database Mysql](./HostingGolangMysql.md)  
 - [Golang with database Mariadb](./HostingGolangMariadb.md)  
+- [Golang with database Mongo](./HostingGolangMongo.md)  
+- [Golang with database Rabbitmq](./HostingGolangRabbitmq.md)  
 
 
 To host an application on Container Hosting `Golang`, you must complete the following three steps.

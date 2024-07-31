@@ -32,9 +32,10 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_DB=db_name
+			- MYSQL_ROOT_PASSWORD=value0
+			- MYSQL_USER=value1
+			- MYSQL_PASSWORD=value2
+			- MYSQL_DATABASE=value3
   mysql0:
     type: mysql
     size: mili
@@ -42,9 +43,10 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_DB=db_name
+			- MYSQL_ROOT_PASSWORD=value0
+			- MYSQL_USER=value1
+			- MYSQL_PASSWORD=value2
+			- MYSQL_DATABASE=value3
   adminer0:
     type: adminer
     size: pico

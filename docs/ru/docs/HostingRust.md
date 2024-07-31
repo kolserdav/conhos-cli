@@ -6,6 +6,8 @@
 - [Rust с базой данных Postgres](./HostingRustPostgres.md)  
 - [Rust с базой данных Mysql](./HostingRustMysql.md)  
 - [Rust с базой данных Mariadb](./HostingRustMariadb.md)  
+- [Rust с базой данных Mongo](./HostingRustMongo.md)  
+- [Rust с базой данных Rabbitmq](./HostingRustRabbitmq.md)  
 
 
 Чтобы разместить на Контейнерном хостинге `Rust` приложение необходимо выполнить следующие три шага.

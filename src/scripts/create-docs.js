@@ -1,3 +1,13 @@
+import { resolve } from 'path';
+import { format } from 'date-fns';
+import {
+  as,
+  ENVIRONMENT_REQUIRED_COMMON,
+  SERVICES_COMMON,
+  SERVICES_COMMON_PUBLIC,
+  SERVICES_CUSTOM,
+} from '../types/interfaces.js';
+
 /**
  * @typedef {import("../types/interfaces.js").ServiceType} ServiceType
  * @typedef {import("../types/interfaces.js").ServiceTypeCommon} ServiceTypeCommon
@@ -13,6 +23,7 @@
  *  DATABASE: ServiceTypeCommon;
  *  DATABASE_UPPERCASE: string;
  *  DATABASE_NAME: string;
+ *  ENVIRONMENT: string;
  * }} DocHostingDatabase
  * @typedef {{
  *  url: string;
@@ -22,14 +33,6 @@
  * }} Metadata
  */
 
-import { resolve } from 'path';
-import { format } from 'date-fns';
-import {
-  as,
-  SERVICES_COMMON,
-  SERVICES_COMMON_PUBLIC,
-  SERVICES_CUSTOM,
-} from '../types/interfaces.js';
 import { COMMAND_DEFAULT, EXCLUDE_DEFAULT } from '../utils/constants.js';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 
@@ -105,6 +108,7 @@ function createTemplate(lang) {
         DATABASE_NAME,
         DATABASE: _item,
         DATABASE_UPPERCASE: _item.toUpperCase(),
+        ENVIRONMENT: createEnvironment(_item),
       });
     });
     dataD.push(dataItem);
@@ -178,6 +182,18 @@ function createTemplate(lang) {
 
   writeFileSync(`${METADATA_FILE_PREFIX}-${lang}.json`, JSON.stringify(metadata));
   writeFileSync(SITEMAP_PATH, sitemap);
+}
+
+/**
+ * @param {ServiceTypeCommon} type
+ */
+function createEnvironment(type) {
+  let res = '';
+  ENVIRONMENT_REQUIRED_COMMON[type].forEach((item, index) => {
+    const newLine = ENVIRONMENT_REQUIRED_COMMON[type][index + 1] === undefined ? '' : '\n';
+    res += `\t\t\t- ${item}=value${index}${newLine}`;
+  });
+  return res;
 }
 
 /**

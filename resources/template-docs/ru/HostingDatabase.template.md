@@ -32,9 +32,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - ${{DATABASE_UPPERCASE}}_USER=user
-      - ${{DATABASE_UPPERCASE}}_PASSWORD=password
-      - ${{DATABASE_UPPERCASE}}_DB=db_name
+${{ENVIRONMENT}}
   ${{DATABASE}}0:
     type: ${{DATABASE}}
     size: mili
@@ -42,9 +40,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - ${{DATABASE_UPPERCASE}}_USER=user
-      - ${{DATABASE_UPPERCASE}}_PASSWORD=password
-      - ${{DATABASE_UPPERCASE}}_DB=db_name
+${{ENVIRONMENT}}
   adminer0:
     type: adminer
     size: pico

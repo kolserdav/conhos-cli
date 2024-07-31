@@ -6,6 +6,8 @@
 - [Python с базой данных Postgres](./HostingPythonPostgres.md)  
 - [Python с базой данных Mysql](./HostingPythonMysql.md)  
 - [Python с базой данных Mariadb](./HostingPythonMariadb.md)  
+- [Python с базой данных Mongo](./HostingPythonMongo.md)  
+- [Python с базой данных Rabbitmq](./HostingPythonRabbitmq.md)  
 
 
 Чтобы разместить на Контейнерном хостинге `Python` приложение необходимо выполнить следующие три шага.

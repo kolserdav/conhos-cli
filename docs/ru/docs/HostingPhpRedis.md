@@ -32,9 +32,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - REDIS_USER=user
-      - REDIS_PASSWORD=password
-      - REDIS_DB=db_name
+			- REDIS_PASSWORD=value0
   redis0:
     type: redis
     size: mili
@@ -42,9 +40,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - REDIS_USER=user
-      - REDIS_PASSWORD=password
-      - REDIS_DB=db_name
+			- REDIS_PASSWORD=value0
   adminer0:
     type: adminer
     size: pico

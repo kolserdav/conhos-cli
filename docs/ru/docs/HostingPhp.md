@@ -6,6 +6,8 @@
 - [Php с базой данных Postgres](./HostingPhpPostgres.md)  
 - [Php с базой данных Mysql](./HostingPhpMysql.md)  
 - [Php с базой данных Mariadb](./HostingPhpMariadb.md)  
+- [Php с базой данных Mongo](./HostingPhpMongo.md)  
+- [Php с базой данных Rabbitmq](./HostingPhpRabbitmq.md)  
 
 
 Чтобы разместить на Контейнерном хостинге `Php` приложение необходимо выполнить следующие три шага.

@@ -32,9 +32,10 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - MYSQL0_USER=user
-      - MYSQL0_PASSWORD=password
-      - MYSQL0_DB=db_name
+			- MYSQL_ROOT_PASSWORD=value0
+			- MYSQL_USER=value1
+			- MYSQL_PASSWORD=value2
+			- MYSQL_DATABASE=value3
   postgres0:
     type: mysql
     size: mili
@@ -42,9 +43,10 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_DB=db_name
+			- MYSQL_ROOT_PASSWORD=value0
+			- MYSQL_USER=value1
+			- MYSQL_PASSWORD=value2
+			- MYSQL_DATABASE=value3
   adminer0:
     type: adminer
     size: pico

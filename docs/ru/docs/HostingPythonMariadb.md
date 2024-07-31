@@ -32,9 +32,10 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - MARIADB_USER=user
-      - MARIADB_PASSWORD=password
-      - MARIADB_DB=db_name
+			- MARIADB_ROOT_PASSWORD=value0
+			- MARIADB_USER=value1
+			- MARIADB_PASSWORD=value2
+			- MARIADB_DATABASE=value3
   mariadb0:
     type: mariadb
     size: mili
@@ -42,9 +43,10 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - MARIADB_USER=user
-      - MARIADB_PASSWORD=password
-      - MARIADB_DB=db_name
+			- MARIADB_ROOT_PASSWORD=value0
+			- MARIADB_USER=value1
+			- MARIADB_PASSWORD=value2
+			- MARIADB_DATABASE=value3
   adminer0:
     type: adminer
     size: pico
