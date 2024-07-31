@@ -67,7 +67,7 @@ export default class Inquirer {
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
       prompt({ type: 'input', name, default: def, validate }).then((d) => {
-        resolve(d[name]);
+        resolve(d[name] || def);
       });
     });
   }

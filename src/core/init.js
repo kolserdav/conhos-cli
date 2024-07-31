@@ -261,12 +261,15 @@ export default class Init extends WS {
       SIZE_INDEX_DEFAULT
     );
 
-    const version = await inquirer.list(
-      `Select ${serv.name} version`,
-      serv.tags.map((item) => item.toString()),
-      serv.tags.length,
-      true
-    );
+    const version =
+      serv.tags.length === 0
+        ? await inquirer.input(`Set ${serv.name} version from ${serv.hub}/tags`, 'latest')
+        : await inquirer.list(
+            `Select ${serv.name} version`,
+            serv.tags.map((item) => item.toString()),
+            serv.tags.length,
+            true
+          );
 
     const fpm = service === 'php' && /fpm/.test(version);
 

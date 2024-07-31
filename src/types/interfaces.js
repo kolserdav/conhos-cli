@@ -2,7 +2,7 @@
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust' | 'python' | 'golang' | 'php'} ServiceTypeCustom
- * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb'} ServiceTypeCommon
+ * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb' | 'mongo' | 'rabbitmq'} ServiceTypeCommon
  * @typedef {'adminer'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  */
@@ -35,6 +35,8 @@ export const ENVIRONMENT_REQUIRED_COMMON = {
     'MARIADB_PASSWORD',
     'MARIADB_DATABASE',
   ],
+  mongo: ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD'],
+  rabbitmq: ['RABBITMQ_DEFAULT_PASS', 'RABBITMQ_DEFAULT_USER'],
 };
 
 /**
@@ -54,7 +56,15 @@ export const SERVICES_CUSTOM = ['node', 'rust', 'python', 'golang', 'php'];
 /**
  * @type {ServiceTypeCommon[]}
  */
-export const SERVICES_COMMON = ['redis', 'postgres', 'adminer', 'mysql', 'mariadb'];
+export const SERVICES_COMMON = [
+  'redis',
+  'postgres',
+  'adminer',
+  'mysql',
+  'mariadb',
+  'mongo',
+  'rabbitmq',
+];
 
 /**
  * @type {ServiceTypeCommonPublic[]}
@@ -922,9 +932,9 @@ export function checkConfig({ services, server }, deployData) {
           }
           return true;
         });
-        if (!checkDeps && !_public) {
+        if (!checkDeps && !_public && SERVICES_COMMON_PUBLIC.indexOf(as(type)) === -1) {
           res.push({
-            msg: `You have ${type} service with name "${item}", bun none another service depends on it`,
+            msg: `You have ${type} service with name "${item}", but none another service depends on it`,
             data: `Add "depends_on" field with item "${item}" to any custom service`,
             exit: false,
           });
