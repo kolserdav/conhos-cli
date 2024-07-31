@@ -32,8 +32,8 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-			- RABBITMQ_DEFAULT_PASS=value0
-			- RABBITMQ_DEFAULT_USER=value1
+      - RABBITMQ_DEFAULT_PASS=value0
+      - RABBITMQ_DEFAULT_USER=value1
   rabbitmq0:
     type: rabbitmq
     size: mili
@@ -41,8 +41,8 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-			- RABBITMQ_DEFAULT_PASS=value0
-			- RABBITMQ_DEFAULT_USER=value1
+      - RABBITMQ_DEFAULT_PASS=value0
+      - RABBITMQ_DEFAULT_USER=value1
   adminer0:
     type: adminer
     size: pico

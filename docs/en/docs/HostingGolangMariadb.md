@@ -32,10 +32,10 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-			- MARIADB_ROOT_PASSWORD=value0
-			- MARIADB_USER=value1
-			- MARIADB_PASSWORD=value2
-			- MARIADB_DATABASE=value3
+      - MARIADB_ROOT_PASSWORD=value0
+      - MARIADB_USER=value1
+      - MARIADB_PASSWORD=value2
+      - MARIADB_DATABASE=value3
   postgres0:
     type: mariadb
     size: mili
@@ -43,10 +43,10 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-			- MARIADB_ROOT_PASSWORD=value0
-			- MARIADB_USER=value1
-			- MARIADB_PASSWORD=value2
-			- MARIADB_DATABASE=value3
+      - MARIADB_ROOT_PASSWORD=value0
+      - MARIADB_USER=value1
+      - MARIADB_PASSWORD=value2
+      - MARIADB_DATABASE=value3
   adminer0:
     type: adminer
     size: pico

@@ -32,8 +32,8 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-			- MONGO_INITDB_ROOT_USERNAME=value0
-			- MONGO_INITDB_ROOT_PASSWORD=value1
+      - MONGO_INITDB_ROOT_USERNAME=value0
+      - MONGO_INITDB_ROOT_PASSWORD=value1
   postgres0:
     type: mongo
     size: mili
@@ -41,8 +41,8 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-			- MONGO_INITDB_ROOT_USERNAME=value0
-			- MONGO_INITDB_ROOT_PASSWORD=value1
+      - MONGO_INITDB_ROOT_USERNAME=value0
+      - MONGO_INITDB_ROOT_PASSWORD=value1
   adminer0:
     type: adminer
     size: pico

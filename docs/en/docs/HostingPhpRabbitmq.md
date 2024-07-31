@@ -32,8 +32,8 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-			- RABBITMQ_DEFAULT_PASS=value0
-			- RABBITMQ_DEFAULT_USER=value1
+      - RABBITMQ_DEFAULT_PASS=value0
+      - RABBITMQ_DEFAULT_USER=value1
   postgres0:
     type: rabbitmq
     size: mili
@@ -41,8 +41,8 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-			- RABBITMQ_DEFAULT_PASS=value0
-			- RABBITMQ_DEFAULT_USER=value1
+      - RABBITMQ_DEFAULT_PASS=value0
+      - RABBITMQ_DEFAULT_USER=value1
   adminer0:
     type: adminer
     size: pico

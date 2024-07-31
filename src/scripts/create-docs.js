@@ -191,7 +191,7 @@ function createEnvironment(type) {
   let res = '';
   ENVIRONMENT_REQUIRED_COMMON[type].forEach((item, index) => {
     const newLine = ENVIRONMENT_REQUIRED_COMMON[type][index + 1] === undefined ? '' : '\n';
-    res += `\t\t\t- ${item}=value${index}${newLine}`;
+    res += `      - ${item}=value${index}${newLine}`;
   });
   return res;
 }

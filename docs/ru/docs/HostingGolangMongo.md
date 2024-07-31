@@ -32,8 +32,8 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-			- MONGO_INITDB_ROOT_USERNAME=value0
-			- MONGO_INITDB_ROOT_PASSWORD=value1
+      - MONGO_INITDB_ROOT_USERNAME=value0
+      - MONGO_INITDB_ROOT_PASSWORD=value1
   mongo0:
     type: mongo
     size: mili
@@ -41,8 +41,8 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-			- MONGO_INITDB_ROOT_USERNAME=value0
-			- MONGO_INITDB_ROOT_PASSWORD=value1
+      - MONGO_INITDB_ROOT_USERNAME=value0
+      - MONGO_INITDB_ROOT_PASSWORD=value1
   adminer0:
     type: adminer
     size: pico
