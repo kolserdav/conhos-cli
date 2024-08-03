@@ -108,7 +108,9 @@ ports:
   - port: 3000
     type: http
     # Оптионально
-    location: /path-url
+    location: /path-url # По умолчанию "/"
+    # Оптионально
+    proxy_path: / # По умолчанию ""
     # Оптионально
     timeout: 30s
     # Оптионально

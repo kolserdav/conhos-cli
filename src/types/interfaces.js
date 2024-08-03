@@ -2,9 +2,11 @@
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust' | 'python' | 'golang' | 'php'} ServiceTypeCustom
- * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb' | 'mongo' | 'rabbitmq'} ServiceTypeCommon
- * @typedef {'adminer'} ServiceTypeCommonPublic
+ * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb' | 'mongo' | 'rabbitmq' | 'phpmyadmin' | 'pgadmin'} ServiceTypeCommon
+ * @typedef {'adminer' | 'phpmyadmin' | 'pgadmin'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
+ * @typedef {Record<string, string>} Domains
+ * @typedef {Record<string, string>} ProxyPaths
  */
 
 export const BUFFER_SIZE_MAX = 512;
@@ -37,6 +39,8 @@ export const ENVIRONMENT_REQUIRED_COMMON = {
   ],
   mongo: ['MONGO_INITDB_ROOT_USERNAME', 'MONGO_INITDB_ROOT_PASSWORD'],
   rabbitmq: ['RABBITMQ_DEFAULT_PASS', 'RABBITMQ_DEFAULT_USER'],
+  phpmyadmin: [],
+  pgadmin: ['PGADMIN_DEFAULT_PASSWORD', 'PGADMIN_DEFAULT_EMAIL'],
 };
 
 /**
@@ -64,12 +68,14 @@ export const SERVICES_COMMON = [
   'mariadb',
   'mongo',
   'rabbitmq',
+  'phpmyadmin',
+  'pgadmin',
 ];
 
 /**
  * @type {ServiceTypeCommonPublic[]}
  */
-export const SERVICES_COMMON_PUBLIC = ['adminer'];
+export const SERVICES_COMMON_PUBLIC = ['adminer', 'phpmyadmin', 'pgadmin'];
 
 /**
  * @type {any[]}
@@ -112,6 +118,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  location?: string;
  *  timeout?: string;
  *  buffer_size?: string;
+ *  proxy_path?: string;
  *  static?: {
  *    location: string;
  *    path: string;
@@ -120,7 +127,7 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * }} Port
  * @typedef {{
  *  serviceName: string;
- *  domains: Record<string, string>;
+ *  domains: Domains;
  *  serviceType: ServiceType;
  *  serviceId: string | null;
  * }} NewDomains
@@ -493,12 +500,16 @@ export const checkEnvironmentRequired = (name) => {
 
 /**
  * @param {ServiceType} type
+ * @returns {null | ServiceTypeCommonPublic}
  */
 export const isCommonServicePublic = (type) => {
-  return (
+  const check =
     SERVICES_COMMON_PUBLIC.indexOf(/** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type)) !==
-    -1
-  );
+    -1;
+  if (check) {
+    return /** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type);
+  }
+  return null;
 };
 
 const PORT_TIMEOUTS = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
@@ -537,7 +548,7 @@ function checkVersion({ services, version, type }) {
  * @param {string} item
  * @returns {CheckConfigResult[]}
  */
-function checkLocation(location, item) {
+function checkLocation(location, item, name = 'Location') {
   /**
    * @type {CheckConfigResult[]}
    */
@@ -545,22 +556,22 @@ function checkLocation(location, item) {
   const allowedRegexp = /^[\\//0-9A-Za-z\\-_/]+$/;
   if (!allowedRegexp.test(location)) {
     res.push({
-      msg: `Location "${location}" of service "${item}" has unallowed symbols`,
+      msg: `${name} "${location}" of service "${item}" has unallowed symbols`,
       data: `Allowed regexp ${allowedRegexp}`,
       exit: true,
     });
   }
-  const startRegexp = /^\/[a-zA-Z0-9]{1}/;
+  const startRegexp = /^\/[a-zA-Z0-9]*/;
   if (!startRegexp.test(location)) {
     res.push({
-      msg: `Location "${location}" of service "${item}" have wrong start`,
+      msg: `${name} "${location}" of service "${item}" have wrong start`,
       data: `It must starts with "/", Allowed start regexp ${startRegexp}`,
       exit: true,
     });
   }
   if (/\/{2,}/.test(location)) {
     res.push({
-      msg: `Location "${location}" of service "${item}" have two or more slushes together`,
+      msg: `${name} "${location}" of service "${item}" have two or more slushes together`,
       data: 'Do not use two and more slushes together in location',
       exit: true,
     });
@@ -705,128 +716,143 @@ export function checkConfig({ services, server }, deployData) {
         }
       }
 
-      (ports || []).forEach(({ port, type, location, timeout, buffer_size, static: _static }) => {
-        // Check timeout
-        if (timeout) {
-          if (type !== 'chunked' && type !== 'ws') {
-            res.push({
-              msg: `Timeout for port "${port}" of service "${item}" doesn't have any effect`,
-              data: `Timeout property doesn't allow for port type "${type}"`,
-              exit: false,
-            });
-          } else {
-            const timeoutStr = timeout.toString();
-            if (!/^[0-9]+[a-zA-Z]{1,2}$/.test(timeoutStr)) {
+      (ports || []).forEach(
+        ({ port, type, location, timeout, buffer_size, static: _static, proxy_path }) => {
+          // Check timeout
+          if (timeout) {
+            if (type !== 'chunked' && type !== 'ws') {
               res.push({
-                msg: `Timeout for port "${port}" of service "${item}" must be a string`,
-                data: `For example "30s", received "${timeout}"`,
-                exit: true,
+                msg: `Timeout for port "${port}" of service "${item}" doesn't have any effect`,
+                data: `Timeout property doesn't allow for port type "${type}"`,
+                exit: false,
               });
             } else {
-              const postfix = timeoutStr.match(/[a-zA-Z]{1,2}$/);
-              if (postfix) {
-                if (PORT_TIMEOUTS.indexOf(postfix[0]) === -1) {
-                  res.push({
-                    msg: `Timeout for port "${port}" of service "${item}" has wrong postfix`,
-                    data: `Allowed postfixes ${PORT_TIMEOUTS.join('|')}, received "${postfix[0]}"`,
-                    exit: true,
-                  });
-                }
-              }
-            }
-          }
-        }
-        // Check buffer_size
-        if (buffer_size) {
-          if (type !== 'chunked') {
-            res.push({
-              msg: `Buffer size for port "${port}" of service "${item}" doesn't have any effect`,
-              data: `Buffer size property doesn't allow for port type "${type}"`,
-              exit: false,
-            });
-          } else {
-            const bufferStr = buffer_size.toString();
-            if (!/^[0-9]+k$/.test(bufferStr)) {
-              res.push({
-                msg: `Buffer size for port "${port}" of service "${item}" must be a string`,
-                data: `For example "10k", received "${buffer_size}"`,
-                exit: true,
-              });
-            } else {
-              const prefix = bufferStr.match(/^[0-9]+/);
-              if (prefix) {
-                const num = parseInt(prefix[0], 10);
-                if (num > BUFFER_SIZE_MAX) {
-                  res.push({
-                    msg: `Buffer size for port "${port}" of service "${item}" is not allowed`,
-                    data: `Maximmum allowed buffer size is "${BUFFER_SIZE_MAX}k", received "${num}k"`,
-                    exit: true,
-                  });
-                }
-              }
-            }
-          }
-        }
-        // Check port
-        if (Number.isNaN(parseInt(port.toString(), 10)) || /\./.test(port.toString())) {
-          res.push({
-            msg: `Port "${port}" of service "${item}" must be an integer`,
-            data: '',
-            exit: true,
-          });
-        }
-        // Check location
-        if (location) {
-          res = res.concat(checkLocation(location, item));
-        }
-        // Check port type
-        if (PORT_TYPES.indexOf(type) === -1) {
-          res.push({
-            msg: `Port type "${type}" of service "${item}" is not allowed`,
-            data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
-            exit: true,
-          });
-        }
-        // Check port static
-        if (_static) {
-          _static.forEach(({ path, location: _location, index }) => {
-            if (!_location) {
-              res.push({
-                msg: `Field "static.location" is required for port ${port}`,
-                data: item,
-                exit: true,
-              });
-            }
-            if (!path) {
-              res.push({
-                msg: `Field "static.path" is required for port ${port}`,
-                data: item,
-                exit: true,
-              });
-            }
-            if (index) {
-              const indexReg = /[a-zA-Z0-9\\.\-_]/;
-              if (!indexReg.test(index)) {
+              const timeoutStr = timeout.toString();
+              if (!/^[0-9]+[a-zA-Z]{1,2}$/.test(timeoutStr)) {
                 res.push({
-                  msg: `Field "static.index" for port ${port} in service "${item}" contains not allowed symbols`,
-                  data: `Allowed regexp ${indexReg}`,
+                  msg: `Timeout for port "${port}" of service "${item}" must be a string`,
+                  data: `For example "30s", received "${timeout}"`,
+                  exit: true,
+                });
+              } else {
+                const postfix = timeoutStr.match(/[a-zA-Z]{1,2}$/);
+                if (postfix) {
+                  if (PORT_TIMEOUTS.indexOf(postfix[0]) === -1) {
+                    res.push({
+                      msg: `Timeout for port "${port}" of service "${item}" has wrong postfix`,
+                      data: `Allowed postfixes ${PORT_TIMEOUTS.join('|')}, received "${
+                        postfix[0]
+                      }"`,
+                      exit: true,
+                    });
+                  }
+                }
+              }
+            }
+          }
+          // Check buffer_size
+          if (buffer_size) {
+            if (type !== 'chunked') {
+              res.push({
+                msg: `Buffer size for port "${port}" of service "${item}" doesn't have any effect`,
+                data: `Buffer size property doesn't allow for port type "${type}"`,
+                exit: false,
+              });
+            } else {
+              const bufferStr = buffer_size.toString();
+              if (!/^[0-9]+k$/.test(bufferStr)) {
+                res.push({
+                  msg: `Buffer size for port "${port}" of service "${item}" must be a string`,
+                  data: `For example "10k", received "${buffer_size}"`,
+                  exit: true,
+                });
+              } else {
+                const prefix = bufferStr.match(/^[0-9]+/);
+                if (prefix) {
+                  const num = parseInt(prefix[0], 10);
+                  if (num > BUFFER_SIZE_MAX) {
+                    res.push({
+                      msg: `Buffer size for port "${port}" of service "${item}" is not allowed`,
+                      data: `Maximmum allowed buffer size is "${BUFFER_SIZE_MAX}k", received "${num}k"`,
+                      exit: true,
+                    });
+                  }
+                }
+              }
+            }
+          }
+          // Check port
+          if (Number.isNaN(parseInt(port.toString(), 10)) || /\./.test(port.toString())) {
+            res.push({
+              msg: `Port "${port}" of service "${item}" must be an integer`,
+              data: '',
+              exit: true,
+            });
+          }
+          // Check location
+          if (location) {
+            res = res.concat(checkLocation(location, item));
+          }
+          // Check proxy_path
+          if (proxy_path) {
+            res = res.concat(checkLocation(proxy_path, item, 'Proxy path'));
+            if (type === 'php') {
+              res.push({
+                msg: `Property "proxy_path" doesn't have any effect for port type "php"`,
+                data: item,
+                exit: false,
+              });
+            }
+          }
+          // Check port type
+          if (PORT_TYPES.indexOf(type) === -1) {
+            res.push({
+              msg: `Port type "${type}" of service "${item}" is not allowed`,
+              data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
+              exit: true,
+            });
+          }
+          // Check port static
+          if (_static) {
+            _static.forEach(({ path, location: _location, index }) => {
+              if (!_location) {
+                res.push({
+                  msg: `Field "static.location" is required for port ${port}`,
+                  data: item,
                   exit: true,
                 });
               }
-            }
-            const loc = location || DEFAULT_LOCATION;
-            if (loc === _location) {
-              res.push({
-                msg: 'Fields "location" and "static.location" can not be the same',
-                data: `Check port "${port}" of service "${item}"`,
-                exit: true,
-              });
-            }
-            // Check location
-            res.concat(checkLocation(_location, item));
-          });
+              if (!path) {
+                res.push({
+                  msg: `Field "static.path" is required for port ${port}`,
+                  data: item,
+                  exit: true,
+                });
+              }
+              if (index) {
+                const indexReg = /[a-zA-Z0-9\\.\-_]/;
+                if (!indexReg.test(index)) {
+                  res.push({
+                    msg: `Field "static.index" for port ${port} in service "${item}" contains not allowed symbols`,
+                    data: `Allowed regexp ${indexReg}`,
+                    exit: true,
+                  });
+                }
+              }
+              const loc = location || DEFAULT_LOCATION;
+              if (loc === _location) {
+                res.push({
+                  msg: 'Fields "location" and "static.location" can not be the same',
+                  data: `Check port "${port}" of service "${item}"`,
+                  exit: true,
+                });
+              }
+              // Check location
+              res.concat(checkLocation(_location, item));
+            });
+          }
         }
-      });
+      );
 
       // Check domains
       if (domains) {
@@ -895,17 +921,6 @@ export function checkConfig({ services, server }, deployData) {
         });
       }
 
-      // Check duplicate service type
-      serviceKeys.forEach((_item) => {
-        if (services[_item].type === type && _item !== item) {
-          res.push({
-            msg: `Duplicate service "${_item}" with type "${type}"`,
-            data: `Only one service in project can have type "${type}"`,
-            exit: true,
-          });
-        }
-      });
-
       // Check command
       if (command) {
         res.push({
@@ -957,7 +972,7 @@ export function checkConfig({ services, server }, deployData) {
           });
           if (!check) {
             res.push({
-              msg: `Required environment variables for service "${item}" is missing:`,
+              msg: `Required environment variable for service "${item}" is missing:`,
               data: _item,
               exit: true,
             });

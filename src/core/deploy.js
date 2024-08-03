@@ -274,7 +274,6 @@ export default class Deploy extends WS {
     if (!this.config) {
       return;
     }
-
     this.uploadedServices.push(service);
 
     const { services } = this.config;
@@ -344,7 +343,7 @@ export default class Deploy extends WS {
       packageName: PACKAGE_NAME,
       data: {
         service,
-        files: deleted.map(({ pathAbs }) => pathAbs.replace(cwd, '')),
+        files: deleted.map(({ pathRel }) => pathRel),
         cwd,
         last,
       },
@@ -549,6 +548,7 @@ export default class Deploy extends WS {
     if (!needUpload) {
       needUpload = files.length !== 0 || deleted.length !== 0;
     }
+    
     return { files: this.filterUnique(files), needUpload, deleted: this.filterUnique(deleted) };
   }
 
