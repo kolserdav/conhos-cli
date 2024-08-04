@@ -33,7 +33,7 @@ export default class Inquirer {
       prompt({ type: 'list', name, choices, default: def }).then((d) => {
         let result = d[name];
         if (!all) {
-          const value = d[name].match(/\w+/);
+          const value = d[name].match(/[a-z_]+/);
           result = value[0];
         }
         resolve(result);

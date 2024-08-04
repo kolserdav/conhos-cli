@@ -1,0 +1,19 @@
+name: pgadmin
+services:
+  mysql0:
+    type: postgres
+    size: mili
+    active: true
+    version: 17beta2
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pass
+      - MYSQ_DATABASE=db_name
+  phpmyadmin0:
+    type: phpmyadmin
+    size: mili
+    active: true
+    version: latest
+    depends_on:
+      - mysql0

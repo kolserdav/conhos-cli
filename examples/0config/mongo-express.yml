@@ -1,0 +1,22 @@
+name: mongo-express
+services:
+  mongo0:
+    type: mongo
+    size: mili
+    active: true
+    version: latest
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=user
+      - MONGO_INITDB_ROOT_PASSWORD=pass
+  mongo_express0:
+    type: mongo_express
+    size: mili
+    active: true
+    version: latest
+    depends_on:
+      - mongo0
+    environment:
+      - ME_CONFIG_BASICAUTH_USERNAME=admin
+      - ME_CONFIG_BASICAUTH_PASSWORD=password
+      - ME_CONFIG_MONGODB_AUTH_USERNAME=user
+      - ME_CONFIG_MONGODB_AUTH_PASSWORD=pass

@@ -304,10 +304,17 @@ export default class WS {
    * @param {{
    *  withoutWarns?: boolean;
    *  changeVars?: boolean;
-   * }} [param0={ withoutWarns: false, changeVars: true }]
+   *  withoutCheck?: boolean;
+   * }} [param0={ withoutWarns: false, changeVars: true, withoutCheck: false }]
    * @returns {ConfigFile}
    */
-  getConfig({ withoutWarns, changeVars } = { withoutWarns: false, changeVars: true }) {
+  getConfig(
+    { withoutWarns, changeVars, withoutCheck } = {
+      withoutWarns: false,
+      changeVars: true,
+      withoutCheck: false,
+    }
+  ) {
     if (!existsSync(this.configFile)) {
       console.warn('Config file is not exists, run', `"${PACKAGE_NAME} init" first`);
       process.exit(2);
@@ -319,20 +326,22 @@ export default class WS {
       process.exit(1);
     }
 
-    const checkErr = checkConfig(config, this.deployData);
-    let checkExit = false;
-    checkErr.forEach((item) => {
-      if (!withoutWarns) {
-        console[item.exit ? 'error' : 'warn'](item.msg, item.data);
-      } else if (item.exit) {
-        console['error'](item.msg, item.data);
+    if (!withoutCheck) {
+      const checkErr = checkConfig(config, this.deployData);
+      let checkExit = false;
+      checkErr.forEach((item) => {
+        if (!withoutWarns) {
+          console[item.exit ? 'error' : 'warn'](item.msg, item.data);
+        } else if (item.exit) {
+          console['error'](item.msg, item.data);
+        }
+        if (item.exit) {
+          checkExit = true;
+        }
+      });
+      if (checkExit) {
+        process.exit(2);
       }
-      if (item.exit) {
-        checkExit = true;
-      }
-    });
-    if (checkExit) {
-      process.exit(2);
     }
 
     return config;

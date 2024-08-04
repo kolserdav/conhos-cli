@@ -1,0 +1,21 @@
+name: pgadmin
+services:
+  postgres0:
+    type: postgres
+    size: mili
+    active: true
+    version: 17beta2
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_DB=db_name
+  pgadmin1:
+    type: pgadmin
+    size: mili
+    active: true
+    version: latest
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=user@uyem.ru
+      - PGADMIN_DEFAULT_PASSWORD=pass
+    depends_on:
+      - postgres0

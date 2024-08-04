@@ -2,8 +2,9 @@
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust' | 'python' | 'golang' | 'php'} ServiceTypeCustom
- * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb' | 'mongo' | 'rabbitmq' | 'phpmyadmin' | 'pgadmin'} ServiceTypeCommon
- * @typedef {'adminer' | 'phpmyadmin' | 'pgadmin'} ServiceTypeCommonPublic
+ * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb' | 'mongo'
+ * | 'rabbitmq' | 'phpmyadmin' | 'pgadmin' | 'mongo_express'} ServiceTypeCommon
+ * @typedef {'adminer' | 'phpmyadmin' | 'pgadmin' | 'mongo_express'} ServiceTypeCommonPublic
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  * @typedef {Record<string, string>} Domains
  * @typedef {Record<string, string>} ProxyPaths
@@ -41,6 +42,12 @@ export const ENVIRONMENT_REQUIRED_COMMON = {
   rabbitmq: ['RABBITMQ_DEFAULT_PASS', 'RABBITMQ_DEFAULT_USER'],
   phpmyadmin: [],
   pgadmin: ['PGADMIN_DEFAULT_PASSWORD', 'PGADMIN_DEFAULT_EMAIL'],
+  mongo_express: [
+    'ME_CONFIG_BASICAUTH_USERNAME',
+    'ME_CONFIG_BASICAUTH_PASSWORD',
+    'ME_CONFIG_MONGODB_AUTH_USERNAME',
+    'ME_CONFIG_MONGODB_AUTH_PASSWORD',
+  ],
 };
 
 /**
@@ -70,12 +77,13 @@ export const SERVICES_COMMON = [
   'rabbitmq',
   'phpmyadmin',
   'pgadmin',
+  'mongo_express',
 ];
 
 /**
  * @type {ServiceTypeCommonPublic[]}
  */
-export const SERVICES_COMMON_PUBLIC = ['adminer', 'phpmyadmin', 'pgadmin'];
+export const SERVICES_COMMON_PUBLIC = ['adminer', 'phpmyadmin', 'pgadmin', 'mongo_express'];
 
 /**
  * @type {any[]}

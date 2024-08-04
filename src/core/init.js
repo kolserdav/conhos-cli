@@ -70,6 +70,11 @@ export default class Init extends WS {
   overwrite = false;
 
   /**
+   * @private
+   */
+  addNewService = false;
+
+  /**
    * @public
    * @type {Options}
    */
@@ -139,7 +144,7 @@ export default class Init extends WS {
               }
             }
           } else {
-            this.config = this.getConfig();
+            this.config = this.getConfig({ withoutCheck: this.addNewService || this.overwrite });
             this.services = this.config.services;
           }
           if (this.config) {
@@ -252,7 +257,7 @@ export default class Init extends WS {
 
     const serv = this.getService(service, services);
     if (!serv) {
-      console.error('Unexpected error. Service is temporarily unavailable.');
+      console.error('Unexpected error. Service is temporarily unavailable.', '');
       process.exit(1);
     }
     const size = await inquirer.list(
@@ -442,12 +447,15 @@ export default class Init extends WS {
     }
     console.info('Config file is exists', this.configFile);
     const OVERWRITE = 'Overwrite';
+    const ADD_NEW_SERVICE = 'Add new service';
     const rewrite = await inquirer.expand('What do you want to make with old config file', 'H', [
       { key: 'o', value: OVERWRITE },
-      { key: 'a', value: 'Add new service' },
+      { key: 'a', value: ADD_NEW_SERVICE },
     ]);
     if (rewrite === OVERWRITE) {
       this.overwrite = true;
+    } else if (rewrite === ADD_NEW_SERVICE) {
+      this.addNewService = true;
     }
     if (this.overwrite) {
       console.warn(
@@ -466,7 +474,7 @@ export default class Init extends WS {
       }
     }
 
-    this.config = this.getConfig();
+    this.config = this.getConfig({ withoutCheck: this.overwrite || this.addNewService });
 
     /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
       token: this.token,
