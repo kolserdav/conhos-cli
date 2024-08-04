@@ -41,13 +41,6 @@ ${{ENVIRONMENT}}
     environment:
       # Переменные для инициализации базы данных
 ${{ENVIRONMENT}}
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - ${{DATABASE}}0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `${{DATABASE}}0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `${{DATABASE_UPPERCASE}}0_HOST`

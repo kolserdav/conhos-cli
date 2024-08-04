@@ -41,13 +41,6 @@ services:
     environment:
       # Переменные для инициализации базы данных
       - REDIS_PASSWORD=value0
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - redis0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `redis0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `REDIS0_HOST`

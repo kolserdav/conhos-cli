@@ -45,13 +45,6 @@ services:
       - POSTGRES_PASSWORD=value0
       - POSTGRES_USER=value1
       - POSTGRES_DB=value2
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - postgres0
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `postgres0` the name of the host variable inside the container that references this service via `depends_on` will be `POSTGRES0_HOST`

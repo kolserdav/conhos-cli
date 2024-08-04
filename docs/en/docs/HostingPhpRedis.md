@@ -41,13 +41,6 @@ services:
     environment:
       # Variables for initializing the database
       - REDIS_PASSWORD=value0
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - redis0
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `redis0` the name of the host variable inside the container that references this service via `depends_on` will be `REDIS0_HOST`

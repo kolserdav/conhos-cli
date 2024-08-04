@@ -47,13 +47,6 @@ services:
       - MYSQL_USER=value1
       - MYSQL_PASSWORD=value2
       - MYSQL_DATABASE=value3
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - mysql0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `mysql0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `MYSQL0_HOST`

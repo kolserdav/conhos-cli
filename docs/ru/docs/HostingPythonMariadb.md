@@ -47,13 +47,6 @@ services:
       - MARIADB_USER=value1
       - MARIADB_PASSWORD=value2
       - MARIADB_DATABASE=value3
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - mariadb0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `mariadb0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `MARIADB0_HOST`

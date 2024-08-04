@@ -45,13 +45,6 @@ services:
       - POSTGRES_PASSWORD=value0
       - POSTGRES_USER=value1
       - POSTGRES_DB=value2
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - postgres0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `postgres0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `POSTGRES0_HOST`

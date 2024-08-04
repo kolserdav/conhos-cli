@@ -43,13 +43,6 @@ services:
       # Переменные для инициализации базы данных
       - RABBITMQ_DEFAULT_PASS=value0
       - RABBITMQ_DEFAULT_USER=value1
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - rabbitmq0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `rabbitmq0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `RABBITMQ0_HOST`

@@ -43,13 +43,6 @@ services:
       # Переменные для инициализации базы данных
       - MONGO_INITDB_ROOT_USERNAME=value0
       - MONGO_INITDB_ROOT_PASSWORD=value1
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - mongo0
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `mongo0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `MONGO0_HOST`

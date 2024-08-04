@@ -43,13 +43,6 @@ services:
       # Variables for initializing the database
       - MONGO_INITDB_ROOT_USERNAME=value0
       - MONGO_INITDB_ROOT_PASSWORD=value1
-  adminer0:
-    type: adminer
-    size: pico
-    active: true
-    version: latest
-    depends_on:
-      - mongo0
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `mongo0` the name of the host variable inside the container that references this service via `depends_on` will be `MONGO0_HOST`
