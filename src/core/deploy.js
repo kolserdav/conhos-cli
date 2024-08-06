@@ -32,8 +32,6 @@ import { filesize } from 'filesize';
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {import('../types/interfaces.js').Status} Status
- * @typedef {import('http').request} HttpRequest
- * @typedef {import('https').request} HttpsRequest
  */
 
 /**
@@ -73,18 +71,6 @@ export default class Deploy extends WS {
    * @type {string[]}
    */
   uploadedServices = [];
-
-  /**
-   * @private
-   * @type {HttpRequest | null}
-   */
-  request = null;
-
-  /**
-   * @private
-   * @type {HttpsRequest | null}
-   */
-  requestHttps = null;
 
   /**
    * @public
@@ -548,7 +534,7 @@ export default class Deploy extends WS {
     if (!needUpload) {
       needUpload = files.length !== 0 || deleted.length !== 0;
     }
-    
+
     return { files: this.filterUnique(files), needUpload, deleted: this.filterUnique(deleted) };
   }
 
@@ -587,38 +573,6 @@ export default class Deploy extends WS {
     }
     this.cacheWorked = true;
     return /** @type {typeof as<CacheItem[]>} */ (as)(cacheRes);
-  }
-
-  /**
-   * @private
-   * @param {string} url
-   * @returns {Promise<HttpRequest | HttpsRequest>}
-   */
-  async setRequest(url) {
-    /**
-     * @type {HttpRequest}
-     */
-    let result;
-    if (/https:/.test(url)) {
-      this.request =
-        this.request ||
-        (await new Promise((resolve) => {
-          import('https').then((d) => {
-            resolve(d.request);
-          });
-        }));
-      result = /** @type {typeof as<HttpRequest>} */ (as)(this.request);
-    } else {
-      this.requestHttps =
-        this.requestHttps ||
-        (await new Promise((resolve) => {
-          import('http').then((d) => {
-            resolve(d.request);
-          });
-        }));
-      result = /** @type {typeof as<HttpsRequest>} */ (as)(this.requestHttps);
-    }
-    return result;
   }
 
   /**

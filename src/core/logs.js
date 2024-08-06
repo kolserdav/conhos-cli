@@ -1,14 +1,14 @@
 import Console from 'console';
 import WS from '../connectors/ws.js';
-import { parseMessageCli } from '../types/interfaces.js';
+import { HEADER_CONN_ID, parseMessageCli, UPLOAD_REQUEST_TIMEOUT } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
-import chalk from 'chalk';
 import Inquirer from '../utils/inquirer.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').Status} Status
  */
 
 /**
@@ -54,10 +54,24 @@ export default class Logs extends WS {
         case 'logs':
           await this.handleLogs(rawMessage);
           break;
+        case 'getLogsCli':
+          await this.getLogs(rawMessage);
+          break;
         default:
           await this.handleCommonMessages(rawMessage);
       }
     });
+  }
+
+  /**
+   * @private
+   * @param {WSMessageCli<'getLogsCli'>} msg
+   */
+  async getLogs({ data, connId }) {
+    const { url, serviceName } = data;
+    const res = await this.readLogsRequest({ url, service: serviceName, connId }, data);
+    console.info('End read logs', serviceName);
+    process.exit(res.code);
   }
 
   /**
@@ -67,9 +81,9 @@ export default class Logs extends WS {
   async handleLogs({ data: { text, last, num }, status }) {
     await this.waitQueue(num);
     this.num++;
-    Console[status](chalk.whiteBright(text));
+    // Console[status](chalk.whiteBright(text));
     if (last) {
-      process.exit(0);
+      // process.exit(0);
     }
   }
 
@@ -111,9 +125,9 @@ export default class Logs extends WS {
     }
 
     const { name } = config;
-    /** @type {typeof this.sendMessage<'getLogs'>} */ (this.sendMessage)({
+    this.sendMessage({
       token: this.token,
-      type: 'getLogs',
+      type: 'getLogsServer',
       message: '',
       packageName: PACKAGE_NAME,
       data: {
@@ -130,6 +144,87 @@ export default class Logs extends WS {
       connId: this.connId,
       status: 'info',
       userId: this.userId,
+    });
+  }
+
+  /**
+   * @private
+   * @param {{
+   *  url: string;
+   *  service: string;
+   *  connId: string;
+   * }} param0
+   * @param {WSMessageCli<'getLogsCli'>['data']} data
+   * @returns {Promise<{
+   *  status: Status
+   *  message: string;
+   *  code: number | undefined;
+   * }>}
+   */
+  async readLogsRequest({ url, service, connId }, data) {
+    console.info(`Request of logs "${service}"`, { url });
+
+    let percent = 0;
+    let percentUpload = 0;
+
+    const fn = await this.setRequest(url);
+
+    return new Promise((resolve) => {
+      const req = fn(
+        url,
+        {
+          method: 'POST',
+          headers: {
+            'Transfer-Encoding': 'chunked',
+            'content-type': 'application/octet-stream',
+            'user-agent': `client ${this.package.version}`,
+            host: url.replace(/https?:\/\//, '').replace(/\/.+$/, ''),
+            [HEADER_CONN_ID]: connId,
+          },
+          timeout: UPLOAD_REQUEST_TIMEOUT,
+        },
+        (res) => {
+          let message = '';
+
+          res.on('data', (msg) => {
+            Console.log(msg.toString());
+          });
+
+          res.on('error', (err) => {
+            console.error('Failed to read logs', err);
+            resolve({
+              status: 'error',
+              code: res.statusCode,
+              message: err.message,
+            });
+          });
+
+          res.on('end', () => {
+            resolve({
+              status: 'info',
+              code: res.statusCode,
+              message,
+            });
+          });
+        }
+      );
+
+      req.on('error', (error) => {
+        console.error('Request failed', { error, url, percent, percentUpload });
+        process.exit(1);
+      });
+
+      req.on('timeout', () => {
+        console.error('Request timeout exceeded', { url });
+        process.exit(1);
+      });
+
+      req.on('close', () => {
+        req.destroy();
+      });
+
+      req.write(JSON.stringify(data));
+      req.write('0');
     });
   }
 }

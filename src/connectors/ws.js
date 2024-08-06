@@ -4,7 +4,7 @@ import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
-import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS } from '../types/interfaces.js';
+import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS, as } from '../types/interfaces.js';
 import Yaml from '../utils/yaml.js';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +18,8 @@ const yaml = new Yaml();
  * @typedef {import('../types/interfaces.js').DeployData} DeployData
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
+ * @typedef {import('http').request} HttpRequest
+ * @typedef {import('https').request} HttpsRequest
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -88,6 +90,17 @@ export class WSInterface {
  * @implements WSInterface
  */
 export default class WS {
+  /**
+   * @private
+   * @type {HttpRequest | null}
+   */
+  request = null;
+
+  /**
+   * @private
+   * @type {HttpsRequest | null}
+   */
+  requestHttps = null;
   /**
    * @protected
    * @type {string}
@@ -298,6 +311,38 @@ export default class WS {
       });
     }
     return res;
+  }
+
+  /**
+   * @protected
+   * @param {string} url
+   * @returns {Promise<HttpRequest | HttpsRequest>}
+   */
+  async setRequest(url) {
+    /**
+     * @type {HttpRequest}
+     */
+    let result;
+    if (/https:/.test(url)) {
+      this.request =
+        this.request ||
+        (await new Promise((resolve) => {
+          import('https').then((d) => {
+            resolve(d.request);
+          });
+        }));
+      result = /** @type {typeof as<HttpRequest>} */ (as)(this.request);
+    } else {
+      this.requestHttps =
+        this.requestHttps ||
+        (await new Promise((resolve) => {
+          import('http').then((d) => {
+            resolve(d.request);
+          });
+        }));
+      result = /** @type {typeof as<HttpsRequest>} */ (as)(this.requestHttps);
+    }
+    return result;
   }
 
   /**

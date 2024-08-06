@@ -154,6 +154,7 @@ if (DEFAULT_WS_ADDRESS !== WEBSOCKET_ADDRESS && process.env.NODE_ENV === 'produc
 export const HEADER_CONN_ID = 'conn-id';
 export const UPLOAD_CHUNK_DELIMITER = '<[rn]>';
 export const UPLOADED_FILE_MESSAGE = `${UPLOAD_CHUNK_DELIMITER}Uploaded`;
+export const LOG_END_MESSAGE = '';
 export const UPLOAD_REQUEST_TIMEOUT = 1000 * 60 * 20 * 100;
 export const REGEXP_IS_DOMAIN = /[a-zA-Z0-9\\-]+\.[a-zA-Z0-9]+$/;
 
@@ -294,7 +295,10 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  tail: number | undefined;
  *  clear: boolean;
  *  config: ConfigFile | null
- * }} getLogs
+ * }} getLogsServer
+ * @property {{
+ *  url: string;
+ * } & WSMessageDataCli['getLogsServer']} getLogsCli
  * @property {{
  *  last: boolean;
  *  text: string;
