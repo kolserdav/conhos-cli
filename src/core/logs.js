@@ -162,7 +162,7 @@ export default class Logs extends WS {
    * }>}
    */
   async readLogsRequest({ url, service, connId }, data) {
-    console.info(`Request of logs "${service}"`, { url });
+    console.log(`Request of logs "${service}"`, { url });
 
     let percent = 0;
     let percentUpload = 0;
