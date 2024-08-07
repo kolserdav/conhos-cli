@@ -166,7 +166,8 @@ export default class Deploy extends WS {
             fileName: file,
             connId: this.connId,
           });
-          console[status](message, file);
+          stdoutWriteStart('');
+          console[status](message, serviceName, file);
           if (status === 'error') {
             console.warn(`Failed to upload volume for service "${key}"`, filePath);
             process.exit(1);
