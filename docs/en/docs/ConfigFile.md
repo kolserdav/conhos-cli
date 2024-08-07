@@ -20,8 +20,8 @@ services:
     - node_modules
   command: npm i && npm run start # Command to start the container
   ports: # List of external ports
-  - port: 3000
-    type: http
+    - port: 3000
+      type: http
   environment: # Environment variables
     - PORT=3000
 ```
@@ -102,7 +102,9 @@ command: npm i && npm run start
 ### Ports
 
 Ports that must be forwarded for public services to the outside; for each port, a separate network address will be used on ports 80 and 443.
+
 > `public` indicates whether the service should be open to the Internet by domain name or whether it will be accessible only through [Internal links](./ConfigFile.md#internal_links) for other project services.
+
 ```yml
 ports:
   - port: 3000
@@ -165,6 +167,19 @@ exclude:
   - node_modules
   - dist
   - some/nested
+```
+
+### Configuration injection
+
+For overwriting configuration files inside the container.
+
+> `volumes` is used only for passing small files inside containers to configure container processes.
+
+```yml
+# Optional
+volumes:
+  # - [absolute or relative path to file]:[absolute path to file inside container]
+  - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
 ```
 
 ## Using your own domain

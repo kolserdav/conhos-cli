@@ -20,9 +20,11 @@ import {
   UPLOAD_CHUNK_DELIMITER,
   UPLOAD_REQUEST_TIMEOUT,
   UPLOADED_FILE_MESSAGE,
+  VOLUME_LOCAL_POSTFIX_REGEX,
+  VOLUME_LOCAL_REGEX,
 } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
-import { normalize, resolve } from 'path';
+import { basename, normalize, resolve } from 'path';
 import { filesize } from 'filesize';
 
 /**
@@ -113,10 +115,66 @@ export default class Deploy extends WS {
         case 'deployDeleteFilesCli':
           this.deleteFiles(rawMessage);
           break;
+        case 'deployPrepareVolumeUploadCli':
+          this.prepareVolumeUpload(rawMessage);
+          break;
         default:
           await this.handleCommonMessages(rawMessage);
       }
     });
+  }
+
+  /**
+   * @private
+   * @param {WSMessageCli<'deployPrepareVolumeUploadCli'>} msg
+   */
+  async prepareVolumeUpload({ data: { url, serviceName } }) {
+    if (!this.config) {
+      return;
+    }
+    const { services } = this.config;
+    const servKeys = Object.keys(services);
+    for (let i = 0; servKeys[i]; i++) {
+      const key = servKeys[i];
+      if (key === serviceName) {
+        const { volumes } = services[key];
+        if (!volumes) {
+          console.error(
+            'Something went wrong',
+            'Program got signal to upload volume, but volumes is undefined',
+            'Try again later'
+          );
+          break;
+        }
+        this.canClose = false;
+        for (let _i = 0; volumes[_i]; _i++) {
+          const volume = volumes[_i];
+          const fileM = volume.match(VOLUME_LOCAL_REGEX);
+          if (!fileM) {
+            console.error(
+              `Service "${key}" has wrong volume "${volume}"`,
+              `It doesn't match to regexp ${VOLUME_LOCAL_REGEX}`
+            );
+            continue;
+          }
+          const filePath = fileM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
+          const file = basename(filePath);
+          const { message, status } = await this.uploadFileRequest({
+            filePath,
+            url: `${url}/${file}`,
+            service: serviceName,
+            fileName: file,
+            connId: this.connId,
+          });
+          console[status](message, file);
+          if (status === 'error') {
+            console.warn(`Failed to upload volume for service "${key}"`, filePath);
+            process.exit(1);
+          }
+        }
+        this.canClose = true;
+      }
+    }
   }
 
   /**
@@ -321,7 +379,7 @@ export default class Deploy extends WS {
     }
 
     const cwd = `${resolve(CWD, pwd)}/`;
-    /** @type {typeof this.sendMessage<'deployDeleteFilesServer'>} */ (this.sendMessage)({
+    this.sendMessage({
       token: this.token,
       message: '',
       type: 'deployDeleteFilesServer',

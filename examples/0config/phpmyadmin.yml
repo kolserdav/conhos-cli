@@ -1,10 +1,10 @@
-name: pgadmin
+name: phpmyadmin
 services:
   mysql0:
-    type: postgres
+    type: mysql
     size: mili
     active: true
-    version: 17beta2
+    version: latest
     environment:
       - MYSQL_ROOT_PASSWORD=pass
       - MYSQL_USER=user

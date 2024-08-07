@@ -10,7 +10,12 @@
  * @typedef {Record<string, string>} ProxyPaths
  */
 
+import { existsSync, statSync } from 'fs';
+import { basename, isAbsolute } from 'path';
+
 export const BUFFER_SIZE_MAX = 512;
+
+export const COUNT_OF_VOLUMES_MAX = 10;
 
 export const ENVIRONMENT_SWITCH = {
   redis: {
@@ -202,6 +207,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *    exclude?: string[]
  *    command?: string;
  *    ports?: Port[];
+ *    volumes?: string[];
  *    depends_on?: string[];
  *    domains?: NewDomains['domains'],
  *    environment?: string[];
@@ -252,6 +258,10 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  projectDeleted: boolean;
  *  config: ConfigFile;
  * }} prepareDeployServer
+ * @property {{
+ *  url: string;
+ *  serviceName: string;
+ * }} deployPrepareVolumeUploadCli
  * @property {{
  *  exclude: string[] | undefined;
  *  pwd: string;
@@ -591,13 +601,21 @@ function checkLocation(location, item, name = 'Location') {
   return res;
 }
 
+export const VOLUME_LOCAL_REGEX = /^[/a-zA-Z0-9.\-_]+:/;
+export const VOLUME_LOCAL_POSTFIX_REGEX = /:$/;
+export const VOLUME_REMOTE_REGEX = /:[/a-zA-Z0-9.\-_]+$/;
+export const VOLUME_REMOTE_PREFIX_REGEX = /^:/;
+
 /**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
  * @param {ConfigFile} config
- * @param {DeployData | null} deployData
+ * @param {{
+ *  deployData: DeployData | null;
+ *  isServer: boolean;
+ * }} deployData
  * @returns {CheckConfigResult[]}
  */
-export function checkConfig({ services, server }, deployData) {
+export function checkConfig({ services, server }, { deployData, isServer }) {
   /**
    * @type {CheckConfigResult[]}
    */
@@ -647,8 +665,101 @@ export function checkConfig({ services, server }, deployData) {
   }
 
   serviceKeys.forEach((item) => {
-    const { domains, ports, type, environment, version, command, depends_on, active, pwd, size } =
-      services[item];
+    const {
+      domains,
+      ports,
+      type,
+      environment,
+      version,
+      command,
+      depends_on,
+      active,
+      pwd,
+      size,
+      volumes,
+    } = services[item];
+
+    // Check volumes
+    if (volumes) {
+      if (volumes.length > COUNT_OF_VOLUMES_MAX) {
+        res.push({
+          msg: `Service "${item}" has too much volumes: "${volumes.length}"`,
+          data: `Maximum count of volumes is ${COUNT_OF_VOLUMES_MAX}`,
+          exit: true,
+        });
+      }
+      /**
+       * @type {string[]}
+       */
+      const volNames = [];
+      volumes.forEach((_item) => {
+        const colons = _item.match(/:/g);
+        if (colons && colons.length > 1) {
+          res.push({
+            msg: `Service "${item}" has wrong volume "${_item}".`,
+            data: 'You can use colon ":" only once',
+            exit: true,
+          });
+        }
+        const local = _item.match(VOLUME_LOCAL_REGEX);
+        if (!local) {
+          res.push({
+            msg: `Service "${item}" has wrong volume "${_item}". Local part of volume must satisfy regex:`,
+            data: `${VOLUME_LOCAL_REGEX}`,
+            exit: true,
+          });
+          return;
+        }
+        const localPath = local[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
+        if (!existsSync(localPath)) {
+          if (!isServer) {
+            res.push({
+              msg: `Service "${item}" has wrong volume "${_item}". Local path is not exists:`,
+              data: localPath,
+              exit: true,
+            });
+          }
+        } else {
+          if (!isServer) {
+            const stats = statSync(localPath);
+            if (stats.isDirectory()) {
+              res.push({
+                msg: `Service "${item}" has wrong volume "${_item}".`,
+                data: "Directory can't be a volume, only files",
+                exit: true,
+              });
+            }
+          }
+        }
+        const filename = basename(localPath);
+        if (volNames.indexOf(filename) !== -1) {
+          res.push({
+            msg: `Service "${item}" has two or more volumes with the same file name.`,
+            data: filename,
+            exit: true,
+          });
+        } else {
+          volNames.push(filename);
+        }
+        const remote = _item.match(VOLUME_REMOTE_REGEX);
+        if (!remote) {
+          res.push({
+            msg: `Service "${item}" has wrong volume "${_item}". Remote part of volume must satisfy regex:`,
+            data: `${VOLUME_REMOTE_REGEX}`,
+            exit: true,
+          });
+          return;
+        }
+        const remotePath = remote[0].replace(VOLUME_REMOTE_PREFIX_REGEX, '');
+        if (!isAbsolute(remotePath)) {
+          res.push({
+            msg: `Service "${item}" has wrong volume "${_item}". Remote part of volume is not absolute`,
+            data: remotePath,
+            exit: true,
+          });
+        }
+      });
+    }
 
     // Check service name
     if (/%/.test(item)) {
@@ -696,7 +807,7 @@ export function checkConfig({ services, server }, deployData) {
     const { sizes, services: _s } = deployData;
 
     // Check version
-    if (!checkVersion({ services: _s, type, version })) {
+    if (!checkVersion({ services: _s, type, version }) && version !== 'latest') {
       res.push({
         msg: `Version "${version}" of service "${item}" is no longer supported`,
         data: `See allowed versions: ${_s.find((item) => item.type === type)?.hub}tags`,

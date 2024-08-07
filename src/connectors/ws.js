@@ -101,6 +101,12 @@ export default class WS {
    * @type {HttpsRequest | null}
    */
   requestHttps = null;
+
+  /**
+   * @protected
+   */
+  canClose = true;
+
   /**
    * @protected
    * @type {string}
@@ -372,7 +378,7 @@ export default class WS {
     }
 
     if (!withoutCheck) {
-      const checkErr = checkConfig(config, this.deployData);
+      const checkErr = checkConfig(config, { deployData: this.deployData, isServer: false });
       let checkExit = false;
       checkErr.forEach((item) => {
         if (!withoutWarns) {
@@ -507,12 +513,25 @@ export default class WS {
       case 'message':
         console[status](`${CLOUD_LOG_PREFIX} ${message}`, data.msg);
         if (status === 'error' || data.end) {
-          process.exit(!data ? 1 : 0);
+          this.closeIfCan(data);
         }
         break;
       default:
         console.warn('Default message case of command:', type);
     }
+  }
+
+  /**
+   * @private
+   * @param {any} data
+   */
+  closeIfCan(data) {
+    const interval = setInterval(() => {
+      if (this.canClose) {
+        clearInterval(interval);
+        process.exit(!data ? 1 : 0);
+      }
+    }, 0);
   }
 
   /**
