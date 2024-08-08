@@ -53,7 +53,7 @@ export default class IP extends WS {
    * @param {WSMessageCli<'ipCli'>} msg
    */
   async handleIP({ data }) {
-    console.info('Project node id received:', data.ip);
+    console.info('Project node id received:', data.ip || 'IP is undefined please write to support');
     process.exit(0);
   }
 
