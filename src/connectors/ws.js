@@ -470,7 +470,7 @@ export default class WS {
         });
       } else {
         const authPath = getPackagePath(SESSION_FILE_NAME);
-        console.info("Now it's using the saved session token:", authPath);
+        console.log("Now it's using the saved session token:", authPath);
         /** @type {typeof this.sendMessage<'checkTokenServer'>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkTokenServer',

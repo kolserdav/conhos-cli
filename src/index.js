@@ -15,7 +15,7 @@ if (!fs.existsSync(packageHomeDir)) {
 }
 
 console.info(`Starting "${PACKAGE_NAME}" v${PACKAGE_VERSION} ...`, '');
-console.info('Package data dir:', packageHomeDir);
+console.log('Package data dir:', packageHomeDir);
 
 const program = new Command();
 
