@@ -68,7 +68,7 @@ To speed up the initialization process and create the base **conhos.yml** file, 
 conhos init -y
 ```
 
-> More information about the configuration file can be found in [Configuration File](./ConfigFile.md)
+> More information about the configuration file can be found in [Configuration File](./ConfigFile.md#example_configuration_file)
 
 ## Launching a project in the cloud
 

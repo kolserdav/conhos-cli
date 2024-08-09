@@ -58,3 +58,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Golang  <<<](./HostingGolang.md) | [>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)

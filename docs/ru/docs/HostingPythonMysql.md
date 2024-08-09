@@ -58,3 +58,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Python  <<<](./HostingPython.md) | [>>> Хостинг Python Mariadb](./HostingPythonMariadb.md)

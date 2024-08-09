@@ -56,3 +56,5 @@ To upload files to the cloud and run services in containers, run the command:
 ```sh
 conhos deploy
 ```
+
+[Hosting Golang Redis <<<](./HostingGolangRedis.md) | [>>> Hosting Golang ](./HostingGolang.md)

@@ -48,3 +48,5 @@ To upload files to the cloud and run services in containers, run the command:
 ```sh
 conhos deploy
 ```
+
+[Hosting Python Mongo <<<](./HostingPythonMongo.md) | [>>> Hosting Python ](./HostingPython.md)

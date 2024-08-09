@@ -42,3 +42,5 @@ To upload files to the cloud and run services in containers, run the command:
 ```sh
 conhos deploy
 ```
+
+[${{BACK_LINK_NAME}} <<<](${{BACK_LINK}}) | [>>> ${{FORWARD_LINK_NAME}}](${{FORWARD_LINK}})

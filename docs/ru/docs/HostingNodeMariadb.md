@@ -58,3 +58,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Node Mysql <<<](./HostingNodeMysql.md) | [>>> Хостинг Node Mongo](./HostingNodeMongo.md)

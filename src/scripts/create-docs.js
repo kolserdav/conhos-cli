@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import {
   as,
   ENVIRONMENT_REQUIRED_COMMON,
+  isCommonServicePublic,
   SERVICES_COMMON,
   SERVICES_COMMON_PUBLIC,
   SERVICES_CUSTOM,
@@ -18,6 +19,10 @@ import {
  *  EXCLUDE: string;
  *  COMMAND: string;
  *  LINKS: string;
+ *  BACK_LINK_NAME: string;
+ *  BACK_LINK: string;
+ *  FORWARD_LINK_NAME: string;
+ *  FORWARD_LINK: string;
  * }} DocHosting
  * @typedef {DocHosting & {
  *  DATABASE: ServiceTypeCommon;
@@ -44,6 +49,8 @@ const RESOURCES_GENERATED_PATH = resolve(TMP_PATH, 'generated');
 const METADATA_FILE_PREFIX = resolve(RESOURCES_GENERATED_PATH, 'metadata');
 const SITEMAP_PATH = resolve(RESOURCES_GENERATED_PATH, 'sitemap.xml');
 const TEMPLATES_PATH = resolve(RESOURCES_PATH, 'template-docs');
+const MD = '.md';
+const MD_REG = new RegExp(`${MD}$`);
 
 if (!existsSync(TEMPLATES_PATH)) {
   console.error('Error: Template directory is missing', TEMPLATES_PATH);
@@ -66,6 +73,100 @@ tempDir.forEach((item) => {
 });
 
 /**
+ * @param {{
+ *  index: number;
+ *  array: string[];
+ *  postfixArray: string[];
+ *  postfixIndex: number;
+ *  lang: string;
+ * }} param0
+ * @returns
+ */
+function getBackLink({ index, array, postfixArray, postfixIndex, lang }) {
+  const postfix =
+    postfixIndex === postfixArray.length - 1
+      ? ''
+      : postfixArray[postfixIndex - 1]
+      ? firstCapitalize(
+          isCommonServicePublic(as(postfixArray[postfixIndex - 1])) === null
+            ? postfixArray[postfixIndex - 1]
+            : ''
+        )
+      : '';
+  return {
+    BACK_LINK_NAME:
+      index === 0
+        ? lang === 'ru'
+          ? 'Начало работы'
+          : 'Getting started'
+        : array[index - 1]
+        ? `${lang === 'ru' ? 'Хостинг ' : 'Hosting '}${firstCapitalize(
+            array[index - 1]
+          )} ${postfix}`
+        : lang === 'ru'
+        ? 'Файл конфигурации'
+        : 'Config file',
+    BACK_LINK:
+      index === 0
+        ? './GettingsStarted.md'
+        : array[index - 1]
+        ? `./${getDatabaseFileName({
+            name: firstCapitalize(array[index - 1]),
+            databaseName: '',
+          }).replace(MD_REG, '')}${postfix}${MD}`
+        : './ConfigFile.md',
+    index,
+  };
+}
+
+/**
+ * @param {{
+ *  index: number;
+ *  array: string[];
+ *  postfixArray: string[];
+ *  postfixIndex: number;
+ *  lang: string;
+ * }} param0
+ * @returns
+ */
+function getForwardLink({ index, array, postfixArray, postfixIndex, lang }) {
+  const postfix =
+    postfixIndex === postfixArray.length - 1
+      ? ''
+      : postfixArray[postfixIndex + 1]
+      ? firstCapitalize(
+          isCommonServicePublic(as(postfixArray[postfixIndex + 1])) === null
+            ? postfixArray[postfixIndex + 1]
+            : ''
+        )
+      : '';
+  return {
+    FORWARD_LINK_NAME:
+      index === array.length - 1
+        ? lang === 'ru'
+          ? 'Начало работы'
+          : 'Getting started'
+        : array[index + 1]
+        ? `${lang === 'ru' ? 'Хостинг ' : 'Hosting '}${firstCapitalize(
+            array[index + 1]
+          )} ${postfix}`
+        : lang === 'ru'
+        ? 'Файл конфигурации'
+        : 'Config file',
+    FORWARD_LINK:
+      index === 0
+        ? './GettingsStarted.md'
+        : array[index + 1]
+        ? `./${getDatabaseFileName({
+            name: firstCapitalize(array[index + 1]),
+            databaseName: postfix,
+          })}`
+        : './ConfigFile.md',
+    index,
+  };
+}
+
+/**
  * @param {string} lang
  */
 function createTemplate(lang) {
@@ -81,7 +182,18 @@ function createTemplate(lang) {
    * @type {DocHosting[]}
    */
   const dataD = [];
-  SERVICES_CUSTOM.forEach((item) => {
+  SERVICES_CUSTOM.forEach((item, index, array) => {
+    const {
+      BACK_LINK,
+      BACK_LINK_NAME,
+      index: indexBackLink,
+    } = getBackLink({ index, lang, array, postfixArray: [], postfixIndex: 0 });
+    const {
+      FORWARD_LINK,
+      FORWARD_LINK_NAME,
+      index: indexFowardLink,
+    } = getForwardLink({ index, lang, array, postfixArray: [], postfixIndex: 0 });
+
     /**
      * @type {DocHosting}
      */
@@ -92,17 +204,38 @@ function createTemplate(lang) {
       COMMAND: COMMAND_DEFAULT[item],
       LINKS: '',
       EXCLUDE: EXCLUDE_DEFAULT[item][0],
+      BACK_LINK,
+      BACK_LINK_NAME,
+      FORWARD_LINK,
+      FORWARD_LINK_NAME,
     };
-    SERVICES_COMMON.forEach((_item) => {
+    SERVICES_COMMON.forEach((_item, _index, _array) => {
       if (SERVICES_COMMON_PUBLIC.indexOf(as(_item)) !== -1) {
         return;
       }
+
       const DATABASE_NAME = firstCapitalize(_item);
       const dbFilename = getDatabaseFileName({ name: dataItem.NAME, databaseName: DATABASE_NAME });
       dataItem.LINKS +=
         lang === 'en'
           ? `- [${dataItem.NAME} with database ${DATABASE_NAME}](./${dbFilename})  \n`
           : `- [${dataItem.NAME} с базой данных ${DATABASE_NAME}](./${dbFilename})  \n`;
+
+      const { BACK_LINK: _BACK_LINK, BACK_LINK_NAME: _BACK_LINK_NAME } = getBackLink({
+        index: indexBackLink + 1,
+        lang,
+        array,
+        postfixArray: _array,
+        postfixIndex: _index,
+      });
+      const { FORWARD_LINK: _FORWARD_LINK, FORWARD_LINK_NAME: _FORWARD_LINK_NAME } = getForwardLink(
+        { index: indexFowardLink - 1, lang, array, postfixArray: _array, postfixIndex: _index }
+      );
+      dataItem.BACK_LINK = _BACK_LINK;
+      dataItem.BACK_LINK_NAME = _BACK_LINK_NAME;
+      dataItem.FORWARD_LINK = _FORWARD_LINK;
+      dataItem.FORWARD_LINK_NAME = _FORWARD_LINK_NAME;
+
       data.push({
         ...dataItem,
         DATABASE_NAME,

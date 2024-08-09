@@ -54,3 +54,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Php Mariadb <<<](./HostingPhpMariadb.md) | [>>> Хостинг Php Rabbitmq](./HostingPhpRabbitmq.md)

@@ -58,3 +58,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Rust Mariadb](./GettingsStarted.md)

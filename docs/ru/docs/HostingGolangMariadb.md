@@ -58,3 +58,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Golang Mysql <<<](./HostingGolangMysql.md) | [>>> Хостинг Golang Mongo](./HostingGolangMongo.md)

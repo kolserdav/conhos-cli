@@ -56,3 +56,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Php Redis <<<](./HostingPhpRedis.md) | [>>> Хостинг Php ](./HostingPhp.md)

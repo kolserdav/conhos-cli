@@ -54,3 +54,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Rust Mongo <<<](./HostingRustMongo.md) | [>>> Хостинг Rust ](./GettingsStarted.md)

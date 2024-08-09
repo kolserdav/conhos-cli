@@ -58,3 +58,5 @@ To upload files to the cloud and run services in containers, run the command:
 ```sh
 conhos deploy
 ```
+
+[Hosting Python  <<<](./HostingPython.md) | [>>> Hosting Python Mariadb](./HostingPythonMariadb.md)

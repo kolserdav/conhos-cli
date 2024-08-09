@@ -56,3 +56,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Golang Redis <<<](./HostingGolangRedis.md) | [>>> Хостинг Golang ](./HostingGolang.md)

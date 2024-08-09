@@ -48,3 +48,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Python Mongo <<<](./HostingPythonMongo.md) | [>>> Хостинг Python ](./HostingPython.md)

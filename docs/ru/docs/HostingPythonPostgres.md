@@ -56,3 +56,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Python Redis <<<](./HostingPythonRedis.md) | [>>> Хостинг Python ](./HostingPython.md)

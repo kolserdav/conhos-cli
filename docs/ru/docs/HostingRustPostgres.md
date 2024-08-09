@@ -56,3 +56,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Rust Redis <<<](./HostingRustRedis.md) | [>>> Хостинг Rust ](./GettingsStarted.md)

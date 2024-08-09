@@ -48,3 +48,5 @@ services:
 ```sh
 conhos deploy
 ```
+
+[Хостинг Php Mongo <<<](./HostingPhpMongo.md) | [>>> Хостинг Php ](./HostingPhp.md)
