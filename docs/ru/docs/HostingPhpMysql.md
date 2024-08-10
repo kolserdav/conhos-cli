@@ -59,4 +59,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Php  <<<](./HostingPhp.md) | [>>> Хостинг Php Mariadb](./HostingPhpMariadb.md)

@@ -144,24 +144,24 @@ function getForwardLink({ index, array, postfixArray, postfixIndex, lang }) {
     FORWARD_LINK_NAME:
       index === array.length - 1
         ? lang === 'ru'
-          ? 'Начало работы'
-          : 'Getting started'
+          ? 'Файл конфигурации'
+          : 'Config file'
         : array[index + 1]
         ? `${lang === 'ru' ? 'Хостинг ' : 'Hosting '}${firstCapitalize(
             array[index + 1]
           )} ${postfix}`
         : lang === 'ru'
-        ? 'Файл конфигурации'
-        : 'Config file',
+        ? 'Начало работы'
+        : 'Getting started',
     FORWARD_LINK:
-      index === 0
-        ? './GettingsStarted.md'
+      index === array.length - 1
+        ? './ConfigFile.md'
         : array[index + 1]
         ? `./${getDatabaseFileName({
             name: firstCapitalize(array[index + 1]),
             databaseName: postfix,
           })}`
-        : './ConfigFile.md',
+        : './GettingsStarted.md',
     index,
   };
 }

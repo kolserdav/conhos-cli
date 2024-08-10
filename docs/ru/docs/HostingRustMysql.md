@@ -59,4 +59,8 @@ services:
 conhos deploy
 ```
 
-[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Rust Mariadb](./GettingsStarted.md)
+---
+
+Продолжить изучение
+
+[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Rust Mariadb](./HostingRustMariadb.md)

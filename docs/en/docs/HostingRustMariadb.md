@@ -59,4 +59,8 @@ To upload files to the cloud and run services in containers, run the command:
 conhos deploy
 ```
 
-[Hosting Rust Mysql <<<](./HostingRustMysql.md) | [>>> Hosting Rust Mongo](./GettingsStarted.md)
+---
+
+Continue studying
+
+[Hosting Rust Mysql <<<](./HostingRustMysql.md) | [>>> Hosting Rust Mongo](./HostingRustMongo.md)

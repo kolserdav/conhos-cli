@@ -59,4 +59,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Python Mysql <<<](./HostingPythonMysql.md) | [>>> Хостинг Python Mongo](./HostingPythonMongo.md)

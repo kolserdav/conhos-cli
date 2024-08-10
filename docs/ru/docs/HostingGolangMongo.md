@@ -55,4 +55,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Golang Mariadb <<<](./HostingGolangMariadb.md) | [>>> Хостинг Golang Rabbitmq](./HostingGolangRabbitmq.md)

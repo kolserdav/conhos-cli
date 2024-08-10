@@ -53,4 +53,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Golang  <<<](./HostingGolang.md) | [>>> Хостинг Golang Postgres](./HostingGolangPostgres.md)

@@ -49,4 +49,8 @@ services:
 conhos deploy
 ```
 
-[Хостинг Rust Mongo <<<](./HostingRustMongo.md) | [>>> Хостинг Rust ](./GettingsStarted.md)
+---
+
+Продолжить изучение
+
+[Хостинг Rust Mongo <<<](./HostingRustMongo.md) | [>>> Хостинг Rust ](./HostingRust.md)

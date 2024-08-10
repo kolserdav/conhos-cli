@@ -57,4 +57,8 @@ To upload files to the cloud and run services in containers, run the command:
 conhos deploy
 ```
 
-[Hosting Rust Redis <<<](./HostingRustRedis.md) | [>>> Hosting Rust ](./GettingsStarted.md)
+---
+
+Continue studying
+
+[Hosting Rust Redis <<<](./HostingRustRedis.md) | [>>> Hosting Rust ](./HostingRust.md)

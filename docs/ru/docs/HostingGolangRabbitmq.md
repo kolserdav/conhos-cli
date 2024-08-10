@@ -55,4 +55,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Хостинг Golang ](./HostingGolang.md)

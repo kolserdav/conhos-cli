@@ -53,4 +53,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Python  <<<](./HostingPython.md) | [>>> Хостинг Python Postgres](./HostingPythonPostgres.md)

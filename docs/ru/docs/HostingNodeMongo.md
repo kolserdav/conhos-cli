@@ -55,4 +55,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Node Mariadb <<<](./HostingNodeMariadb.md) | [>>> Хостинг Node Rabbitmq](./HostingNodeRabbitmq.md)

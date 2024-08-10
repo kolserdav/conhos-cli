@@ -53,4 +53,8 @@ services:
 conhos deploy
 ```
 
-[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Rust Postgres](./GettingsStarted.md)
+---
+
+Продолжить изучение
+
+[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Rust Postgres](./HostingRustPostgres.md)

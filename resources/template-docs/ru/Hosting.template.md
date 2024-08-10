@@ -43,4 +43,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [${{BACK_LINK_NAME}} <<<](${{BACK_LINK}}) | [>>> ${{FORWARD_LINK_NAME}}](${{FORWARD_LINK}})

@@ -53,4 +53,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Node  <<<](./HostingNode.md) | [>>> Хостинг Node Postgres](./HostingNodePostgres.md)

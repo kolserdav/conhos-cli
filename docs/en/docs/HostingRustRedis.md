@@ -53,4 +53,8 @@ To upload files to the cloud and run services in containers, run the command:
 conhos deploy
 ```
 
-[Hosting Rust  <<<](./HostingRust.md) | [>>> Hosting Rust Postgres](./GettingsStarted.md)
+---
+
+Continue studying
+
+[Hosting Rust  <<<](./HostingRust.md) | [>>> Hosting Rust Postgres](./HostingRustPostgres.md)

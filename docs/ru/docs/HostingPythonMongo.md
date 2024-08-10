@@ -55,4 +55,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Python Mariadb <<<](./HostingPythonMariadb.md) | [>>> Хостинг Python Rabbitmq](./HostingPythonRabbitmq.md)

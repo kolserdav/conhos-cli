@@ -57,4 +57,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Node Redis <<<](./HostingNodeRedis.md) | [>>> Хостинг Node ](./HostingNode.md)

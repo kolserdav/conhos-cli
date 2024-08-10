@@ -53,4 +53,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Php  <<<](./HostingPhp.md) | [>>> Хостинг Php Postgres](./HostingPhpPostgres.md)

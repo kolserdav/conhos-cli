@@ -49,4 +49,8 @@ services:
 conhos deploy
 ```
 
+---
+
+Продолжить изучение
+
 [Хостинг Node Mongo <<<](./HostingNodeMongo.md) | [>>> Хостинг Node ](./HostingNode.md)

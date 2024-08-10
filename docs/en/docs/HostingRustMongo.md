@@ -55,4 +55,8 @@ To upload files to the cloud and run services in containers, run the command:
 conhos deploy
 ```
 
-[Hosting Rust Mariadb <<<](./HostingRustMariadb.md) | [>>> Hosting Rust Rabbitmq](./GettingsStarted.md)
+---
+
+Continue studying
+
+[Hosting Rust Mariadb <<<](./HostingRustMariadb.md) | [>>> Hosting Rust Rabbitmq](./HostingRustRabbitmq.md)
