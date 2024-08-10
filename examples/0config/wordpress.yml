@@ -1,0 +1,31 @@
+name: wordpress
+services:
+  mariadb0:
+    type: mariadb
+    size: micro
+    active: true
+    version: 11.5.1-ubi9-rc
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=pass
+      - MARIADB_DATABASE=db_name
+    domains:
+      "3306": a5d54636-39d6-436f-bc4a-fb1abc90fafa
+  php1:
+    type: php
+    size: nano
+    active: true
+    version: 8.4-rc-fpm-bookworm
+    pwd: ./examples/wordpress
+    no_restart: true
+    exclude:
+      - vendor
+    command: sh examples/php/install-extensions.sh && php-fpm
+    depends_on:
+      - mariadb0
+    ports:
+      - port: 9000
+        type: php
+    environment:
+      - PORT=9000

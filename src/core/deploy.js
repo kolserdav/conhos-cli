@@ -147,6 +147,10 @@ export default class Deploy extends WS {
           break;
         }
         this.canClose = false;
+        /**
+         * @type {ReturnType<typeof this.uploadFileRequest>[]}
+         */
+        const proms = [];
         for (let _i = 0; volumes[_i]; _i++) {
           const volume = volumes[_i];
           const fileM = volume.match(VOLUME_LOCAL_REGEX);
@@ -186,6 +190,7 @@ export default class Deploy extends WS {
     if (files.length !== 0) {
       console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
     }
+
     for (let i = 0; this.fileList[i]; i++) {
       const file = this.fileList[i];
       const latest = this.fileList[i + 1] === undefined;

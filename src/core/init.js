@@ -148,8 +148,8 @@ export default class Init extends WS {
             this.services = this.config.services;
           }
           if (this.config) {
+            this.config.name = this.project;
             this.server = this.config.server;
-            this.project = this.config.name || this.project;
           }
           await this.handleDeployData(rawMessage);
           break;
@@ -377,9 +377,6 @@ export default class Init extends WS {
         const num = parseInt(input, 10);
         if (Number.isNaN(num) || !/^\d+$/.test(input)) {
           return 'Port must be a decimal number';
-        }
-        if (num < PORT_DEFAULT.port) {
-          return `Port must be more than ${PORT_DEFAULT.port}`;
         }
         if (num > PORT_MAX) {
           return `Port can't be more than ${PORT_MAX}`;

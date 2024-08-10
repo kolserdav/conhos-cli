@@ -359,15 +359,22 @@ export const DOMAIN_MAX_LENGTH = 77;
  * @param {Omit<WSMessageDataCli['deployData'], 'services' | 'nodePublic'>} options
  */
 export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) {
+  const SHIFT_PRICE_COEFF = 1.3;
+  const index = sizes.findIndex((item) => item.name === serviceSize);
   const currValueItem = sizes.find((item) => item.name === serviceSize);
   if (!currValueItem) {
     console.error('Failed to get cost of service for', serviceSize);
     return null;
   }
+
+  let coeff = 1;
+
+  coeff -= index / SHIFT_PRICE_COEFF / 10;
+
   const {
     memory: { value },
   } = currValueItem;
-  const month = parseInt((value / (baseValue / (baseCost * 100))).toFixed(0));
+  const month = parseInt((value / (baseValue / (baseCost * 100 * coeff))).toFixed(0));
   const hour = month / 30 / 24;
   const minute = hour / 60;
   return { month, hour, minute };
