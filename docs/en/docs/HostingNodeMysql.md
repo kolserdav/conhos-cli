@@ -8,7 +8,7 @@ If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility
 
 ## 2. Creating a configuration file
 
-Configuration file for creating a `Node` service in Container Hosting with a `Mysql` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md).
+Configuration file for creating a `Node` service in Container Hosting with a `Mysql` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md#example_configuration_file).
 
 > Check the current version of the `Mysql` container in the [official Mysql repository](https://hub.docker.com/_/mysql/tags)
 

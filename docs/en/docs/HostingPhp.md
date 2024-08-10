@@ -18,7 +18,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 ## 2. Create a configuration file
 
-Configuration file for creating the `Php` service in Container Hosting. More details in [Configuration File](./ConfigFile.md).
+Configuration file for creating the `Php` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
 > Check the current version of the `Php` container in the [official Php repository](https://hub.docker.com/_/php/tags)
 
