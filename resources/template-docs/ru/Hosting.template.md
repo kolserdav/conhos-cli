@@ -43,7 +43,7 @@ services:
 conhos deploy
 ```
 
----
+<div style="margin-top: 4rem;"></div>
 
 Продолжить изучение
 

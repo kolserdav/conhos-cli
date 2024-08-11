@@ -49,7 +49,7 @@ To upload files to the cloud and run services in containers, run the command:
 conhos deploy
 ```
 
----
+<div style="margin-top: 4rem;"></div>
 
 Continue studying
 
