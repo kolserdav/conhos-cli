@@ -103,7 +103,7 @@ command: npm i && npm run start
 
 Ports that must be forwarded for public services to the outside; for each port, a separate network address will be used on ports 80 and 443.
 
-> `public` indicates whether the service should be open to the Internet by domain name or whether it will be accessible only through [Internal links](./ConfigFile.md#internal_links) for other project services.
+> `ports` specifies that the port should be exposed to the Internet via the domain name, otherwise the service can only be accessed via [Internal Links](./ConfigFile.md#internal_links) for other services in the project.
 
 ```yml
 ports:
