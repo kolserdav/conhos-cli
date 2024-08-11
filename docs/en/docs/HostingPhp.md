@@ -14,7 +14,7 @@ To host an application on Container Hosting `Php`, you must complete the followi
 
 ## 1. Installing the project management utility
 
-If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earlier, then simply proceed to the next step. If not installed, then use [Instructions](./GettingStarted.md) to install.
+If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earlier, then simply proceed to the next step. If not installed, then use [Instructions](./GettingStarted.md#introduction) to install.
 
 ## 2. Create a configuration file
 
