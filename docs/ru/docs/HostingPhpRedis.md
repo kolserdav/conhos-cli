@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang  <<<](./HostingGolang.md) | [>>> Хостинг Php Postgres](./HostingPhpPostgres.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Golang  <<<](./HostingGolang.md)</span> <span>|</span> <span>[>>> Хостинг Php Postgres](./HostingPhpPostgres.md)</span></div>

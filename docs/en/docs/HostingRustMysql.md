@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Rust Postgres <<<](./HostingRustPostgres.md) | [>>> Hosting Rust Mariadb](./HostingRustMariadb.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Rust Postgres <<<](./HostingRustPostgres.md)</span> <span>|</span> <span>[>>> Hosting Rust Mariadb](./HostingRustMariadb.md)</span></div>

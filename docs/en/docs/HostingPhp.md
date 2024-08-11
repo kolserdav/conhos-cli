@@ -53,4 +53,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Php Mongo <<<](./HostingPhpMongo.md) | [>>> Hosting Php Redis](./HostingPhpRedis.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Php Mongo <<<](./HostingPhpMongo.md)</span> <span>|</span> <span>[>>> Hosting Php Redis](./HostingPhpRedis.md)</span></div>

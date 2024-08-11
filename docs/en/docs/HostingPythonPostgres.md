@@ -61,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Python Redis <<<](./HostingPythonRedis.md) | [>>> Hosting Python Mysql](./HostingPythonMysql.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Python Redis <<<](./HostingPythonRedis.md)</span> <span>|</span> <span>[>>> Hosting Python Mysql](./HostingPythonMysql.md)</span></div>

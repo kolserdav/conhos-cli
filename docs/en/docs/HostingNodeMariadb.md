@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Node Mysql <<<](./HostingNodeMysql.md) | [>>> Hosting Node Mongo](./HostingNodeMongo.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Node Mysql <<<](./HostingNodeMysql.md)</span> <span>|</span> <span>[>>> Hosting Node Mongo](./HostingNodeMongo.md)</span></div>

@@ -53,4 +53,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Hosting Golang Redis](./HostingGolangRedis.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Golang Mongo <<<](./HostingGolangMongo.md)</span> <span>|</span> <span>[>>> Hosting Golang Redis](./HostingGolangRedis.md)</span></div>

@@ -59,4 +59,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Golang Mariadb <<<](./HostingGolangMariadb.md) | [>>> Hosting Golang Rabbitmq](./HostingGolangRabbitmq.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Golang Mariadb <<<](./HostingGolangMariadb.md)</span> <span>|</span> <span>[>>> Hosting Golang Rabbitmq](./HostingGolangRabbitmq.md)</span></div>

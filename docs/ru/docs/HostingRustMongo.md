@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Rust Mariadb <<<](./HostingRustMariadb.md) | [>>> Хостинг Rust Rabbitmq](./HostingRustRabbitmq.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Rust Mariadb <<<](./HostingRustMariadb.md)</span> <span>|</span> <span>[>>> Хостинг Rust Rabbitmq](./HostingRustRabbitmq.md)</span></div>

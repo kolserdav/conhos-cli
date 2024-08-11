@@ -59,4 +59,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Php Mariadb <<<](./HostingPhpMariadb.md) | [>>> Hosting Php Rabbitmq](./HostingPhpRabbitmq.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Php Mariadb <<<](./HostingPhpMariadb.md)</span> <span>|</span> <span>[>>> Hosting Php Rabbitmq](./HostingPhpRabbitmq.md)</span></div>

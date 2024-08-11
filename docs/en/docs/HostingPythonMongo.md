@@ -59,4 +59,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Python Mariadb <<<](./HostingPythonMariadb.md) | [>>> Hosting Python Rabbitmq](./HostingPythonRabbitmq.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Python Mariadb <<<](./HostingPythonMariadb.md)</span> <span>|</span> <span>[>>> Hosting Python Rabbitmq](./HostingPythonRabbitmq.md)</span></div>

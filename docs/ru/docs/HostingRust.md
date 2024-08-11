@@ -53,4 +53,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Rust Mongo <<<](./HostingRustMongo.md) | [>>> Хостинг Rust Redis](./HostingRustRedis.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Rust Mongo <<<](./HostingRustMongo.md)</span> <span>|</span> <span>[>>> Хостинг Rust Redis](./HostingRustRedis.md)</span></div>

@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Python Mysql <<<](./HostingPythonMysql.md) | [>>> Hosting Python Mongo](./HostingPythonMongo.md)
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Python Mysql <<<](./HostingPythonMysql.md)</span> <span>|</span> <span>[>>> Hosting Python Mongo](./HostingPythonMongo.md)</span></div>

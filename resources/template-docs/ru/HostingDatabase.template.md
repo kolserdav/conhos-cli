@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[${{BACK_LINK_NAME}} <<<](${{BACK_LINK}}) | [>>> ${{FORWARD_LINK_NAME}}](${{FORWARD_LINK}})
+<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[${{BACK_LINK_NAME}} <<<](${{BACK_LINK}})</span> <span>|</span> <span>[>>> ${{FORWARD_LINK_NAME}}](${{FORWARD_LINK}})</span></div>
