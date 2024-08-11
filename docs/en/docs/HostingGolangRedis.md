@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Python  <<<](./HostingPython.md)</span> <span>|</span> <span>[>>> Hosting Golang Postgres](./HostingGolangPostgres.md)</span></div>
+[Hosting Python  <<<](./HostingPython.md) | [>>> Hosting Golang Postgres](./HostingGolangPostgres.md)

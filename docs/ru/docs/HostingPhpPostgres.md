@@ -61,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Php Redis <<<](./HostingPhpRedis.md)</span> <span>|</span> <span>[>>> Хостинг Php Mysql](./HostingPhpMysql.md)</span></div>
+[Хостинг Php Redis <<<](./HostingPhpRedis.md) | [>>> Хостинг Php Mysql](./HostingPhpMysql.md)

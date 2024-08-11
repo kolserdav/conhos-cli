@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Php Mysql <<<](./HostingPhpMysql.md)</span> <span>|</span> <span>[>>> Hosting Php Mongo](./HostingPhpMongo.md)</span></div>
+[Hosting Php Mysql <<<](./HostingPhpMysql.md) | [>>> Hosting Php Mongo](./HostingPhpMongo.md)

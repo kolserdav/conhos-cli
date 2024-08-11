@@ -59,4 +59,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Node Mongo <<<](./HostingNodeMongo.md)</span> <span>|</span> <span>[>>> Hosting Node Redis](./HostingNodeRedis.md)</span></div>
+[Hosting Node Mongo <<<](./HostingNodeMongo.md) | [>>> Hosting Node Redis](./HostingNodeRedis.md)

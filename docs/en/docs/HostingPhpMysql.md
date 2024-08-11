@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Php Postgres <<<](./HostingPhpPostgres.md)</span> <span>|</span> <span>[>>> Hosting Php Mariadb](./HostingPhpMariadb.md)</span></div>
+[Hosting Php Postgres <<<](./HostingPhpPostgres.md) | [>>> Hosting Php Mariadb](./HostingPhpMariadb.md)

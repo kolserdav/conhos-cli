@@ -63,4 +63,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Node Postgres <<<](./HostingNodePostgres.md)</span> <span>|</span> <span>[>>> Хостинг Node Mariadb](./HostingNodeMariadb.md)</span></div>
+[Хостинг Node Postgres <<<](./HostingNodePostgres.md) | [>>> Хостинг Node Mariadb](./HostingNodeMariadb.md)

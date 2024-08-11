@@ -59,4 +59,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Node Mariadb <<<](./HostingNodeMariadb.md)</span> <span>|</span> <span>[>>> Hosting Node Rabbitmq](./HostingNodeRabbitmq.md)</span></div>
+[Hosting Node Mariadb <<<](./HostingNodeMariadb.md) | [>>> Hosting Node Rabbitmq](./HostingNodeRabbitmq.md)

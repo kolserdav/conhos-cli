@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Rust Mongo <<<](./HostingRustMongo.md)</span> <span>|</span> <span>[>>> Хостинг Rust Redis](./HostingRustRedis.md)</span></div>
+[Хостинг Rust Mongo <<<](./HostingRustMongo.md) | [>>> Хостинг Rust Redis](./HostingRustRedis.md)

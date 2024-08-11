@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Golang Mongo <<<](./HostingGolangMongo.md)</span> <span>|</span> <span>[>>> Хостинг Golang Redis](./HostingGolangRedis.md)</span></div>
+[Хостинг Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Хостинг Golang Redis](./HostingGolangRedis.md)

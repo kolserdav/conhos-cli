@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Golang Mysql <<<](./HostingGolangMysql.md)</span> <span>|</span> <span>[>>> Hosting Golang Mongo](./HostingGolangMongo.md)</span></div>
+[Hosting Golang Mysql <<<](./HostingGolangMysql.md) | [>>> Hosting Golang Mongo](./HostingGolangMongo.md)

@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Getting started <<<](./GettingsStarted.md)</span> <span>|</span> <span>[>>> Hosting Node Postgres](./HostingNodePostgres.md)</span></div>
+[Getting started <<<](./GettingsStarted.md) | [>>> Hosting Node Postgres](./HostingNodePostgres.md)

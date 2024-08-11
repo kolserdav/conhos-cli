@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Python Mongo <<<](./HostingPythonMongo.md)</span> <span>|</span> <span>[>>> Хостинг Python Redis](./HostingPythonRedis.md)</span></div>
+[Хостинг Python Mongo <<<](./HostingPythonMongo.md) | [>>> Хостинг Python Redis](./HostingPythonRedis.md)

@@ -53,4 +53,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Php Mongo <<<](./HostingPhpMongo.md)</span> <span>|</span> <span>[>>> Хостинг Php Redis](./HostingPhpRedis.md)</span></div>
+[Хостинг Php Mongo <<<](./HostingPhpMongo.md) | [>>> Хостинг Php Redis](./HostingPhpRedis.md)

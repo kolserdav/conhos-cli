@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Node  <<<](./HostingNode.md)</span> <span>|</span> <span>[>>> Hosting Rust Postgres](./HostingRustPostgres.md)</span></div>
+[Hosting Node  <<<](./HostingNode.md) | [>>> Hosting Rust Postgres](./HostingRustPostgres.md)

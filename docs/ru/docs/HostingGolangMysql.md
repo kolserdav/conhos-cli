@@ -63,4 +63,4 @@ conhos deploy
 
 Продолжить изучение
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Хостинг Golang Postgres <<<](./HostingGolangPostgres.md)</span> <span>|</span> <span>[>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)</span></div>
+[Хостинг Golang Postgres <<<](./HostingGolangPostgres.md) | [>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)

@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-<div style="display: flex; flex-direction: row; justify-content: space-around;"><span>[Hosting Rust Mysql <<<](./HostingRustMysql.md)</span> <span>|</span> <span>[>>> Hosting Rust Mongo](./HostingRustMongo.md)</span></div>
+[Hosting Rust Mysql <<<](./HostingRustMysql.md) | [>>> Hosting Rust Mongo](./HostingRustMongo.md)
