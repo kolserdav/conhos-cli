@@ -63,4 +63,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang  <<<](./HostingGolang.md) | [>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)
+[Хостинг Golang Postgres <<<](./HostingGolangPostgres.md) | [>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)

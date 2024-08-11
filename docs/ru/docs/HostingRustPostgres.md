@@ -61,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Rust Redis <<<](./HostingRustRedis.md) | [>>> Хостинг Rust ](./HostingRust.md)
+[Хостинг Rust Redis <<<](./HostingRustRedis.md) | [>>> Хостинг Rust Mysql](./HostingRustMysql.md)

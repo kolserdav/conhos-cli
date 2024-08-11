@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Хостинг Golang ](./HostingGolang.md)
+[Хостинг Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Хостинг Golang Redis](./HostingGolangRedis.md)

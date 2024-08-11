@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Rust Postgres](./HostingRustPostgres.md)
+[Хостинг Node  <<<](./HostingNode.md) | [>>> Хостинг Rust Postgres](./HostingRustPostgres.md)

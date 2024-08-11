@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Python  <<<](./HostingPython.md) | [>>> Хостинг Python Postgres](./HostingPythonPostgres.md)
+[Хостинг Rust  <<<](./HostingRust.md) | [>>> Хостинг Python Postgres](./HostingPythonPostgres.md)

@@ -63,4 +63,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Node  <<<](./HostingNode.md) | [>>> Хостинг Node Mariadb](./HostingNodeMariadb.md)
+[Хостинг Node Postgres <<<](./HostingNodePostgres.md) | [>>> Хостинг Node Mariadb](./HostingNodeMariadb.md)

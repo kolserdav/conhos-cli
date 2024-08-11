@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Php  <<<](./HostingPhp.md) | [>>> Hosting Php Postgres](./HostingPhpPostgres.md)
+[Hosting Golang  <<<](./HostingGolang.md) | [>>> Hosting Php Postgres](./HostingPhpPostgres.md)

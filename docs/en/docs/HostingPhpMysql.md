@@ -63,4 +63,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Php  <<<](./HostingPhp.md) | [>>> Hosting Php Mariadb](./HostingPhpMariadb.md)
+[Hosting Php Postgres <<<](./HostingPhpPostgres.md) | [>>> Hosting Php Mariadb](./HostingPhpMariadb.md)

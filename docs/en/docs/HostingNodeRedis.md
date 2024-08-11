@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Node  <<<](./HostingNode.md) | [>>> Hosting Node Postgres](./HostingNodePostgres.md)
+[Getting started <<<](./GettingsStarted.md) | [>>> Hosting Node Postgres](./HostingNodePostgres.md)

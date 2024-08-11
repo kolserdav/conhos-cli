@@ -61,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang Redis <<<](./HostingGolangRedis.md) | [>>> Хостинг Golang ](./HostingGolang.md)
+[Хостинг Golang Redis <<<](./HostingGolangRedis.md) | [>>> Хостинг Golang Mysql](./HostingGolangMysql.md)

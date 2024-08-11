@@ -61,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Node Redis <<<](./HostingNodeRedis.md) | [>>> Hosting Node ](./HostingNode.md)
+[Hosting Node Redis <<<](./HostingNodeRedis.md) | [>>> Hosting Node Mysql](./HostingNodeMysql.md)

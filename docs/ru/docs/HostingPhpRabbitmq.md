@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Php Mongo <<<](./HostingPhpMongo.md) | [>>> Хостинг Php ](./HostingPhp.md)
+[Хостинг Php Mongo <<<](./HostingPhpMongo.md) | [>>> Хостинг Php Redis](./HostingPhpRedis.md)

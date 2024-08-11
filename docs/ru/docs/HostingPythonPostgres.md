@@ -61,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Python Redis <<<](./HostingPythonRedis.md) | [>>> Хостинг Python ](./HostingPython.md)
+[Хостинг Python Redis <<<](./HostingPythonRedis.md) | [>>> Хостинг Python Mysql](./HostingPythonMysql.md)

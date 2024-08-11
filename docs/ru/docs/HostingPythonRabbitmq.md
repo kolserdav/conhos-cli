@@ -59,4 +59,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Python Mongo <<<](./HostingPythonMongo.md) | [>>> Хостинг Python ](./HostingPython.md)
+[Хостинг Python Mongo <<<](./HostingPythonMongo.md) | [>>> Хостинг Python Redis](./HostingPythonRedis.md)

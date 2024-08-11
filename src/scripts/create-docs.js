@@ -79,12 +79,13 @@ tempDir.forEach((item) => {
  *  postfixArray: string[];
  *  postfixIndex: number;
  *  lang: string;
+ *  _currentItem: string
  * }} param0
  * @returns
  */
-function getBackLink({ index, array, postfixArray, postfixIndex, lang }) {
+function getBackLink({ index, array, postfixArray, postfixIndex, lang, _currentItem }) {
   const postfix =
-    postfixIndex === postfixArray.length - 1
+    postfixIndex === 0
       ? ''
       : postfixArray[postfixIndex - 1]
       ? firstCapitalize(
@@ -95,7 +96,7 @@ function getBackLink({ index, array, postfixArray, postfixIndex, lang }) {
       : '';
   return {
     BACK_LINK_NAME:
-      index === 0
+      index === 0 || firstCapitalize(_currentItem) === postfix
         ? lang === 'ru'
           ? 'Начало работы'
           : 'Getting started'
@@ -107,7 +108,7 @@ function getBackLink({ index, array, postfixArray, postfixIndex, lang }) {
         ? 'Файл конфигурации'
         : 'Config file',
     BACK_LINK:
-      index === 0
+      index === 0 || firstCapitalize(_currentItem) === postfix
         ? './GettingsStarted.md'
         : array[index - 1]
         ? `./${getDatabaseFileName({
@@ -116,6 +117,7 @@ function getBackLink({ index, array, postfixArray, postfixIndex, lang }) {
           }).replace(MD_REG, '')}${postfix}${MD}`
         : './ConfigFile.md',
     index,
+    postfix,
   };
 }
 
@@ -126,10 +128,11 @@ function getBackLink({ index, array, postfixArray, postfixIndex, lang }) {
  *  postfixArray: string[];
  *  postfixIndex: number;
  *  lang: string;
+ *  _currentItem: string;
  * }} param0
  * @returns
  */
-function getForwardLink({ index, array, postfixArray, postfixIndex, lang }) {
+function getForwardLink({ index, array, postfixArray, postfixIndex, lang, _currentItem }) {
   const postfix =
     postfixIndex === postfixArray.length - 1
       ? ''
@@ -137,12 +140,12 @@ function getForwardLink({ index, array, postfixArray, postfixIndex, lang }) {
       ? firstCapitalize(
           isCommonServicePublic(as(postfixArray[postfixIndex + 1])) === null
             ? postfixArray[postfixIndex + 1]
-            : ''
+            : postfixArray[0]
         )
       : '';
   return {
     FORWARD_LINK_NAME:
-      index === array.length - 1
+      index === array.length - 1 || firstCapitalize(_currentItem) === postfix
         ? lang === 'ru'
           ? 'Файл конфигурации'
           : 'Config file'
@@ -154,7 +157,7 @@ function getForwardLink({ index, array, postfixArray, postfixIndex, lang }) {
         ? 'Начало работы'
         : 'Getting started',
     FORWARD_LINK:
-      index === array.length - 1
+      index === array.length - 1 || firstCapitalize(_currentItem) === postfix
         ? './ConfigFile.md'
         : array[index + 1]
         ? `./${getDatabaseFileName({
@@ -163,6 +166,7 @@ function getForwardLink({ index, array, postfixArray, postfixIndex, lang }) {
           })}`
         : './GettingsStarted.md',
     index,
+    postfix,
   };
 }
 
@@ -187,12 +191,19 @@ function createTemplate(lang) {
       BACK_LINK,
       BACK_LINK_NAME,
       index: indexBackLink,
-    } = getBackLink({ index, lang, array, postfixArray: [], postfixIndex: 0 });
+    } = getBackLink({ index, lang, array, postfixArray: [], postfixIndex: 0, _currentItem: '1' });
     const {
       FORWARD_LINK,
       FORWARD_LINK_NAME,
       index: indexFowardLink,
-    } = getForwardLink({ index, lang, array, postfixArray: [], postfixIndex: 0 });
+    } = getForwardLink({
+      index,
+      lang,
+      array,
+      postfixArray: [],
+      postfixIndex: 0,
+      _currentItem: '1',
+    });
 
     /**
      * @type {DocHosting}
@@ -221,20 +232,39 @@ function createTemplate(lang) {
           ? `- [${dataItem.NAME} with database ${DATABASE_NAME}](./${dbFilename})  \n`
           : `- [${dataItem.NAME} с базой данных ${DATABASE_NAME}](./${dbFilename})  \n`;
 
-      const { BACK_LINK: _BACK_LINK, BACK_LINK_NAME: _BACK_LINK_NAME } = getBackLink({
+      const {
+        BACK_LINK: _BACK_LINK,
+        BACK_LINK_NAME: _BACK_LINK_NAME,
+        postfix: postfixBack,
+      } = getBackLink({
         index: indexBackLink + 1,
         lang,
         array,
         postfixArray: _array,
         postfixIndex: _index,
+        _currentItem: _item,
       });
-      const { FORWARD_LINK: _FORWARD_LINK, FORWARD_LINK_NAME: _FORWARD_LINK_NAME } = getForwardLink(
-        { index: indexFowardLink - 1, lang, array, postfixArray: _array, postfixIndex: _index }
-      );
-      dataItem.BACK_LINK = _BACK_LINK;
-      dataItem.BACK_LINK_NAME = _BACK_LINK_NAME;
-      dataItem.FORWARD_LINK = _FORWARD_LINK;
-      dataItem.FORWARD_LINK_NAME = _FORWARD_LINK_NAME;
+      const {
+        FORWARD_LINK: _FORWARD_LINK,
+        FORWARD_LINK_NAME: _FORWARD_LINK_NAME,
+        postfix: postfixForward,
+      } = getForwardLink({
+        index: indexFowardLink - 1,
+        lang,
+        array,
+        postfixArray: _array,
+        postfixIndex: _index,
+        _currentItem: _item,
+      });
+      if (postfixBack) {
+        dataItem.BACK_LINK = _BACK_LINK;
+        dataItem.BACK_LINK_NAME = _BACK_LINK_NAME;
+      }
+
+      if (postfixForward) {
+        dataItem.FORWARD_LINK = _FORWARD_LINK;
+        dataItem.FORWARD_LINK_NAME = _FORWARD_LINK_NAME;
+      }
 
       data.push({
         ...dataItem,

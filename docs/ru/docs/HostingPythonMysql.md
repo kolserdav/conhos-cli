@@ -63,4 +63,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Python  <<<](./HostingPython.md) | [>>> Хостинг Python Mariadb](./HostingPythonMariadb.md)
+[Хостинг Python Postgres <<<](./HostingPythonPostgres.md) | [>>> Хостинг Python Mariadb](./HostingPythonMariadb.md)

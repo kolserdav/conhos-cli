@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang  <<<](./HostingGolang.md) | [>>> Хостинг Golang Postgres](./HostingGolangPostgres.md)
+[Хостинг Python  <<<](./HostingPython.md) | [>>> Хостинг Golang Postgres](./HostingGolangPostgres.md)

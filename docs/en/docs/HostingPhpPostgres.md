@@ -61,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Php Redis <<<](./HostingPhpRedis.md) | [>>> Hosting Php ](./HostingPhp.md)
+[Hosting Php Redis <<<](./HostingPhpRedis.md) | [>>> Hosting Php Mysql](./HostingPhpMysql.md)

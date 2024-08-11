@@ -75,11 +75,11 @@ export const SERVICES_CUSTOM = ['node', 'rust', 'python', 'golang', 'php'];
 export const SERVICES_COMMON = [
   'redis',
   'postgres',
-  'adminer',
   'mysql',
   'mariadb',
   'mongo',
   'rabbitmq',
+  'adminer',
   'phpmyadmin',
   'pgadmin',
   'mongo_express',

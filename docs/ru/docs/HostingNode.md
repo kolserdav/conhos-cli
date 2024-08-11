@@ -53,4 +53,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Node Mongo <<<](./HostingNodeMongo.md) | [>>> Хостинг Node ](./HostingNode.md)
+[Хостинг Node Mongo <<<](./HostingNodeMongo.md) | [>>> Хостинг Node Redis](./HostingNodeRedis.md)

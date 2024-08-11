@@ -53,4 +53,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Rust Mongo <<<](./HostingRustMongo.md) | [>>> Hosting Rust ](./HostingRust.md)
+[Hosting Rust Mongo <<<](./HostingRustMongo.md) | [>>> Hosting Rust Redis](./HostingRustRedis.md)
