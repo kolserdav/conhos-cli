@@ -1,6 +1,11 @@
 import Console from 'console';
 import WS from '../connectors/ws.js';
-import { HEADER_CONN_ID, parseMessageCli, UPLOAD_REQUEST_TIMEOUT } from '../types/interfaces.js';
+import {
+  HEADER_CONN_ID,
+  LOGS_REQUEST_TIMEOUT,
+  parseMessageCli,
+  UPLOAD_REQUEST_TIMEOUT,
+} from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
@@ -181,7 +186,7 @@ export default class Logs extends WS {
             host: url.replace(/https?:\/\//, '').replace(/\/.+$/, ''),
             [HEADER_CONN_ID]: connId,
           },
-          timeout: UPLOAD_REQUEST_TIMEOUT,
+          timeout: LOGS_REQUEST_TIMEOUT,
         },
         (res) => {
           let message = '';

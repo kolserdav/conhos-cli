@@ -9,7 +9,7 @@ services:
       - MYSQL_ROOT_PASSWORD=pass
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pass
-      - MYSQ_DATABASE=db_name
+      - MYSQL_DATABASE=db_name
   phpmyadmin0:
     type: phpmyadmin
     size: mili

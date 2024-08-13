@@ -1,3 +1,6 @@
+import { filesize } from 'filesize';
+import { create } from 'tar';
+import { tmpdir } from 'os';
 import CacheChanged from 'cache-changed';
 import WS from '../connectors/ws.js';
 import { console, getPackagePath, stdoutWriteStart } from '../utils/lib.js';
@@ -15,6 +18,7 @@ import {
 import {
   as,
   HEADER_CONN_ID,
+  HEADER_TARBALL,
   isCustomService,
   parseMessageCli,
   UPLOAD_CHUNK_DELIMITER,
@@ -25,7 +29,6 @@ import {
 } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
 import { basename, normalize, resolve } from 'path';
-import { filesize } from 'filesize';
 
 /**
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
@@ -73,6 +76,11 @@ export default class Deploy extends WS {
    * @type {string[]}
    */
   uploadedServices = [];
+
+  /**
+   * @private
+   */
+  isNewUpload = false;
 
   /**
    * @public
@@ -147,10 +155,7 @@ export default class Deploy extends WS {
           break;
         }
         this.canClose = false;
-        /**
-         * @type {ReturnType<typeof this.uploadFileRequest>[]}
-         */
-        const proms = [];
+
         for (let _i = 0; volumes[_i]; _i++) {
           const volume = volumes[_i];
           const fileM = volume.match(VOLUME_LOCAL_REGEX);
@@ -169,6 +174,7 @@ export default class Deploy extends WS {
             service: serviceName,
             fileName: file,
             connId: this.connId,
+            tarball: false,
           });
           stdoutWriteStart('');
           console[status](message, serviceName, file);
@@ -191,10 +197,44 @@ export default class Deploy extends WS {
       console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
     }
 
-    for (let i = 0; this.fileList[i]; i++) {
-      const file = this.fileList[i];
-      const latest = this.fileList[i + 1] === undefined;
-      await this.uploadFile({ service, file, cwd, last, latest, url });
+    let tarbalPath = '';
+
+    if (this.isNewUpload) {
+      tarbalPath = resolve(tmpdir(), `${this.project}.tgz`);
+      console.info('Creating tarball ...', tarbalPath);
+      await new Promise((resolve) => {
+        create(
+          {
+            file: tarbalPath,
+            cwd,
+            onwarn: (d) => {
+              console.warn('Creating tarball onwarn', d);
+            },
+          },
+          this.fileList
+        ).then((_) => {
+          console.info('Tarball created', tarbalPath);
+          resolve(0);
+        });
+      });
+    }
+
+    if (tarbalPath) {
+      await this.uploadFile({
+        service,
+        file: tarbalPath,
+        cwd,
+        last,
+        latest: true,
+        url,
+        tarball: true,
+      });
+    } else {
+      for (let i = 0; this.fileList[i]; i++) {
+        const file = this.fileList[i];
+        const latest = this.fileList[i + 1] === undefined;
+        await this.uploadFile({ service, file, cwd, last, latest, url, tarball: false });
+      }
     }
 
     if (this.fileList.length === 0) {
@@ -324,6 +364,11 @@ export default class Deploy extends WS {
     if (!this.config) {
       return;
     }
+
+    if (cache.length === 0) {
+      this.isNewUpload = true;
+    }
+
     this.uploadedServices.push(service);
 
     const { services } = this.config;
@@ -432,18 +477,20 @@ export default class Deploy extends WS {
    *  last: boolean;
    *  latest: boolean;
    *  url: string;
+   *  tarball: boolean
    * }} param0
    */
-  async uploadFile({ service, file, cwd, last, latest, url }) {
+  async uploadFile({ service, file, cwd, last, latest, url, tarball }) {
     let num = 0;
     const filePath = resolve(cwd, file);
 
     const { message, status } = await this.uploadFileRequest({
       filePath,
-      url: `${url}/${file}`,
+      url: `${url}/${tarball ? basename(file) : file}`,
       service,
       fileName: file,
       connId: this.connId,
+      tarball,
     });
     stdoutWriteStart('');
     console[status](`${message}: ${service}|${file}`, filePath);
@@ -647,6 +694,7 @@ export default class Deploy extends WS {
    *  service: string;
    *  fileName: string;
    *  connId: string;
+   *  tarball: boolean;
    * }} param0
    * @returns {Promise<{
    *  status: Status
@@ -654,7 +702,7 @@ export default class Deploy extends WS {
    *  code: number | undefined;
    * }>}
    */
-  async uploadFileRequest({ filePath, url, service, fileName, connId }) {
+  async uploadFileRequest({ filePath, url, service, fileName, connId, tarball }) {
     console.log(`Upload file "${service}"`, { fileName, url });
 
     const allSize = await new Promise((resolve) => {
@@ -733,6 +781,7 @@ export default class Deploy extends WS {
             'user-agent': `client ${this.package.version}`,
             host: url.replace(/https?:\/\//, '').replace(/\/.+$/, ''),
             [HEADER_CONN_ID]: connId,
+            [HEADER_TARBALL]: tarball ? '1' : '0',
           },
           timeout: UPLOAD_REQUEST_TIMEOUT,
         },

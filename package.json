@@ -1,6 +1,6 @@
 {
   "name": "conhos",
-  "version": "2.1.2",
+  "version": "2.1.3",
   "description": "",
   "type": "module",
   "repository": "https://github.com/kolserdav/conhos.git",
@@ -27,6 +27,7 @@
     "filesize": "^10.1.4",
     "inquirer": "^9.2.22",
     "open": "^10.1.0",
+    "tar": "^7.4.3",
     "uuid": "^9.0.1",
     "ws": "^8.17.0",
     "yaml": "^2.4.2"
