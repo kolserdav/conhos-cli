@@ -144,6 +144,11 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  serviceType: ServiceType;
  *  serviceId: string | null;
  * }} NewDomains
+ * @typedef {'github' | 'gitlab'} GitType
+ * @typedef {{
+ *  url: string;
+ *  branch: string;
+ * }} Git
  */
 
 const DEFAULT_WS_ADDRESS = 'wss://ws.conhos.ru';
@@ -206,6 +211,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *    version: string;
  *    no_restart?: boolean;
  *    pwd?: string;
+ *    git?: Git;
  *    exclude?: string[]
  *    command?: string;
  *    ports?: Port[];
@@ -271,7 +277,18 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  cache: CacheItem[];
  *  pwdServer: string;
  *  active: boolean;
+ *  git?: Git;
  * }} prepareDeployCli
+ * @property {{
+ *  git: Git;
+ *  pwd: string;
+ *  service: string;
+ *  last: boolean;
+ * }} deployGitServer
+ * @property {{
+ *  service: string;
+ *  last: boolean;
+ * }} deployGitCli
  * @property {{
  *  service: string;
  *  skip: boolean;
@@ -1174,4 +1191,22 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
     }
     return 1;
   });
+}
+
+/**
+ * @param {string} url
+ * @returns {GitType | null}
+ */
+export function checkGitType(url) {
+  /**
+   * @type {GitType | null}
+   */
+  let res = null;
+  if (/https:\/\/github.com/.test(url)) {
+    res = 'github';
+  }
+  if (/https:\/\/gitlab.com/.test(url)) {
+    res = 'gitlab';
+  }
+  return res;
 }

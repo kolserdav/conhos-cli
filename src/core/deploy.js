@@ -123,6 +123,9 @@ export default class Deploy extends WS {
         case 'deployDeleteFilesCli':
           this.deleteFiles(rawMessage);
           break;
+        case 'deployGitCli':
+          this.gitCli(rawMessage);
+          break;
         case 'deployPrepareVolumeUploadCli':
           this.prepareVolumeUpload(rawMessage);
           break;
@@ -238,7 +241,7 @@ export default class Deploy extends WS {
     }
 
     if (this.fileList.length === 0) {
-      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
+      this.sendMessage({
         token: this.token,
         message: '',
         type: 'deployEndServer',
@@ -358,9 +361,37 @@ export default class Deploy extends WS {
 
   /**
    * @public
+   * @param {WSMessageCli<'deployGitCli'>} param0
+   */
+  async gitCli({ data: { service, last } }) {
+    if (!this.config) {
+      return;
+    }
+
+    this.sendMessage({
+      token: this.token,
+      message: '',
+      type: 'deployEndServer',
+      userId: this.userId,
+      packageName: PACKAGE_NAME,
+      data: {
+        service,
+        skip: true,
+        last,
+        file: '',
+        latest: true,
+        num: 0,
+      },
+      status: 'info',
+      connId: this.connId,
+    });
+  }
+
+  /**
+   * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data: { service, exclude, pwd, active, cache, pwdServer } }) {
+  async prepareUpload({ data: { service, exclude, pwd, active, cache, pwdServer, git } }) {
     if (!this.config) {
       return;
     }
@@ -374,6 +405,26 @@ export default class Deploy extends WS {
     const { services } = this.config;
     const activeServices = this.getActiveServices(services);
     const last = activeServices.length === this.uploadedServices.length;
+
+    if (git) {
+      console.info('Starting synchronyze git', git);
+      this.sendMessage({
+        token: this.token,
+        message: '',
+        type: 'deployGitServer',
+        userId: this.userId,
+        packageName: PACKAGE_NAME,
+        data: {
+          service,
+          last,
+          pwd,
+          git,
+        },
+        status: 'info',
+        connId: this.connId,
+      });
+      return;
+    }
 
     this.setCacheFilePath({ project: this.project, service });
 
@@ -409,7 +460,7 @@ export default class Deploy extends WS {
 
     if (!needUpload) {
       console.info('Skipping to upload service files', pwd);
-      /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
+      this.sendMessage({
         token: this.token,
         message: '',
         type: 'deployEndServer',
