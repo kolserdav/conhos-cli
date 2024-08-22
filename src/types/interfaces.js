@@ -151,6 +151,11 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  * }} Git
  */
 
+/**
+ * @type {GitType[]}
+ */
+export const GIT_TYPES = ['github', 'gitlab'];
+
 const DEFAULT_WS_ADDRESS = 'wss://ws.conhos.ru';
 export const WEBSOCKET_ADDRESS = process.env.WEBSOCKET_ADDRESS || DEFAULT_WS_ADDRESS;
 if (DEFAULT_WS_ADDRESS !== WEBSOCKET_ADDRESS && process.env.NODE_ENV === 'production') {
@@ -275,7 +280,6 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  pwd: string;
  *  service: string;
  *  cache: CacheItem[];
- *  pwdServer: string;
  *  active: boolean;
  *  git?: Git;
  * }} prepareDeployCli
@@ -303,6 +307,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  files: string[];
  *  cwd: string;
  *  last: boolean;
+ *  pwd: string;
  * }} deployDeleteFilesServer
  * @property {{
  *  service: string;
@@ -310,6 +315,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  cwd: string;
  *  last: boolean;
  *  url: string;
+ *  pwd: string;
  * }} deployDeleteFilesCli
  * @property {{
  *  nodeName?: string;
@@ -704,6 +710,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
       pwd,
       size,
       volumes,
+      git,
     } = services[item];
 
     // Check volumes
@@ -847,10 +854,64 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
       // Check pwd
       if (!pwd) {
         res.push({
-          msg: "Required parameter 'pwd' is missing",
+          msg: `Required parameter 'pwd' is missing in service "${item}"`,
           data: `"${item}"`,
           exit: true,
         });
+        return res;
+      }
+      if (isAbsolute(pwd)) {
+        res.push({
+          msg: `Parameter 'pwd' must be relative in service "${item}"`,
+          data: pwd,
+          exit: true,
+        });
+        return res;
+      }
+      if (!/\w+/.test(pwd) && pwd !== './') {
+        res.push({
+          msg: `Default parameter 'pwd' must be './' in service "${item}"`,
+          data: pwd,
+          exit: true,
+        });
+      }
+
+      // Check git
+      if (git) {
+        const { url, branch } = git;
+        if (!url) {
+          res.push({
+            msg: `Missing required parameter 'git.url' in service "${item}"`,
+            data: url,
+            exit: true,
+          });
+          return res;
+        }
+        if (!branch) {
+          res.push({
+            msg: `Missing required parameter 'git.branch' in service "${item}"`,
+            data: url,
+            exit: true,
+          });
+          return res;
+        }
+        const gitType = checkGitType(url);
+        if (!gitType) {
+          res.push({
+            msg: `Wrong parameter 'git.url' in service "${item}"`,
+            data: `Only urls which related to ${GIT_TYPES.join('|')} are supported`,
+            exit: true,
+          });
+          return res;
+        }
+        const parsed = parseGitUrl(url);
+        if (!parsed) {
+          res.push({
+            msg: `Failed to parse parameter 'git.url' in service "${item}"`,
+            data: 'Url must contain user and repository for example: https://github.com/user/repository.git',
+            exit: true,
+          });
+        }
       }
 
       // Check ports

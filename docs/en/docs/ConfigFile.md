@@ -149,9 +149,25 @@ depends_on:
 
 > When one of the connected services, for example **postgres**, is specified as an internal link, then an environment variable with the address of this link will be automatically added to the service during the operation of the **deploy** command
 
+### Downloading files from Git
+
+This parameter downloads files from the Git repository and monitors changes in the specified branch, updating the service if necessary.
+
+> **If a private repository is specified, you must configure access rights to private repositories for the Conhos application in your personal account**
+
+> Pay attention to the `pwd` parameter if `git` is present, it will download from the repository only the folder specified in `pwd` and make it the root in the container
+
+```yml
+git:
+  url: https://github.com/user/repository.git
+  branch: master
+```
+
 ### Work folder
 
 This directory will be uploaded to the cloud and will become the working directory of the service
+
+> If the `git` parameter is specified for the service, the given rule (`pwd`) will point to a directory within the Git project
 
 ```yml
 pwd: ./

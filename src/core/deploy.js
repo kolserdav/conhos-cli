@@ -221,7 +221,6 @@ export default class Deploy extends WS {
         });
       });
     }
-
     if (tarbalPath) {
       await this.uploadFile({
         service,
@@ -391,7 +390,7 @@ export default class Deploy extends WS {
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data: { service, exclude, pwd, active, cache, pwdServer, git } }) {
+  async prepareUpload({ data: { service, exclude, pwd, active, cache, git } }) {
     if (!this.config) {
       return;
     }
@@ -455,7 +454,7 @@ export default class Deploy extends WS {
       return;
     }
 
-    const cached = this.changePWD({ cache, pwd, pwdServer });
+    const cached = this.changePWD({ cache, pwd });
     const { files, needUpload, deleted } =
       (await this.checkCache({ exclude, pwd, service, cached })) || [];
 
@@ -493,6 +492,7 @@ export default class Deploy extends WS {
         files: deleted.map(({ pathRel }) => pathRel),
         cwd,
         last,
+        pwd: pwd || '',
       },
       status: 'info',
       connId: this.connId,
@@ -508,14 +508,13 @@ export default class Deploy extends WS {
    * @param {{
    *  cache: CacheItem[];
    *  pwd: string;
-   *  pwdServer: string;
    * }} param0
    */
-  changePWD({ cache, pwd, pwdServer }) {
+  changePWD({ cache, pwd }) {
     const cwd = resolve(CWD, pwd);
     return cache.map((item) => {
       const _item = structuredClone(item);
-      _item.pathAbs = item.pathAbs.replace(pwdServer, cwd);
+      _item.pathAbs = resolve(cwd, item.pathRel);
       return _item;
     });
   }
@@ -536,9 +535,25 @@ export default class Deploy extends WS {
     let num = 0;
     const filePath = resolve(cwd, file);
 
+    if (!this.config) {
+      return;
+    }
+    const { services } = this.config;
+    let pwd = '';
+    Object.keys(services).every((item) => {
+      if (item === service) {
+        pwd = services[item].pwd || '';
+        if (pwd) {
+          pwd = pwd.replace(/^\.\//, '');
+        }
+        return false;
+      }
+      return true;
+    });
+
     const { message, status } = await this.uploadFileRequest({
       filePath,
-      url: `${url}/${tarball ? basename(file) : file}`,
+      url: `${url}/${pwd}/${tarball ? basename(file) : file}`,
       service,
       fileName: file,
       connId: this.connId,
