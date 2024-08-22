@@ -15,6 +15,8 @@ import { basename, isAbsolute } from 'path';
 
 export const BUFFER_SIZE_MAX = 512;
 
+export const PWD_DEFAULT = './';
+
 export const COUNT_OF_VOLUMES_MAX = 10;
 
 export const ENVIRONMENT_SWITCH = {
@@ -868,9 +870,9 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
         });
         return res;
       }
-      if (!/\w+/.test(pwd) && pwd !== './') {
+      if (!/[a-zA-Z0-9_-]+/.test(pwd) && pwd !== PWD_DEFAULT) {
         res.push({
-          msg: `Default parameter 'pwd' must be './' in service "${item}"`,
+          msg: `Default parameter 'pwd' must be '${PWD_DEFAULT}' in service "${item}"`,
           data: pwd,
           exit: true,
         });
@@ -1311,4 +1313,12 @@ export function parseGitUrl(url) {
     user: userM[0].replace(/^\//, ''),
     project: repoM[0].replace(/^\//, ''),
   };
+}
+
+/**
+ * @param {string} url
+ * @returns
+ */
+export function clearRelPath(url) {
+  return url.replace(/^\.\//, '');
 }
