@@ -551,9 +551,10 @@ export default class Deploy extends WS {
       return true;
     });
 
+    const uploadUrl = `${url}/${tarball ? basename(file) : file}`;
     const { message, status } = await this.uploadFileRequest({
       filePath,
-      url: `${url}/${pwd}/${tarball ? basename(file) : file}`,
+      url: uploadUrl,
       service,
       fileName: file,
       connId: this.connId,
