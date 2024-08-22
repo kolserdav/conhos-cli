@@ -419,6 +419,7 @@ export default class Deploy extends WS {
           last,
           pwd,
           git,
+          active,
         },
         status: 'info',
         connId: this.connId,

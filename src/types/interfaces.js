@@ -284,6 +284,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  pwd: string;
  *  service: string;
  *  last: boolean;
+ *  active: boolean;
  * }} deployGitServer
  * @property {{
  *  service: string;
@@ -1209,4 +1210,44 @@ export function checkGitType(url) {
     res = 'gitlab';
   }
   return res;
+}
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+export function cleanGitPostfix(url) {
+  return url.replace(/\.git/, '');
+}
+
+/**
+ * @typedef {{
+ *  user: string;
+ *  project: string;
+ * }} ParsedGitRepo
+ * @param {string} url
+ * @returns {ParsedGitRepo | null}
+ */
+export function parseGitUrl(url) {
+  /**
+   * @type {ParsedGitRepo | null}
+   */
+  const res = null;
+  let _url = cleanGitPostfix(url);
+
+  const lastPathReg = /\/[a-zA-Z0-9_-]+$/;
+  const repoM = _url.match(lastPathReg);
+  if (!repoM) {
+    return res;
+  }
+  _url = _url.replace(lastPathReg, '');
+  const userM = _url.match(lastPathReg);
+  if (!userM) {
+    return res;
+  }
+
+  return {
+    user: userM[0].replace(/^\//, ''),
+    project: repoM[0].replace(/^\//, ''),
+  };
 }
