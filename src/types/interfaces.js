@@ -147,11 +147,22 @@ const SERVICE_TYPES = _SERVICES_COMMON.concat(SERVICES_CUSTOM);
  *  serviceId: string | null;
  * }} NewDomains
  * @typedef {'github' | 'gitlab'} GitType
+ * @typedef {'checkout' | 'push' | 'merge'} GitUntrackedPolicy
  * @typedef {{
  *  url: string;
  *  branch: string;
+ *  untracked?: GitUntrackedPolicy
  * }} Git
  */
+
+/**
+ * @type {Record<GitUntrackedPolicy, GitUntrackedPolicy>}
+ */
+export const GIT_UNTRACKED_POLICY = {
+  merge: 'merge',
+  checkout: 'checkout',
+  push: 'push',
+};
 
 /**
  * @type {GitType[]}
@@ -880,7 +891,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
 
       // Check git
       if (git) {
-        const { url, branch } = git;
+        const { url, branch, untracked } = git;
         if (!url) {
           res.push({
             msg: `Missing required parameter 'git.url' in service "${item}"`,
@@ -913,6 +924,15 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
             data: 'Url must contain user and repository for example: https://github.com/user/repository.git',
             exit: true,
           });
+        }
+        if (untracked) {
+          if (!GIT_UNTRACKED_POLICY[untracked]) {
+            res.push({
+              msg: `Failed parameter 'git.untracked' in service "${item}"`,
+              data: `Allowed values [${Object.keys(GIT_UNTRACKED_POLICY).join('|')}]`,
+              exit: true,
+            });
+          }
         }
       }
 

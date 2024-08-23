@@ -159,9 +159,19 @@ This parameter downloads files from the Git repository and monitors changes in t
 
 ```yml
 git:
-  url: https://github.com/user/repository.git
-  branch: master
+  url: https://github.com/user/repository.git # Repository address
+  branch: master # Name of the working branch
+  # Optional
+  untracked: merge # Merger Policy
 ```
+
+#### Supported merge policies
+
+In case of changes on disk, `git pull` works according to the following rules:
+
+- `merge`: Default. The service tries to automatically merge with the files from the working branch and update the working branch with local changes. If the merge cannot be done automatically, then the changes on the server are pushed to the new branch, and the service continues working with the files from the working branch.
+- `push`: changes on the server are immediately pushed to the new branch, and the service continues working with the files from the working branch.
+- `checkout`: local changes on the server are discarded, and the service continues working with the files from the working branch.
 
 ### Work folder
 
@@ -170,7 +180,7 @@ This directory will be uploaded to the cloud and will become the working directo
 > If the `git` parameter is specified for the service, the given rule (`pwd`) will point to a directory within the Git project
 
 ```yml
-pwd: ./
+pwd: ./ # Relative path only
 ```
 
 ### Excludes
