@@ -853,6 +853,21 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
 
     const { sizes, services: _s } = deployData;
 
+    // Check size
+    let checkSize = false;
+    sizes.forEach((item) => {
+      if (item.name === size) {
+        checkSize = true;
+      }
+    });
+    if (!checkSize) {
+      res.push({
+        msg: `Size '${size}' doesn't allowed in service "${item}"`,
+        data: `Allowed sizes: ${sizes.map(({ name }) => name).join('|')}`,
+        exit: true,
+      });
+    }
+
     // Check version
     if (!checkVersion({ services: _s, type, version }) && version !== 'latest') {
       res.push({

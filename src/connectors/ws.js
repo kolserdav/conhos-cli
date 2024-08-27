@@ -225,6 +225,7 @@ export default class WS {
     }
     this.conn.on('error', (error) => {
       console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
+      process.exit(1);
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
