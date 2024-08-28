@@ -86,7 +86,7 @@ export const EXCLUDE_DEFAULT = {
 
 export const SIZE_INDEX_DEFAULT = 3;
 export const CACHE_FILE_NAME = '.cache.json';
-export const CLOUD_LOG_PREFIX = '<cloud>';
+export const CLOUD_LOG_PREFIX = '[cloud]';
 export const UPLOAD_PERCENT_DIFF = 3;
 export const UPLOAD_CHUNK_SIZE = 64 * 1024;
 export const UPLOAD_SPEED_INTERVAL = 2000;
