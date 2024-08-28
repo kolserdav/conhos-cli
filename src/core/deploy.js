@@ -17,6 +17,7 @@ import {
 } from '../utils/constants.js';
 import {
   as,
+  GIT_UNTRACKED_POLICY,
   HEADER_CONN_ID,
   HEADER_TARBALL,
   isCustomService,
@@ -211,7 +212,7 @@ export default class Deploy extends WS {
             file: tarbalPath,
             cwd,
             onwarn: (d) => {
-              console.warn('Creating tarball onwarn', d);
+              console.warn('Creating tarball onwarn', d.toString());
             },
           },
           this.fileList
@@ -295,6 +296,7 @@ export default class Deploy extends WS {
   }
 
   /**
+   * @deprecated
    * @private
    * @param {WSMessageCli<'setDomains'>} param0
    */
@@ -313,7 +315,13 @@ export default class Deploy extends WS {
       }
       const dataDomains = data.find((_item) => _item.serviceName === item);
       if (!dataDomains) {
-        console.warn(`Failed to find domains for service "${item}"`, data);
+        let doms = '';
+        data.forEach(({ domains }) => {
+          Object.keys(domains).forEach((key) => {
+            doms += `${key}: ${domains[key]}\n`;
+          });
+        });
+        console.warn(`Failed to find domains for service "${item}"`, doms);
         return;
       }
       const { domains } = dataDomains;
@@ -406,7 +414,12 @@ export default class Deploy extends WS {
     const last = activeServices.length === this.uploadedServices.length;
 
     if (git) {
-      console.info('Starting synchronyze git', git);
+      console.info(
+        'Starting synchronyze git',
+        `Url: ${git.url}, branch: ${git.branch}, untracked: ${
+          git.untracked || Object.keys(GIT_UNTRACKED_POLICY)[0]
+        }`
+      );
       this.sendMessage({
         token: this.token,
         message: '',
@@ -771,7 +784,7 @@ export default class Deploy extends WS {
    * }>}
    */
   async uploadFileRequest({ filePath, url, service, fileName, connId, tarball }) {
-    console.log(`Upload file "${service}"`, { fileName, url });
+    console.log(`Upload file "${service}"`, `Filename: ${fileName}, url: ${url}`);
 
     const allSize = await new Promise((resolve) => {
       stat(filePath, (err, data) => {
@@ -889,7 +902,11 @@ export default class Deploy extends WS {
 
           res.on('error', (err) => {
             stdoutWriteStart('');
-            console.error('Failed to upload file', { err, url, percent, percentUpload });
+            console.warn(
+              'Can not upload file',
+              `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
+            );
+            console.error('Failed to upload file', err);
             resolve({
               status: 'error',
               code: res.statusCode,
@@ -935,13 +952,17 @@ export default class Deploy extends WS {
 
       req.on('error', (error) => {
         stdoutWriteStart('');
-        console.error('Request failed', { error, url, percent, percentUpload });
+        console.warn(
+          'Request error',
+          `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
+        );
+        console.error('Request failed', error);
         process.exit(1);
       });
 
       req.on('timeout', () => {
         stdoutWriteStart('');
-        console.error('Request timeout exceeded', { url });
+        console.error('Request timeout exceeded', url);
         process.exit(1);
       });
 
