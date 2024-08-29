@@ -62,12 +62,11 @@ export default class IP extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    const config = this.getConfig();
-    if (!config) {
+    if (!this.config) {
       return;
     }
 
-    const { name } = config;
+    const { name } = this.config;
     this.sendMessage({
       token: this.token,
       type: 'ipServer',

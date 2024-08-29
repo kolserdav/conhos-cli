@@ -56,12 +56,6 @@ export default class Deploy extends WS {
 
   /**
    * @private
-   * @type {ConfigFile | null}
-   */
-  config = null;
-
-  /**
-   * @private
    * @type {Record<string, string>}
    */
   cacheFilePath = {};
@@ -112,9 +106,6 @@ export default class Deploy extends WS {
        */
       const _type = type;
       switch (_type) {
-        case 'setDomains':
-          this.setDomainsHandler(rawMessage);
-          break;
         case 'acceptDeleteCli':
           this.acceptDelete(rawMessage);
           break;
@@ -293,51 +284,6 @@ export default class Deploy extends WS {
       console.info('Operation exited', 'Deletion canceled by user');
       process.exit(2);
     }
-  }
-
-  /**
-   * @deprecated
-   * @private
-   * @param {WSMessageCli<'setDomains'>} param0
-   */
-  setDomainsHandler({ data }) {
-    const config = this.getConfig({ changeVars: false, withoutWarns: true });
-    if (!config) {
-      return;
-    }
-    const _configFile = structuredClone(config);
-    Object.keys(config.services).forEach((item) => {
-      if (!config) {
-        return;
-      }
-      if (!config.services[item].active) {
-        return;
-      }
-      const dataDomains = data.find((_item) => _item.serviceName === item);
-      if (!dataDomains) {
-        let doms = '';
-        data.forEach(({ domains }) => {
-          Object.keys(domains).forEach((key) => {
-            doms += `${key}: ${domains[key]}\n`;
-          });
-        });
-        console.warn(`Failed to find domains for service "${item}"`, doms);
-        return;
-      }
-      const { domains } = dataDomains;
-      _configFile.services[item].domains = domains;
-
-      console.info(
-        `Service "${item}" links:\n`,
-        Object.keys(domains)
-          .map((dK) => {
-            const domain = domains[parseInt(dK, 10)];
-            return `${dK}: ${/\./.test(domain) ? 'http://' : ''}${domain}`;
-          })
-          .join('\n ')
-      );
-    });
-    this.writeConfigFile(_configFile);
   }
 
   /**
@@ -603,7 +549,6 @@ export default class Deploy extends WS {
    * @type {WS['handler']}
    */
   async handler(_, msg) {
-    this.config = this.getConfig({ withoutWarns: true, changeVars: true });
     if (!this.config) {
       return;
     }
@@ -633,6 +578,7 @@ export default class Deploy extends WS {
         data: {
           config: this.config,
           projectDeleted: needToRemoveProject,
+          volumes: this.volumes,
         },
         status: 'info',
         connId: this.connId,

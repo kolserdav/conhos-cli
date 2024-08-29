@@ -1,11 +1,6 @@
 import Console from 'console';
 import WS from '../connectors/ws.js';
-import {
-  HEADER_CONN_ID,
-  LOGS_REQUEST_TIMEOUT,
-  parseMessageCli,
-  UPLOAD_REQUEST_TIMEOUT,
-} from '../types/interfaces.js';
+import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT, parseMessageCli } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
@@ -112,8 +107,7 @@ export default class Logs extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    const config = this.getConfig();
-    if (!config) {
+    if (!this.config) {
       return;
     }
 
@@ -129,7 +123,7 @@ export default class Logs extends WS {
       }
     }
 
-    const { name } = config;
+    const { name } = this.config;
     this.sendMessage({
       token: this.token,
       type: 'getLogsServer',
@@ -144,7 +138,7 @@ export default class Logs extends WS {
         until: this.options.until,
         tail: this.options.tail,
         clear: this.options.clear || false,
-        config,
+        config: this.config,
       },
       connId: this.connId,
       status: 'info',

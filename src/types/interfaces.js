@@ -8,10 +8,12 @@
  * @typedef {ServiceTypeCommon | ServiceTypeCustom} ServiceType
  * @typedef {Record<string, string>} Domains
  * @typedef {Record<string, string>} ProxyPaths
+ * @typedef {Record<string, string[]>} Volumes
  */
 
-import { existsSync, statSync } from 'fs';
-import { basename, isAbsolute } from 'path';
+import { existsSync, statSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { basename, isAbsolute, resolve } from 'path';
 
 export const BUFFER_SIZE_MAX = 512;
 
@@ -270,11 +272,11 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  * @property {string} loginServer
  * @property {{
  *  checked: boolean;
- *  project: string | null;
+ *  skipSetProject: boolean;
  *  errMess?: string;
  * }} checkTokenCli
  * @property {{
- *  project: string | null
+ *  skipSetProject: boolean;
  * }} checkTokenServer
  * @property {{
  *  msg: string | number;
@@ -283,6 +285,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  * @property {{
  *  projectDeleted: boolean;
  *  config: ConfigFile;
+ *  volumes: Volumes
  * }} prepareDeployServer
  * @property {{
  *  url: string;
@@ -371,7 +374,6 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  * @property {{
  *  ip: string;
  * }} ipCli
- * @property {NewDomains[]} setDomains
  */
 
 /**
@@ -651,6 +653,7 @@ export const VOLUME_LOCAL_REGEX = /^[/a-zA-Z0-9.\-_]+:/;
 export const VOLUME_LOCAL_POSTFIX_REGEX = /:$/;
 export const VOLUME_REMOTE_REGEX = /:[/a-zA-Z0-9.\-_]+$/;
 export const VOLUME_REMOTE_PREFIX_REGEX = /^:/;
+export const VOLUME_UPLOAD_MAX_SIZE = 100000;
 
 /**
  * @typedef {{msg: string; data: string; exit: boolean;}} CheckConfigResult
@@ -773,6 +776,13 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
               res.push({
                 msg: `Service "${item}" has wrong volume "${_item}".`,
                 data: "Directory can't be a volume, only files",
+                exit: true,
+              });
+            }
+            if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
+              res.push({
+                msg: `Volume file '${localPath}' of service "${item}" is too big.`,
+                data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
                 exit: true,
               });
             }
@@ -1359,18 +1369,171 @@ export function clearRelPath(url) {
 }
 
 /**
- * @param {{url: string}} param0
- * @returns
+ * @param {{url: string; maxSize: number}} param0
+ * @returns {Promise<string>}
  */
-export async function getFile({ url }) {
+async function getFile({ url, maxSize }) {
   return new Promise((resolve, reject) => {
     fetch(url)
-      .then((r) => r.text())
-      .then((d) => {
-        resolve(d);
+      .then((response) => {
+        if (!response.ok) {
+          return reject(new Error(`HTTP error! status: ${response.status}`));
+        }
+
+        let totalBytes = 0;
+        /**
+         * @type {string[]}
+         */
+        const chunks = [];
+        const decoder = new TextDecoder();
+        const { body } = response;
+
+        if (!body) {
+          reject(new Error('Response body is unused'));
+          return;
+        }
+
+        const reader = body.getReader();
+
+        const readStream = () => {
+          reader
+            .read()
+            .then(({ done, value }) => {
+              if (done) {
+                const finalString = chunks.join('') + decoder.decode();
+                return resolve(finalString);
+              }
+
+              totalBytes += value.length;
+              if (totalBytes > maxSize) {
+                return reject(
+                  new Error(`Response size exceeds the maximum limit of ${maxSize} bytes`)
+                );
+              }
+              chunks.push(decoder.decode(value, { stream: true }));
+              readStream();
+            })
+            .catch(reject);
+        };
+        readStream();
       })
-      .catch((e) => {
-        reject(e);
-      });
+      .catch(reject);
   });
+}
+
+/**
+ *
+ * @param {{config: ConfigFile; userId: string}} param0
+ * @param {Volumes | undefined} volumes
+ * @returns {Promise<{config: ConfigFile; volumes: Volumes | undefined; error: string | null}>}
+ */
+export async function changeConfigFileVolumes({ config, userId }, volumes = undefined) {
+  /**
+   * @type {Volumes}
+   */
+  const _volumes = {};
+  const _config = structuredClone(config);
+  const { services, name } = config;
+
+  if (!name) {
+    return {
+      config,
+      volumes,
+      error: 'Project name is missing in config',
+    };
+  }
+
+  if (!services) {
+    return {
+      config,
+      volumes,
+      error: 'Field services is missing in config',
+    };
+  }
+
+  const serviceKeys = Object.keys(services);
+  /**
+   * @type {string | null}
+   */
+  let error = null;
+  if (!volumes) {
+    if (!userId) {
+      return {
+        config,
+        volumes,
+        error: 'User id is missing in changeVolumes',
+      };
+    }
+    for (let i = 0; serviceKeys[i]; i++) {
+      if (error) {
+        break;
+      }
+      const serviceKey = serviceKeys[i];
+      const { volumes } = services[serviceKey];
+
+      if (volumes) {
+        _config.services[serviceKey].volumes = [];
+        _volumes[serviceKey] = [];
+        for (let _i = 0; volumes[_i]; _i++) {
+          let volume = volumes[_i];
+          const httpM = volume.match(/^https?:\/\//);
+          if (!httpM) {
+            _config.services[serviceKey].volumes?.push(volume);
+            continue;
+          }
+          const http = httpM[0];
+          volume = volume.replace(http, '');
+
+          const localM = volume.match(VOLUME_LOCAL_REGEX);
+          if (!localM) {
+            error = `Volume local in service "${serviceKey}" has wrong value '${volume}'`;
+            break;
+          }
+          const local = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
+          const filenameReg = /\/?[a-zA-Z_0-9\-\\.]+$/;
+          const filenameM = local.match(filenameReg);
+          if (!filenameM) {
+            error = `Local value of volume '${volume}' has wrong filename in service "${serviceKey}"`;
+            break;
+          }
+          const filename = filenameM[0].replace(/^\//, '');
+          const remoteM = volume.match(VOLUME_REMOTE_REGEX);
+          if (!remoteM) {
+            error = `Volume remote in service "${serviceKey}" has wrong value '${volume}'`;
+            break;
+          }
+          const remote = remoteM[0].replace(VOLUME_REMOTE_PREFIX_REGEX, '');
+
+          const file = await getFile({
+            url: `${http}${local}`,
+            maxSize: VOLUME_UPLOAD_MAX_SIZE,
+          }).catch((e) => {
+            error = e.message;
+          });
+          if (file === undefined) {
+            break;
+          }
+
+          const tmpFilePath = resolve(tmpdir(), `${userId}_${name}_${serviceKey}_${filename}`);
+          writeFileSync(tmpFilePath, file);
+          _config.services[serviceKey].volumes?.push(`${tmpFilePath}:${remote}`);
+          _volumes[serviceKey].push(`${http}${volume}`);
+        }
+      }
+    }
+  } else {
+    for (let i = 0; serviceKeys[i]; i++) {
+      if (error) {
+        break;
+      }
+      const serviceKey = serviceKeys[i];
+      const { volumes: sVolumes } = services[serviceKey];
+
+      if (sVolumes) {
+        _config.services[serviceKey].volumes = volumes[serviceKey];
+      }
+    }
+  }
+
+  return { config: _config, volumes: _volumes, error: null };
 }

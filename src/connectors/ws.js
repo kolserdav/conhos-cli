@@ -4,7 +4,13 @@ import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
-import { PROTOCOL_CLI, checkConfig, WEBSOCKET_ADDRESS, as } from '../types/interfaces.js';
+import {
+  PROTOCOL_CLI,
+  checkConfig,
+  WEBSOCKET_ADDRESS,
+  as,
+  changeConfigFileVolumes,
+} from '../types/interfaces.js';
 import Yaml from '../utils/yaml.js';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -20,6 +26,7 @@ const yaml = new Yaml();
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
  * @typedef {import('http').request} HttpRequest
  * @typedef {import('https').request} HttpsRequest
+ * @typedef {import('../types/interfaces.js').Volumes} Volumes
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -157,6 +164,18 @@ export default class WS {
   deployData = null;
 
   /**
+   * @protected
+   * @type {ConfigFile | null}
+   */
+  config = null;
+
+  /**
+   * @protected
+   * @type {Volumes}
+   */
+  volumes = {};
+
+  /**
    * @param {Options} options
    */
   constructor(options) {
@@ -258,13 +277,25 @@ export default class WS {
    */
   async listenCheckToken(msg) {
     const { data, token, userId } = msg;
+    const { skipSetProject } = data;
+
+    this.setUserId(userId);
+
+    if (!skipSetProject) {
+      const { config, volumes } = await this.getConfig();
+      if (config) {
+        this.setProject(config.name);
+        this.config = config;
+        this.volumes = volumes;
+      }
+    }
+
     if ((!data && !this.options.isLogin) || !token) {
       console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
-      process.exit(2);
+      process.exit(1);
     }
 
     this.setToken(token);
-    this.setUserId(userId);
 
     const {
       status,
@@ -353,14 +384,15 @@ export default class WS {
   }
 
   /**
+   * @protected
    * @param {{
    *  withoutWarns?: boolean;
    *  changeVars?: boolean;
    *  withoutCheck?: boolean;
    * }} [param0={ withoutWarns: false, changeVars: true, withoutCheck: false }]
-   * @returns {ConfigFile}
+   * @returns {Promise<{config: ConfigFile; volumes: Volumes}>}
    */
-  getConfig(
+  async getConfig(
     { withoutWarns, changeVars, withoutCheck } = {
       withoutWarns: false,
       changeVars: true,
@@ -369,15 +401,22 @@ export default class WS {
   ) {
     if (!existsSync(this.configFile)) {
       console.warn('Config file is not exists, run', `"${PACKAGE_NAME} init" first`);
-      process.exit(2);
+      process.exit(1);
     }
     const _data = readFileSync(this.configFile).toString();
     const data = changeVars ? this.changeVariables(_data) : _data;
-    const config = yaml.parse(data);
+    let config = yaml.parse(data);
     if (!config) {
       process.exit(1);
     }
 
+    const changeRes = await changeConfigFileVolumes({ config, userId: this.userId });
+    if (changeRes.error) {
+      console.error(changeRes.error, '');
+      process.exit(1);
+    }
+    config = changeRes.config;
+    const volumes = changeRes.volumes || {};
     if (!withoutCheck) {
       const checkErr = checkConfig(config, { deployData: this.deployData, isServer: false });
       let checkExit = false;
@@ -396,7 +435,7 @@ export default class WS {
       }
     }
 
-    return config;
+    return { config, volumes };
   }
 
   /**
@@ -425,19 +464,10 @@ export default class WS {
    */
   async listenSetSocket(msg, skipSetProject = false) {
     const { connId } = msg;
-
     this.setConnId(connId);
-
     const authData = this.readSessionFile();
 
     this.setDeployData(msg.data.deployData);
-
-    if (!skipSetProject) {
-      const config = this.getConfig();
-      if (config) {
-        this.setProject(config.name);
-      }
-    }
 
     if (authData) {
       this.setUserId(authData.uid);
@@ -462,7 +492,7 @@ export default class WS {
           type: 'checkTokenServer',
           packageName: PACKAGE_NAME,
           data: {
-            project: this.project,
+            skipSetProject,
           },
           message: '',
           status: 'info',
@@ -477,7 +507,7 @@ export default class WS {
           type: 'checkTokenServer',
           packageName: PACKAGE_NAME,
           data: {
-            project: this.project,
+            skipSetProject,
           },
           message: '',
           status: 'info',

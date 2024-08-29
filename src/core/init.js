@@ -144,7 +144,10 @@ export default class Init extends WS {
               }
             }
           } else {
-            this.config = this.getConfig({ withoutCheck: this.addNewService || this.overwrite });
+            const { config } = await this.getConfig({
+              withoutCheck: this.addNewService || this.overwrite,
+            });
+            this.config = config;
             this.services = this.config.services;
           }
           if (this.config) {
@@ -471,7 +474,8 @@ export default class Init extends WS {
       }
     }
 
-    this.config = this.getConfig({ withoutCheck: this.overwrite || this.addNewService });
+    const { config } = await this.getConfig({ withoutCheck: this.overwrite || this.addNewService });
+    this.config = config;
 
     /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
       token: this.token,
