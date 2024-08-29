@@ -748,8 +748,8 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
             exit: true,
           });
         }
-        const local = _item.match(VOLUME_LOCAL_REGEX);
-        if (!local) {
+        const localM = _item.match(VOLUME_LOCAL_REGEX);
+        if (!localM) {
           res.push({
             msg: `Service "${item}" has wrong volume "${_item}". Local part of volume must satisfy regex:`,
             data: `${VOLUME_LOCAL_REGEX}`,
@@ -757,7 +757,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
           });
           return;
         }
-        const localPath = local[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
+        const localPath = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
         if (!existsSync(localPath)) {
           if (!isServer) {
             res.push({
@@ -1356,4 +1356,21 @@ export function parseGitUrl(url) {
  */
 export function clearRelPath(url) {
   return url.replace(/^\.\//, '');
+}
+
+/**
+ * @param {{url: string}} param0
+ * @returns
+ */
+export async function getFile({ url }) {
+  return new Promise((resolve, reject) => {
+    fetch(url)
+      .then((r) => r.text())
+      .then((d) => {
+        resolve(d);
+      })
+      .catch((e) => {
+        reject(e);
+      });
+  });
 }
