@@ -1,0 +1,18 @@
+name: node
+services:
+  node0:
+    type: node
+    size: mili
+    active: true
+    git:
+      url: https://github.com/kolserdav/conhos-test-git.git
+      branch: master
+      untracked: checkout
+    version: latest
+    pwd: ./hello-world
+    ports:
+      - port: 3000
+        type: http
+    command: npm i && npm run start
+    environment:
+      - PORT=3000
