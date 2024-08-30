@@ -419,7 +419,7 @@ export default class WS {
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
     if (!withoutCheck) {
-      const checkErr = checkConfig(config, { deployData: this.deployData, isServer: false });
+      const checkErr = await checkConfig(config, { deployData: this.deployData, isServer: false });
       let checkExit = false;
       checkErr.forEach((item) => {
         if (!withoutWarns) {
@@ -432,7 +432,7 @@ export default class WS {
         }
       });
       if (checkExit) {
-        process.exit(2);
+        process.exit(1);
       }
     }
 

@@ -1,5 +1,6 @@
 /**
  * @typedef {import('cache-changed').CacheItem} CacheItem
+ * @typedef {import('fs')} FS
  * @typedef {'%'} NotPermitedServiceNameSymbols
  * @typedef {'node' | 'rust' | 'python' | 'golang' | 'php'} ServiceTypeCustom
  * @typedef {'redis' | 'postgres' | 'mysql' | 'adminer' | 'mariadb' | 'mongo'
@@ -11,9 +12,15 @@
  * @typedef {Record<string, string[]>} Volumes
  */
 
-import { existsSync, statSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { basename, isAbsolute, resolve } from 'path';
+
+/**
+ * @type {FS | null}
+ */
+let fs = null;
+
+export const ERROR_LOG_PREFIX = 'error:';
 
 export const BUFFER_SIZE_MAX = 512;
 
@@ -448,7 +455,7 @@ export function parseMessageCli(msg) {
  * @returns {ServiceTypeCustom | null}
  */
 export const isCustomService = (type) => {
-  const res = SERVICES_CUSTOM.indexOf(/** @type {typeof as<ServiceTypeCustom>} */ (as)(type));
+  const res = SERVICES_CUSTOM.findIndex((item) => item === type);
   return res === -1 ? null : /** @type {typeof as<ServiceTypeCustom>} */ as(type);
 };
 
@@ -458,7 +465,7 @@ export const isCustomService = (type) => {
  */
 export const isCommonService = (type) => {
   const _type = /** @type {typeof as<ServiceTypeCommon>} */ (as)(type);
-  if (SERVICES_COMMON.indexOf(_type) !== -1) {
+  if (SERVICES_COMMON.findIndex((item) => item === _type) !== -1) {
     return _type;
   }
   return null;
@@ -576,10 +583,8 @@ export const checkEnvironmentRequired = (name) => {
  * @returns {null | ServiceTypeCommonPublic}
  */
 export const isCommonServicePublic = (type) => {
-  const index = SERVICES_COMMON_PUBLIC.indexOf(
-    /** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type)
-  );
-  const check = index !== 1;
+  const index = SERVICES_COMMON_PUBLIC.findIndex((item) => item === type);
+  const check = index !== -1;
   if (check) {
     return /** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type);
   }
@@ -664,9 +669,9 @@ export const VOLUME_UPLOAD_MAX_SIZE = 100000;
  *  deployData: DeployData | null;
  *  isServer: boolean;
  * }} deployData
- * @returns {CheckConfigResult[]}
+ * @returns {Promise<CheckConfigResult[]>}
  */
-export function checkConfig({ services, server }, { deployData, isServer }) {
+export async function checkConfig({ services, server }, { deployData, isServer }) {
   /**
    * @type {CheckConfigResult[]}
    */
@@ -715,7 +720,8 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
     return res;
   }
 
-  serviceKeys.forEach((item) => {
+  for (let i = 0; serviceKeys[i]; i++) {
+    const item = serviceKeys[i];
     const {
       domains,
       ports,
@@ -744,7 +750,8 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
        * @type {string[]}
        */
       const volNames = [];
-      volumes.forEach((_item) => {
+      for (let _i = 0; volumes[_i]; _i++) {
+        const _item = volumes[_i];
         const colons = _item.match(/:/g);
         if (colons && colons.length > 1) {
           res.push({
@@ -760,33 +767,48 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
             data: `${VOLUME_LOCAL_REGEX}`,
             exit: true,
           });
-          return;
+          continue;
         }
         const localPath = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
-        if (!existsSync(localPath)) {
-          if (!isServer) {
-            res.push({
-              msg: `Service "${item}" has wrong volume "${_item}". Local path is not exists:`,
-              data: localPath,
-              exit: true,
-            });
+        fs =
+          fs ||
+          (await new Promise((_resolve) => {
+            if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
+              import('fs').then((_fs) => {
+                _resolve(_fs);
+              });
+            } else {
+              _resolve(null);
+            }
+          }));
+        if (fs) {
+          if (!fs.existsSync(localPath)) {
+            if (!isServer) {
+              res.push({
+                msg: `Service "${item}" has wrong volume "${_item}". Local path is not exists:`,
+                data: localPath,
+                exit: true,
+              });
+            }
+          } else if (!isServer) {
+            const stats = fs.statSync(localPath);
+            if (stats.isDirectory()) {
+              res.push({
+                msg: `Service "${item}" has wrong volume "${_item}".`,
+                data: "Directory can't be a volume, only files",
+                exit: true,
+              });
+            }
+            if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
+              res.push({
+                msg: `Volume file '${localPath}' of service "${item}" is too big.`,
+                data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
+                exit: true,
+              });
+            }
           }
-        } else if (!isServer) {
-          const stats = statSync(localPath);
-          if (stats.isDirectory()) {
-            res.push({
-              msg: `Service "${item}" has wrong volume "${_item}".`,
-              data: "Directory can't be a volume, only files",
-              exit: true,
-            });
-          }
-          if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
-            res.push({
-              msg: `Volume file '${localPath}' of service "${item}" is too big.`,
-              data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
-              exit: true,
-            });
-          }
+        } else {
+          console.error('FS is missing in checkConfiug', '');
         }
         const filename = basename(localPath);
         if (volNames.indexOf(filename) !== -1) {
@@ -805,7 +827,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
             data: `${VOLUME_REMOTE_REGEX}`,
             exit: true,
           });
-          return;
+          continue;
         }
         const remotePath = remote[0].replace(VOLUME_REMOTE_PREFIX_REGEX, '');
         if (!isAbsolute(remotePath)) {
@@ -815,7 +837,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
             exit: true,
           });
         }
-      });
+      }
     }
 
     // Check service name
@@ -1207,7 +1229,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
         });
         if (!checkDeps && !_public && SERVICES_COMMON_PUBLIC.indexOf(as(type)) === -1) {
           res.push({
-            msg: `You have ${type} service with name "${item}", but none another service depends on it`,
+            msg: `You have ${type} service with name "${item}", but none custom service depends on it`,
             data: `Add "depends_on" field with item "${item}" to any custom service`,
             exit: false,
           });
@@ -1297,7 +1319,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
         });
       }
     }
-  });
+  }
   return res.sort((a, b) => {
     if (!a.exit && b.exit) {
       return -1;
@@ -1520,7 +1542,22 @@ export async function changeConfigFileVolumes({ config, userId }, volumes = unde
           }
 
           const tmpFilePath = resolve(tmpdir(), `${userId}_${name}_${serviceKey}_${filename}`);
-          writeFileSync(tmpFilePath, file);
+          fs =
+            fs ||
+            (await new Promise((_resolve) => {
+              if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
+                import('fs').then((_fs) => {
+                  _resolve(_fs);
+                });
+              } else {
+                _resolve(null);
+              }
+            }));
+          if (fs) {
+            fs.writeFileSync(tmpFilePath, file);
+          } else {
+            console.warn('FS is missing in changeConfigFileVolumes', '');
+          }
           _config.services[serviceKey].volumes?.push(`${tmpFilePath}:${remote}`);
           _volumes[serviceKey].push(`${http}${volume}`);
         }

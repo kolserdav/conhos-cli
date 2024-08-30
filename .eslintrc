@@ -28,7 +28,7 @@
     "import/extensions": 0,
     "class-methods-use-this": 1,
     "object-curly-newline": 0,
-    "no-loop-func": 1,
+    "no-loop-func": 0,
     "no-await-in-loop": 1,
     "no-continue": 0,
     "no-plusplus": 0,

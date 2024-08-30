@@ -3,6 +3,7 @@ import Console from 'console';
 import path from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
+import { ERROR_LOG_PREFIX } from '../types/interfaces.js';
 
 /**
  * @typedef {number | null} StatusCode
@@ -73,7 +74,12 @@ export const console = {
    * @returns {void}
    */
   error: (...args) => {
-    Console.error('error:', chalk.red(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+    Console.error(
+      ERROR_LOG_PREFIX,
+      chalk.red(args[0]),
+      getBrightUnderline(args[1]),
+      ...args.slice(2)
+    );
   },
 };
 
