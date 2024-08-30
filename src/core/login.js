@@ -1,3 +1,4 @@
+import { existsSync, rmSync, writeFileSync } from 'fs';
 import WS from '../connectors/ws.js';
 import { console, getPackagePath, openBrowser } from '../utils/lib.js';
 import {
@@ -6,7 +7,6 @@ import {
   QUERY_STRING_CONN_ID,
   PACKAGE_NAME,
 } from '../utils/constants.js';
-import { existsSync, rmSync, writeFileSync } from 'fs';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
 import { parseMessageCli } from '../types/interfaces.js';
@@ -115,13 +115,9 @@ export default class Login extends WS {
       uid: userId,
     };
     if (this.options.crypt) {
-      /**
-       * @type {string | undefined}
-       */
-      let password = undefined;
       console.info('Session token will be encrypted with your password');
 
-      password = await inquirer.promptPassword('Enter a new password');
+      const password = await inquirer.promptPassword('Enter a new password');
       const key = crypto.createHash(password);
       session = crypto.encrypt(token, key, userId);
     }

@@ -416,14 +416,16 @@ export function computeCostService(serviceSize, { sizes, baseCost, baseValue }) 
   const {
     memory: { value },
   } = currValueItem;
-  const month = parseInt((value / (baseValue / (baseCost * 100 * coeff))).toFixed(0));
+  const month = parseInt((value / (baseValue / (baseCost * 100 * coeff))).toFixed(0), 10);
   const hour = month / 30 / 24;
   const minute = hour / 60;
   return { month, hour, minute };
 }
 
 /**
- * @typedef {Omit<ConfigFile, 'services'> & {services: Record<string, ConfigFile['services'][0] & { serviceId: string }>}} ConfigFileBackend
+ * @typedef {Omit<ConfigFile, 'services'> & {
+ *  services: Record<string, ConfigFile['services'][0] & { serviceId: string }>}
+ * } ConfigFileBackend
  */
 
 /**
@@ -574,9 +576,10 @@ export const checkEnvironmentRequired = (name) => {
  * @returns {null | ServiceTypeCommonPublic}
  */
 export const isCommonServicePublic = (type) => {
-  const check =
-    SERVICES_COMMON_PUBLIC.indexOf(/** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type)) !==
-    -1;
+  const index = SERVICES_COMMON_PUBLIC.indexOf(
+    /** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type)
+  );
+  const check = index !== 1;
   if (check) {
     return /** @type {typeof as<ServiceTypeCommonPublic>} */ (as)(type);
   }
@@ -589,9 +592,7 @@ const PORT_TIMEOUTS = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
  * @param {DeployData['sizes']} sizes
  * @param {ServiceSize} size
  */
-export const getServiceBySize = (sizes, size) => {
-  return sizes.find(({ name }) => name === size);
-};
+export const getServiceBySize = (sizes, size) => sizes.find(({ name }) => name === size);
 
 const DEFAULT_LOCATION = '/';
 
@@ -623,7 +624,7 @@ function checkLocation(location, item, name = 'Location') {
   /**
    * @type {CheckConfigResult[]}
    */
-  let res = [];
+  const res = [];
   const allowedRegexp = /^[\\//0-9A-Za-z\\-_/]+$/;
   if (!allowedRegexp.test(location)) {
     res.push({
@@ -770,23 +771,21 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
               exit: true,
             });
           }
-        } else {
-          if (!isServer) {
-            const stats = statSync(localPath);
-            if (stats.isDirectory()) {
-              res.push({
-                msg: `Service "${item}" has wrong volume "${_item}".`,
-                data: "Directory can't be a volume, only files",
-                exit: true,
-              });
-            }
-            if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
-              res.push({
-                msg: `Volume file '${localPath}' of service "${item}" is too big.`,
-                data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
-                exit: true,
-              });
-            }
+        } else if (!isServer) {
+          const stats = statSync(localPath);
+          if (stats.isDirectory()) {
+            res.push({
+              msg: `Service "${item}" has wrong volume "${_item}".`,
+              data: "Directory can't be a volume, only files",
+              exit: true,
+            });
+          }
+          if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
+            res.push({
+              msg: `Volume file '${localPath}' of service "${item}" is too big.`,
+              data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
+              exit: true,
+            });
           }
         }
         const filename = basename(localPath);
@@ -837,7 +836,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
       });
     }
 
-    let _public = ports && ports.length > 0;
+    const _public = ports && ports.length > 0;
 
     // Check service public
     if (_public) {
@@ -866,8 +865,8 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
 
     // Check size
     let checkSize = false;
-    sizes.forEach((item) => {
-      if (item.name === size) {
+    sizes.forEach((_item) => {
+      if (_item.name === size) {
         checkSize = true;
       }
     });
@@ -883,7 +882,7 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
     if (!checkVersion({ services: _s, type, version }) && version !== 'latest') {
       res.push({
         msg: `Version "${version}" of service "${item}" is no longer supported`,
-        data: `See allowed versions: ${_s.find((item) => item.type === type)?.hub}tags`,
+        data: `See allowed versions: ${_s.find((_item) => _item.type === type)?.hub}tags`,
         exit: false,
       });
     }
@@ -976,13 +975,13 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
       }
 
       (ports || []).forEach(
-        ({ port, type, location, timeout, buffer_size, static: _static, proxy_path }) => {
+        ({ port, type: _type, location, timeout, buffer_size, static: _static, proxy_path }) => {
           // Check timeout
           if (timeout) {
-            if (type !== 'chunked' && type !== 'ws') {
+            if (_type !== 'chunked' && _type !== 'ws') {
               res.push({
                 msg: `Timeout for port "${port}" of service "${item}" doesn't have any effect`,
-                data: `Timeout property doesn't allow for port type "${type}"`,
+                data: `Timeout property doesn't allow for port type "${_type}"`,
                 exit: false,
               });
             } else {
@@ -1011,10 +1010,10 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
           }
           // Check buffer_size
           if (buffer_size) {
-            if (type !== 'chunked') {
+            if (_type !== 'chunked') {
               res.push({
                 msg: `Buffer size for port "${port}" of service "${item}" doesn't have any effect`,
-                data: `Buffer size property doesn't allow for port type "${type}"`,
+                data: `Buffer size property doesn't allow for port type "${_type}"`,
                 exit: false,
               });
             } else {
@@ -1055,18 +1054,18 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
           // Check proxy_path
           if (proxy_path) {
             res = res.concat(checkLocation(proxy_path, item, 'Proxy path'));
-            if (type === 'php') {
+            if (_type === 'php') {
               res.push({
-                msg: `Property "proxy_path" doesn't have any effect for port type "php"`,
+                msg: 'Property "proxy_path" doesn\'t have any effect for port type "php"',
                 data: item,
                 exit: false,
               });
             }
           }
           // Check port type
-          if (PORT_TYPES.indexOf(type) === -1) {
+          if (PORT_TYPES.indexOf(_type) === -1) {
             res.push({
-              msg: `Port type "${type}" of service "${item}" is not allowed`,
+              msg: `Port type "${_type}" of service "${item}" is not allowed`,
               data: `Allowed port types: [${PORT_TYPES.join('|')}]`,
               exit: true,
             });
@@ -1193,13 +1192,13 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
         // Check depends on
         let checkDeps = false;
         serviceKeys.forEach((_item) => {
-          const { type: _type, depends_on } = services[_item];
+          const { type: _type, depends_on: _depends_on } = services[_item];
           if (isCustomService(_type)) {
-            if (!depends_on) {
+            if (!_depends_on) {
               return true;
             }
 
-            if (depends_on.indexOf(item) !== -1) {
+            if (_depends_on.indexOf(item) !== -1) {
               checkDeps = true;
               return false;
             }
@@ -1249,12 +1248,16 @@ export function checkConfig({ services, server }, { deployData, isServer }) {
           const index = commonVaribles.indexOf(name);
           if (index !== -1) {
             serviceKeys.forEach((__item) => {
-              const { type: _type, environment: _environment, depends_on } = services[__item];
+              const {
+                type: _type,
+                environment: _environment,
+                depends_on: _depends_on,
+              } = services[__item];
 
-              if (!depends_on) {
+              if (!_depends_on) {
                 return;
               }
-              if (depends_on.indexOf(item) === -1) {
+              if (_depends_on.indexOf(item) === -1) {
                 return;
               }
 
@@ -1374,7 +1377,7 @@ export function clearRelPath(url) {
  * @returns {Promise<string>}
  */
 async function getFile({ url, maxSize }) {
-  return new Promise((resolve, reject) => {
+  return new Promise((_resolve, reject) => {
     fetch(url)
       .then((response) => {
         if (!response.ok) {
@@ -1402,7 +1405,7 @@ async function getFile({ url, maxSize }) {
             .then(({ done, value }) => {
               if (done) {
                 const finalString = chunks.join('') + decoder.decode();
-                return resolve(finalString);
+                return _resolve(finalString);
               }
 
               totalBytes += value.length;
@@ -1470,13 +1473,14 @@ export async function changeConfigFileVolumes({ config, userId }, volumes = unde
         break;
       }
       const serviceKey = serviceKeys[i];
-      const { volumes } = services[serviceKey];
+      const { volumes: __volumes } = services[serviceKey];
 
-      if (volumes) {
+      if (__volumes) {
         _config.services[serviceKey].volumes = [];
         _volumes[serviceKey] = [];
-        for (let _i = 0; volumes[_i]; _i++) {
-          let volume = volumes[_i];
+        for (let _i = 0; __volumes[_i]; _i++) {
+          let volume = __volumes[_i];
+
           const httpM = volume.match(/^https?:\/\//);
           if (!httpM) {
             _config.services[serviceKey].volumes?.push(volume);

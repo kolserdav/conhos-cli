@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import WS from '../connectors/ws.js';
 import Inquirer from '../utils/inquirer.js';
 import {
@@ -17,7 +18,6 @@ import {
   as,
   isCommonService,
 } from '../types/interfaces.js';
-import { existsSync } from 'fs';
 import {
   getConfigFilePath,
   console,
@@ -285,10 +285,10 @@ export default class Init extends WS {
     /**
      * @type {ConfigFile['services'][0]['exclude']}
      */
-    let exclude = undefined;
+    let exclude;
     // Group services
     if (customService) {
-      ports = await this.getPorts([], fpm);
+      ports = await this.getPorts(fpm);
       exclude = EXCLUDE_DEFAULT[customService].concat(exclude || []).filter(filterUnique);
     }
 
@@ -318,6 +318,8 @@ export default class Init extends WS {
           )
         );
         break;
+      default:
+        console.log('Default case in create service command', service);
     }
 
     const environment = (ports || []).map(
@@ -367,11 +369,11 @@ export default class Init extends WS {
 
   /**
    * @private
-   * @param {ConfigFile['services'][0]['ports']} ports
    * @param {boolean} fpm
+   * @param {ConfigFile['services'][0]['ports']} ports
    * @returns {Promise<ConfigFile['services'][0]['ports']>}
    */
-  async getPorts(ports = [], fpm) {
+  async getPorts(fpm, ports = []) {
     const _ports = ports.slice();
     const port = await inquirer.input(
       ports.length === 0 ? 'Setting up a listening port' : 'Setting up another listening port',
@@ -403,7 +405,7 @@ export default class Init extends WS {
 
     const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);
     if (anotherPort) {
-      return this.getPorts(_ports, fpm);
+      return this.getPorts(fpm, _ports);
     }
     return _ports;
   }

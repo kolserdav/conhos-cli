@@ -1,8 +1,8 @@
 import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';
-import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
 import { existsSync, readFileSync } from 'fs';
+import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
 
 /**
  * @typedef {number | null} StatusCode
@@ -175,6 +175,4 @@ export function getPHPCommandDefault(port, fpm) {
  * @param {string[]} array
  * @returns
  */
-export const filterUnique = (value, index, array) => {
-  return array.indexOf(value) === index;
-};
+export const filterUnique = (value, index, array) => array.indexOf(value) === index;

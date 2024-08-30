@@ -1,8 +1,10 @@
 import WebSocket from 'ws';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
+import path, { resolve } from 'path';
+import { fileURLToPath } from 'url';
 import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX } from '../utils/constants.js';
 import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
 import Inquirer from '../utils/inquirer.js';
 import {
   PROTOCOL_CLI,
@@ -12,8 +14,6 @@ import {
   changeConfigFileVolumes,
 } from '../types/interfaces.js';
 import Yaml from '../utils/yaml.js';
-import path, { resolve } from 'path';
-import { fileURLToPath } from 'url';
 
 const __filenameNew = fileURLToPath(import.meta.url);
 
@@ -213,7 +213,7 @@ export default class WS {
       console.warn('Missing connection in send message');
       return;
     }
-    let _data = structuredClone(data);
+    const _data = structuredClone(data);
     console.log('Send message', _data);
     this.conn.send(JSON.stringify(data));
   }
@@ -249,8 +249,8 @@ export default class WS {
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
-    const version = this.package.version;
-    this.conn.on('open', function open() {
+    const { version } = this.package;
+    this.conn.on('open', () => {
       console.log('Open WS connection:', WEBSOCKET_ADDRESS);
       /** @type {typeof ws.sendMessage<'setSocketServer'>} */ (ws.sendMessage)({
         status: 'info',
@@ -365,18 +365,18 @@ export default class WS {
     if (/https:/.test(url)) {
       this.request =
         this.request ||
-        (await new Promise((resolve) => {
+        (await new Promise((_resolve) => {
           import('https').then((d) => {
-            resolve(d.request);
+            _resolve(d.request);
           });
         }));
       result = /** @type {typeof as<HttpRequest>} */ (as)(this.request);
     } else {
       this.requestHttps =
         this.requestHttps ||
-        (await new Promise((resolve) => {
+        (await new Promise((_resolve) => {
           import('http').then((d) => {
-            resolve(d.request);
+            _resolve(d.request);
           });
         }));
       result = /** @type {typeof as<HttpsRequest>} */ (as)(this.requestHttps);
@@ -425,7 +425,7 @@ export default class WS {
         if (!withoutWarns) {
           console[item.exit ? 'error' : 'warn'](item.msg, item.data);
         } else if (item.exit) {
-          console['error'](item.msg, item.data);
+          console.error(item.msg, item.data);
         }
         if (item.exit) {
           checkExit = true;

@@ -15,14 +15,6 @@ import { console } from '../utils/lib.js';
 export default class IP extends WS {
   num = 0;
 
-  /**
-   * @public
-   * @param {Options} options
-   */
-  constructor(options) {
-    super(options);
-  }
-
   listener() {
     if (!this.conn) {
       return;

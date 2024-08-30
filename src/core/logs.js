@@ -20,11 +20,13 @@ const inquirer = new Inquirer();
 
 export default class Logs extends WS {
   num = 0;
+
   /**
    * @private
    * @type {string}
    */
   serviceName;
+
   /**
    * @public
    * @param {Options} options
@@ -93,7 +95,7 @@ export default class Logs extends WS {
    */
   async waitQueue(num) {
     await new Promise((resolve) => {
-      let interval = setInterval(() => {
+      const interval = setInterval(() => {
         if (num === this.num) {
           clearInterval(interval);
           resolve(0);
@@ -163,8 +165,8 @@ export default class Logs extends WS {
   async readLogsRequest({ url, service, connId }, data) {
     console.log(`Request of logs "${service}"`, { url });
 
-    let percent = 0;
-    let percentUpload = 0;
+    const percent = 0;
+    const percentUpload = 0;
 
     const fn = await this.setRequest(url);
 
@@ -183,7 +185,7 @@ export default class Logs extends WS {
           timeout: LOGS_REQUEST_TIMEOUT,
         },
         (res) => {
-          let message = '';
+          const message = '';
 
           res.on('data', (msg) => {
             Console.log(msg.toString());
