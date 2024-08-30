@@ -274,7 +274,7 @@ export default class Deploy extends WS {
         });
     } else {
       console.info('Operation exited', 'Deletion canceled by user');
-      process.exit(2);
+      process.exit(1);
     }
   }
 
@@ -603,7 +603,7 @@ export default class Deploy extends WS {
     if (!existsSync(targetDirPath)) {
       console.warn('Target dir is missing', targetDirPath);
       console.error('Exited with code 2', 'Fix warning before and try again');
-      process.exit(2);
+      process.exit(1);
     }
 
     const cacheChanged = new CacheChanged({
