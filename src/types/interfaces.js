@@ -286,6 +286,7 @@ export const PORT_TYPES = as(Object.keys(_PORT_TYPES));
  *  projectDeleted: boolean;
  *  config: ConfigFile;
  *  volumes: Volumes
+ *  interractive: boolean;
  * }} prepareDeployServer
  * @property {{
  *  url: string;

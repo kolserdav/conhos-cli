@@ -5,6 +5,8 @@ services:
     size: mili
     active: true
     version: latest
+    volumes:
+      - https://raw.githubusercontent.com/kolserdav/conhos-cli/master/examples/mysql/config/my.cnf:/etc/mysql/conf.d/my.cnf
     environment:
       - MYSQL_ROOT_PASSWORD=pass
       - MYSQL_USER=user

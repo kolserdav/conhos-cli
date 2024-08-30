@@ -579,6 +579,7 @@ export default class Deploy extends WS {
           config: this.config,
           projectDeleted: needToRemoveProject,
           volumes: this.volumes,
+          interractive: this.options.interractive || false,
         },
         status: 'info',
         connId: this.connId,

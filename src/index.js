@@ -49,6 +49,10 @@ program
 program
   .command('deploy')
   .description('Upload files and run app in cloud')
+  .option(
+    '--no-interractive',
+    'If you are asked to confirm the deletion of the service, the script will automatically answer "yes"'
+  )
   .option('-c, --clear-cache', 'Clear cache before upload to upload all files')
   .action(async (options) => {
     new Deploy(options);

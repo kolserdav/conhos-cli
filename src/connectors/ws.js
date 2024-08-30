@@ -58,6 +58,7 @@ const yaml = new Yaml();
  *  tail?: number
  *  clear?: boolean;
  *  clearCache?: boolean;
+ *  interractive?: boolean;
  * }} Options
  */
 
