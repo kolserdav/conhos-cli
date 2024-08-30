@@ -752,14 +752,6 @@ export async function checkConfig({ services, server }, { deployData, isServer }
       const volNames = [];
       for (let _i = 0; volumes[_i]; _i++) {
         const _item = volumes[_i];
-        const colons = _item.match(/:/g);
-        if (colons && colons.length > 1) {
-          res.push({
-            msg: `Service "${item}" has wrong volume "${_item}".`,
-            data: 'You can use colon ":" only once',
-            exit: true,
-          });
-        }
         const localM = _item.match(VOLUME_LOCAL_REGEX);
         if (!localM) {
           res.push({
@@ -775,7 +767,7 @@ export async function checkConfig({ services, server }, { deployData, isServer }
           (await new Promise((_resolve) => {
             if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
               import('fs').then((_fs) => {
-                _resolve(_fs);
+                _resolve(_fs.default);
               });
             } else {
               _resolve(null);
@@ -1547,7 +1539,7 @@ export async function changeConfigFileVolumes({ config, userId }, volumes = unde
             (await new Promise((_resolve) => {
               if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
                 import('fs').then((_fs) => {
-                  _resolve(_fs);
+                  _resolve(_fs.default);
                 });
               } else {
                 _resolve(null);
