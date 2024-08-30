@@ -148,6 +148,7 @@ export default class Init extends WS {
               withoutCheck: this.addNewService || this.overwrite,
             });
             this.config = config;
+            this.project = config.name;
             this.services = this.config.services;
           }
           if (this.config) {

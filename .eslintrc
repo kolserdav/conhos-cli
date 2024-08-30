@@ -37,7 +37,6 @@
     "camelcase": 1,
     "no-underscore-dangle": 0,
     "comma-dangle": 0,
-    "no-use-before-define": 1,
     "no-unused-vars": 1,
     "prettier/prettier": 1,
     "@typescript-eslint/ban-ts-comment": 1,
@@ -45,5 +44,11 @@
     "@typescript-eslint/no-unused-vars": 1,
     "@typescript-eslint/no-explicit-any": 1,
     "@typescript-eslint/no-this-alias": 1,
+    "no-use-before-define": ["error", {
+        "functions": false,
+        "classes": true,
+        "variables": true,
+        "allowNamedExports": false
+    }]
   }
 }
