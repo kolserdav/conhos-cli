@@ -117,6 +117,9 @@ export function getPackagePath(postfix = '') {
  * @param {string} title
  */
 export function stdoutWriteStart(title) {
+  if (!process.stdout.clearLine) {
+    return;
+  }
   process.stdout.clearLine(0);
   process.stdout.cursorTo(0);
   process.stdout.write(title);
