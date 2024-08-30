@@ -2,9 +2,10 @@ import { filesize } from 'filesize';
 import { create } from 'tar';
 import { tmpdir } from 'os';
 import CacheChanged from 'cache-changed';
+import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
+import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
 import { console, getPackagePath, stdoutWriteStart } from '../utils/lib.js';
-import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -29,7 +30,6 @@ import {
   VOLUME_LOCAL_REGEX,
 } from '../types/interfaces.js';
 import Inquirer from '../utils/inquirer.js';
-import { basename, normalize, resolve } from 'path';
 
 /**
  * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
@@ -76,14 +76,6 @@ export default class Deploy extends WS {
    * @private
    */
   isNewUpload = false;
-
-  /**
-   * @public
-   * @param {Options} options
-   */
-  constructor(options) {
-    super(options);
-  }
 
   /**
    * @public
@@ -197,7 +189,7 @@ export default class Deploy extends WS {
     if (this.isNewUpload) {
       tarbalPath = resolve(tmpdir(), `${this.project}.tgz`);
       console.info('Creating tarball ...', tarbalPath);
-      await new Promise((resolve) => {
+      await new Promise((_resolve) => {
         create(
           {
             file: tarbalPath,
@@ -209,7 +201,7 @@ export default class Deploy extends WS {
           this.fileList
         ).then((_) => {
           console.info('Tarball created', tarbalPath);
-          resolve(0);
+          _resolve(0);
         });
       });
     }
@@ -491,7 +483,7 @@ export default class Deploy extends WS {
    * }} param0
    */
   async uploadFile({ service, file, cwd, last, latest, url, tarball }) {
-    let num = 0;
+    const num = 0;
     const filePath = resolve(cwd, file);
 
     if (!this.config) {
@@ -702,7 +694,7 @@ export default class Deploy extends WS {
    * @returns {Promise<CacheItem[] | null>}
    */
   async createCache(cacheChanged, noWrite = false) {
-    let cacheRes = await cacheChanged.create({ noWrite }).catch((err) => {
+    const cacheRes = await cacheChanged.create({ noWrite }).catch((err) => {
       console.error('Failed to create cache', err, new Error().stack);
       console.warn('Cache skipping');
     });
@@ -733,15 +725,15 @@ export default class Deploy extends WS {
   async uploadFileRequest({ filePath, url, service, fileName, connId, tarball }) {
     console.log(`Upload file "${service}"`, `Filename: ${fileName}, url: ${url}`);
 
-    const allSize = await new Promise((resolve) => {
+    const allSize = await new Promise((_resolve) => {
       stat(filePath, (err, data) => {
         if (err) {
           console.error('Failed to get stat of file', err);
-          resolve(0);
+          _resolve(0);
           return;
         }
         const { size } = data;
-        resolve(size);
+        _resolve(size);
       });
     });
 
@@ -755,26 +747,25 @@ export default class Deploy extends WS {
       return percent - percentUpload >= UPLOAD_PERCENT_DIFF;
     };
 
-    const waitRead = async () => {
-      return new Promise((resolve) => {
+    const waitRead = async () =>
+      new Promise((_resolve) => {
         const interval = setInterval(() => {
           if (!checkNeedWait()) {
             clearInterval(interval);
-            resolve(0);
+            _resolve(0);
           }
         }, 0);
       });
-    };
 
     const fn = await this.setRequest(url);
 
-    return new Promise((resolve) => {
+    return new Promise((_resolve) => {
       let size = 0;
       let sizeUpload = 0;
       let speed = '-- KB/s';
       let fileSize = '-- B';
       let oldSize = 0;
-      let interval = setInterval(() => {
+      const interval = setInterval(() => {
         const _speed = sizeUpload - oldSize;
         speed =
           _speed !== 0
@@ -784,21 +775,22 @@ export default class Deploy extends WS {
             : speed;
         oldSize = sizeUpload;
       }, UPLOAD_SPEED_INTERVAL);
-      let interval2 = setInterval(() => {
+      const interval2 = setInterval(() => {
         fileSize = filesize(sizeUpload, {
           standard: 'jedec',
         });
       }, 1000);
 
       /**
-       * @param {number} size
+       * @param {number} _size
        * @param {number} curSize
        * @returns {number}
        */
-      const calculatePercents = (size, curSize) => {
-        const percent = (curSize / size) * 100;
-        return parseInt(percent.toFixed(0), 10);
+      const calculatePercents = (_size, curSize) => {
+        const _percent = (curSize / _size) * 100;
+        return parseInt(_percent.toFixed(0), 10);
       };
+
       const req = fn(
         url,
         {
@@ -829,7 +821,7 @@ export default class Deploy extends WS {
             if (percent !== 100) {
               percent = calculatePercents(allSize, size);
             }
-            const columns = process.stdout.columns;
+            const { columns } = process.stdout;
             const shift = 10 - speed.length;
 
             const output = `${service}|${fileName} - uploading: ${percentUpload}% |${new Array(
@@ -854,7 +846,7 @@ export default class Deploy extends WS {
               `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
             );
             console.error('Failed to upload file', err);
-            resolve({
+            _resolve({
               status: 'error',
               code: res.statusCode,
               message: err.message,
@@ -862,7 +854,7 @@ export default class Deploy extends WS {
           });
 
           res.on('end', () => {
-            resolve({
+            _resolve({
               status:
                 message === UPLOADED_FILE_MESSAGE.replace(UPLOAD_CHUNK_DELIMITER, '')
                   ? 'info'

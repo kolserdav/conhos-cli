@@ -1,5 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 import { resolve } from 'path';
 import { format } from 'date-fns';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import {
   as,
   ENVIRONMENT_REQUIRED_COMMON,
@@ -39,7 +41,6 @@ import {
  */
 
 import { COMMAND_DEFAULT, EXCLUDE_DEFAULT } from '../utils/constants.js';
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 
 const CWD = process.cwd();
 const DOCS_PATH = resolve(CWD, 'docs');

@@ -31,14 +31,14 @@ program.configureOutput({
 
 program
   .enablePositionalOptions()
-  .usage(`[options] <command> [options]`)
+  .usage('[options] <command> [options]')
   .name(PACKAGE_NAME)
   .version(PACKAGE_VERSION, '-v, --version')
   .description('Hosting client');
 
 program
   .command('login')
-  .usage(`[options] <command> [options]`)
+  .usage('[options] <command> [options]')
   .description('Login via browser')
   .option('-c, --crypt', 'encrypt session token with password')
   .option('-r, --remove', 'remove session token from this device')
@@ -67,7 +67,7 @@ program
 
 program
   .command('logs')
-  .usage(`[options] <service_name> [options]`)
+  .usage('[options] <service_name> [options]')
   .description('Show logs of the service')
   .option('-f, --follow', 'Looking forward to the next logs')
   .option('-t, --timestamps', 'Show timestamps')
@@ -88,7 +88,7 @@ program
 
 program
   .command('init')
-  .usage(`[options] <command> [options]`)
+  .usage('[options] <command> [options]')
   .description('Set up project configuration')
   .option('-y, --yes', 'default for all')
   .action(async (options) => {
