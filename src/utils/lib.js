@@ -1,3 +1,13 @@
+/******************************************************************************************
+ * Repository: Conhos cli
+ * File name: lib.js
+ * Author: Sergey Kolmiller
+ * Email: <kolserdav@conhos.ru>
+ * License: MIT
+ * License text: See LICENSE file
+ * Copyright: kolserdav, All rights reserved (c)
+ * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
+ ******************************************************************************************/
 import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';

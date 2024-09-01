@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc -p ./jsconfig.json",
-    "script:create-docs": "node src/scripts/create-docs.js"
+    "script:create-docs": "node src/scripts/create-docs.js",
+    "fhead": "fhead"
   },
   "keywords": [],
   "author": "kolserdav",
@@ -42,6 +43,23 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "fhead": "^3.2.8",
     "typescript": "^5.4.5"
+  },
+  "fhead": {
+    "root": "src",
+    "repository": "Conhos cli",
+    "patterns": [
+      ".js"
+    ],
+    "exclude": [
+      "node_modules"
+    ],
+    "name": "Sergey Kolmiller",
+    "email": "kolserdav@conhos.ru",
+    "license": "MIT",
+    "licenseText": "See LICENSE file",
+    "copyright": "kolserdav, All rights reserved (c)",
+    "renewAll": false
   }
 }

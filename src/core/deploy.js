@@ -1,3 +1,13 @@
+/******************************************************************************************
+ * Repository: Conhos cli
+ * File name: deploy.js
+ * Author: Sergey Kolmiller
+ * Email: <kolserdav@conhos.ru>
+ * License: MIT
+ * License text: See LICENSE file
+ * Copyright: kolserdav, All rights reserved (c)
+ * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
+ ******************************************************************************************/
 import { filesize } from 'filesize';
 import { create } from 'tar';
 import { tmpdir } from 'os';
