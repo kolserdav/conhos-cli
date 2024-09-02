@@ -104,4 +104,5 @@ program
   .action(async (options) => {
     new Init(options);
   });
+
 program.parse();

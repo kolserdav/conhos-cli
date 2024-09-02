@@ -773,16 +773,17 @@ export async function checkConfig({ services, server }, { deployData, isServer }
         }
         const localPath = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
         fs =
-          fs ||
-          (await new Promise((_resolve) => {
-            if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
-              import('fs').then((_fs) => {
-                _resolve(_fs.default);
+          fs !== null
+            ? fs
+            : await new Promise((_resolve) => {
+                if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
+                  import('fs').then((_fs) => {
+                    _resolve(_fs.default);
+                  });
+                } else {
+                  _resolve(null);
+                }
               });
-            } else {
-              _resolve(null);
-            }
-          }));
         if (fs) {
           if (!fs.existsSync(localPath)) {
             if (!isServer) {
@@ -1545,16 +1546,17 @@ export async function changeConfigFileVolumes({ config, userId }, volumes = unde
 
           const tmpFilePath = resolve(tmpdir(), `${userId}_${name}_${serviceKey}_${filename}`);
           fs =
-            fs ||
-            (await new Promise((_resolve) => {
-              if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
-                import('fs').then((_fs) => {
-                  _resolve(_fs.default);
+            fs !== null
+              ? fs
+              : await new Promise((_resolve) => {
+                  if (typeof window === 'undefined' && process.env.APP_PORT === undefined) {
+                    import('fs').then((_fs) => {
+                      _resolve(_fs.default);
+                    });
+                  } else {
+                    _resolve(null);
+                  }
                 });
-              } else {
-                _resolve(null);
-              }
-            }));
           if (fs) {
             fs.writeFileSync(tmpFilePath, file);
           } else {
