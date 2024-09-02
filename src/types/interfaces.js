@@ -811,7 +811,7 @@ export async function checkConfig({ services, server }, { deployData, isServer }
             }
           }
         } else {
-          console.error('FS is missing in checkConfiug', '');
+          console.error('FS is missing in checkConfig', '');
         }
         const filename = basename(localPath);
         if (volNames.indexOf(filename) !== -1) {
