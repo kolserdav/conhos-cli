@@ -179,7 +179,7 @@ export default class Logs extends WS {
     const percentUpload = 0;
 
     const fn = await this.setRequest(url);
-
+    const date = new Date().getTime();
     return new Promise((resolve) => {
       const req = fn(
         url,
@@ -202,7 +202,7 @@ export default class Logs extends WS {
           });
 
           res.on('error', (err) => {
-            console.error('Failed to read logs', err);
+            console.error('Failed to read logs', err.message);
             resolve({
               status: 'error',
               code: res.statusCode,

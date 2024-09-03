@@ -63,7 +63,7 @@ services:
 type: node
 ```
 
-Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'python' | 'redis' | 'postgres' | 'mysql' | 'adminer'_
+Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
 
 ### Размер сервиса
 
@@ -73,7 +73,7 @@ type: node
 size: mili
 ```
 
-Поддерживаемые типы размеров: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo' | 'mega'_
+Поддерживаемые типы размеров: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo'_
 
 ### Активный сервис
 
@@ -109,15 +109,15 @@ command: npm i && npm run start
 ports:
   - port: 3000
     type: http
-    # Оптионально
+    # Опционально
     location: /path-url # По умолчанию "/"
-    # Оптионально
+    # Опционально
     proxy_path: / # По умолчанию ""
-    # Оптионально
+    # Опционально
     timeout: 30s
-    # Оптионально
+    # Опционально
     buffer_size: 64k
-    # Оптионально
+    # Опционально
     static:
       - location: /static
         path: static

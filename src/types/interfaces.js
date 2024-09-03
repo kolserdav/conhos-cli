@@ -748,7 +748,7 @@ export async function checkConfig({ services, server }, { deployData, isServer }
     } = services[item];
 
     // Check volumes
-    if (volumes) {
+    if (volumes && active) {
       if (volumes.length > COUNT_OF_VOLUMES_MAX) {
         res.push({
           msg: `Service "${item}" has too much volumes: "${volumes.length}"`,
@@ -855,7 +855,7 @@ export async function checkConfig({ services, server }, { deployData, isServer }
     // Check service type
     if (SERVICE_TYPES.indexOf(type) === -1) {
       res.push({
-        msg: `Service type "${type}" is not allowed`,
+        msg: `Service type "${type}" is not allowed in service ${item}`,
         data: `Allowed service types: [${SERVICE_TYPES.join('|')}]`,
         exit: true,
       });
@@ -1498,7 +1498,11 @@ export async function changeConfigFileVolumes({ config, userId }, volumes = unde
         break;
       }
       const serviceKey = serviceKeys[i];
-      const { volumes: __volumes } = services[serviceKey];
+      const { volumes: __volumes, active } = services[serviceKey];
+
+      if (!active) {
+        continue;
+      }
 
       if (__volumes) {
         _config.services[serviceKey].volumes = [];

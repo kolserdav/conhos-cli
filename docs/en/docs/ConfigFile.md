@@ -63,7 +63,7 @@ The image of the operating system and the list of installed service dependencies
 type: node
 ```
 
-Supported service types: _'node' | 'rust' | 'golang' | 'python' | 'redis' | 'postgres' | 'mysql' | 'adminer'_
+Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
 
 ### Service size
 
@@ -73,7 +73,7 @@ The allocation of cloud server resources for the operation of a specific service
 size: mili
 ```
 
-Supported size types: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo' | 'mega'_
+Supported size types: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo'_
 
 ### Active service
 
