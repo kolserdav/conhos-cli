@@ -56,6 +56,17 @@ export default class Login extends WS {
       return;
     }
 
+    if (this.options.remove) {
+      const authPath = getPackagePath(SESSION_FILE_NAME);
+      if (existsSync(authPath)) {
+        rmSync(authPath);
+        console.info('Session token was deleted', authPath);
+      } else {
+        console.warn('Session token file not found', authPath);
+      }
+      process.exit(0);
+    }
+
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
       if (rawMessage === null) {
@@ -81,7 +92,6 @@ export default class Login extends WS {
    * @type {WS['handler']}
    */
   async handler({ failedLogin, sessionExists }, rawMessage) {
-    const authPath = getPackagePath(SESSION_FILE_NAME);
     if (!this.options.remove) {
       let checked = false;
       if (rawMessage) {
@@ -93,14 +103,6 @@ export default class Login extends WS {
         console.info('You have already signed in', '');
         process.exit(0);
       }
-    } else {
-      if (existsSync(authPath)) {
-        rmSync(authPath);
-        console.info('Session token was deleted');
-      } else {
-        console.info('Session token file not found');
-      }
-      process.exit(0);
     }
   }
 
