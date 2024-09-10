@@ -21,13 +21,9 @@ import {
 import {
   parseMessageCli,
   computeCostService,
-  PORT_MAX,
-  PORT_DEFAULT,
-  PORT_TYPES,
   isCustomService,
-  as,
   isCommonService,
-} from '../types/interfaces.js';
+} from 'conhos-vscode/dist/lib.js';
 import {
   getConfigFilePath,
   console,
@@ -35,18 +31,20 @@ import {
   getRustCommandDefault,
   filterUnique,
   getPHPCommandDefault,
+  as,
 } from '../utils/lib.js';
+import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants.js';
 
 /**
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
- * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
- * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
+ * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('../connectors/ws.js').Session} Session
- * @typedef {import('../types/interfaces.js').ServiceType} ServiceType
- * @typedef {import('../types/interfaces.js').ServiceTypeCustom} ServiceTypeCustom
- * @typedef {import('../types/interfaces.js').PortType} PortType
- * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
+ * @typedef {import('conhos-vscode').ServiceType} ServiceType
+ * @typedef {import('conhos-vscode').ServiceTypeCustom} ServiceTypeCustom
+ * @typedef {import('conhos-vscode').PortType} PortType
+ * @typedef {import('conhos-vscode').ServiceSize} ServiceSize
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -234,7 +232,7 @@ export default class Init extends WS {
         name: packageName,
         services: {
           node1: {
-            type: 'node',
+            image: 'node',
             active: true,
             pwd: 'examples/hello-world',
             exclude: EXCLUDE_DEFAULT.node,
@@ -337,7 +335,7 @@ export default class Init extends WS {
       (item, index) => `PORT${index === 0 ? '' : index}=${item.port}`
     );
     this.services[this.getServiceName(service)] = {
-      type: service,
+      image: service,
       size: /** @type {typeof as<ServiceSize>} */ (as)(size),
       active: true,
       version,

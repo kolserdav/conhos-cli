@@ -18,9 +18,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
+ * @typedef {import('conhos-vscode').ServiceSize} ServiceSize
  * @typedef {'rust' | 'php'} NoCommandDefault
- * @typedef {Record<import('../types/interfaces.js').ServiceTypeCustom, string>} CommandDefault
+ * @typedef {Record<import('conhos-vscode').ServiceTypeCustom, string>} CommandDefault
  */
 
 const packStr = readFileSync(path.resolve(__dirname, '../../package.json')).toString();
@@ -84,7 +84,7 @@ export const COMMAND_DEFAULT = {
 };
 export const EXPLICIT_EXCLUDE = ['.git', '.vscode'];
 /**
- * @type {Record<import('../types/interfaces.js').ServiceTypeCustom, string[]>}
+ * @type {Record<import('conhos-vscode').ServiceTypeCustom, string[]>}
  */
 export const EXCLUDE_DEFAULT = {
   node: ['node_modules'],

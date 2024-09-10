@@ -13,12 +13,21 @@ import Console from 'console';
 import path from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
-import { ERROR_LOG_PREFIX } from '../types/interfaces.js';
+import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
+
+/**
+ * @template T
+ * @param {*} data
+ * @returns {T}
+ */
+export function as(data) {
+  return data;
+}
 
 /**
  * @typedef {number | null} StatusCode
- * @typedef {import('../types/interfaces.js').Status} Status
- * @typedef {import('../types/interfaces.js').UploadFileBody} UploadFileBody
+ * @typedef {import('conhos-vscode').Status} Status
+ * @typedef {import('conhos-vscode').UploadFileBody} UploadFileBody
  * @typedef {import('./constants.js').CommandDefault} CommandDefault
  */
 

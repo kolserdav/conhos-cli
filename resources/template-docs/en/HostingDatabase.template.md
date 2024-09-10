@@ -16,7 +16,7 @@ Configuration file for creating a `${{NAME}}` service in Container Hosting with 
 name: name-of-project
 services:
   ${{TYPE}}1:
-    type: ${{TYPE}}
+    image: ${{TYPE}}
     size: mili
     active: true
     version: ${{VERSION}}

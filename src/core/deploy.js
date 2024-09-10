@@ -15,7 +15,7 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import { console, getPackagePath, stdoutWriteStart } from '../utils/lib.js';
+import { as, console, getPackagePath, stdoutWriteStart } from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -27,27 +27,25 @@ import {
   UPLOAD_SPEED_INTERVAL,
 } from '../utils/constants.js';
 import {
-  as,
   GIT_UNTRACKED_POLICY,
   HEADER_CONN_ID,
   HEADER_TARBALL,
-  isCustomService,
-  parseMessageCli,
   UPLOAD_CHUNK_DELIMITER,
   UPLOAD_REQUEST_TIMEOUT,
   UPLOADED_FILE_MESSAGE,
   VOLUME_LOCAL_POSTFIX_REGEX,
   VOLUME_LOCAL_REGEX,
-} from '../types/interfaces.js';
+} from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
+import { isCustomService, parseMessageCli } from 'conhos-vscode/dist/lib.js';
 
 /**
- * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
+ * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
- * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('cache-changed').CacheItem} CacheItem
- * @typedef {import('../types/interfaces.js').Status} Status
+ * @typedef {import('conhos-vscode').Status} Status
  */
 
 /**
@@ -308,8 +306,8 @@ export default class Deploy extends WS {
   getActiveServices(services) {
     return Object.keys(services)
       .map((item) => {
-        const { active, type } = services[item];
-        return active && isCustomService(type);
+        const { active, image } = services[item];
+        return active && isCustomService(image);
       })
       .filter((item) => item);
   }
@@ -582,6 +580,7 @@ export default class Deploy extends WS {
           projectDeleted: needToRemoveProject,
           volumes: this.volumes,
           interractive: this.options.interractive || false,
+          configText: this.configText,
         },
         status: 'info',
         connId: this.connId,

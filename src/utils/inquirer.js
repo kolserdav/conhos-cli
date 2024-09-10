@@ -12,7 +12,7 @@ import inquirer from 'inquirer';
 import { console } from './lib.js';
 
 /**
- * @typedef {import('../types/interfaces.js').ServiceSize} ServiceSize
+ * @typedef {import('conhos-vscode').ServiceSize} ServiceSize
  */
 
 export default class Inquirer {

@@ -10,20 +10,21 @@
  ******************************************************************************************/
 import Console from 'console';
 import WS from '../connectors/ws.js';
-import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT, parseMessageCli } from '../types/interfaces.js';
+import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constants.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
+import { parseMessageCli } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
- * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
- * @typedef {import('../types/interfaces.js').Status} Status
+ * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('conhos-vscode').Status} Status
  */
 
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('conhos-vscode').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();

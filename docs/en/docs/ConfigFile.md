@@ -10,7 +10,7 @@ The project configuration file is a mandatory file that is used to configure the
 name: name-of-project # Project name
 services:
   node1:
-  type: node # Node.js runtime
+  image: node # Node.js runtime
   size: mili # Service size (affects price)
   active: true # Service started
   version: latest # Container version
@@ -60,7 +60,7 @@ The top-level field **services** must have a root field with an arbitrary unique
 The image of the operating system and the list of installed service dependencies depend on this
 
 ```yml
-type: node
+image: node
 ```
 
 Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_

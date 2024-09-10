@@ -20,7 +20,7 @@ Configuration file for creating the `${{NAME}}` service in Container Hosting. Mo
 name: my-awesome-project
 services:
   ${{TYPE}}0:
-    type: ${{TYPE}}
+    image: ${{TYPE}}
     size: mili
     active: true
     pwd: examples/${{TYPE}}

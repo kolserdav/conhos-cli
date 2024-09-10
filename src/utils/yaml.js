@@ -12,7 +12,7 @@ import { parse, stringify } from 'yaml';
 import { console } from './lib.js';
 
 /**
- * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
+ * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  */
 
 export default class Yaml {

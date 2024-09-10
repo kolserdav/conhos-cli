@@ -9,7 +9,7 @@
     "eslint-config-prettier",
     "prettier",
     "plugin:@typescript-eslint/recommended",
-    "airbnb",
+    "airbnb"
   ],
   "plugins": ["prettier", "@typescript-eslint", "eslint-plugin-prettier"],
   "parser": "@typescript-eslint/parser",

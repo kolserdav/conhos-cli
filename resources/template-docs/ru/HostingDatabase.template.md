@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   ${{TYPE}}1:
-    type: ${{TYPE}}
+    image: ${{TYPE}}
     size: mili
     active: true
     version: latest
@@ -34,7 +34,7 @@ services:
       # Далее пробрасываем переменные для подключения
 ${{ENVIRONMENT}}
   ${{DATABASE}}0:
-    type: ${{DATABASE}}
+    image: ${{DATABASE}}
     size: mili
     active: true
     version: latest

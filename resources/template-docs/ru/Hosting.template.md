@@ -20,7 +20,7 @@ ${{LINKS}}
 name: my-awesome-project
 services:
   ${{TYPE}}0:
-    type: ${{TYPE}}
+    image: ${{TYPE}}
     size: mili
     active: true
     pwd: examples/${{TYPE}}

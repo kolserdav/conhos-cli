@@ -11,19 +11,18 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { resolve } from 'path';
 import { format } from 'date-fns';
+import { isCommonServicePublic } from 'conhos-vscode/dist/lib.js';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import {
-  as,
   ENVIRONMENT_REQUIRED_COMMON,
-  isCommonServicePublic,
   SERVICES_COMMON,
   SERVICES_COMMON_PUBLIC,
   SERVICES_CUSTOM,
-} from '../types/interfaces.js';
+} from 'conhos-vscode/dist/constants.js';
 
 /**
- * @typedef {import("../types/interfaces.js").ServiceType} ServiceType
- * @typedef {import("../types/interfaces.js").ServiceTypeCommon} ServiceTypeCommon
+ * @typedef {import("conhos-vscode").ServiceType} ServiceType
+ * @typedef {import("conhos-vscode").ServiceTypeCommon} ServiceTypeCommon
  * @typedef {{
  *  NAME: string;
  *  TYPE: ServiceType;
@@ -51,6 +50,7 @@ import {
  */
 
 import { COMMAND_DEFAULT, EXCLUDE_DEFAULT } from '../utils/constants.js';
+import { as } from '../utils/lib.js';
 
 const CWD = process.cwd();
 const DOCS_PATH = resolve(CWD, 'docs');

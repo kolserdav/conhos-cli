@@ -19,14 +19,14 @@ import {
 } from '../utils/constants.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import { parseMessageCli } from '../types/interfaces.js';
+import { parseMessageCli } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
- * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../connectors/ws.js').Session} Session
- * @typedef {import('../types/interfaces.js').Identity} Identity
+ * @typedef {{userId: string;}} Identity
  */
 /**
  * @template T

@@ -13,17 +13,12 @@ import { readFileSync, existsSync, writeFileSync } from 'fs';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX } from '../utils/constants.js';
-import { getPackagePath, console, getConfigFilePath } from '../utils/lib.js';
+import { getPackagePath, console, getConfigFilePath, as } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import {
-  PROTOCOL_CLI,
-  checkConfig,
-  WEBSOCKET_ADDRESS,
-  as,
-  changeConfigFileVolumes,
-} from '../types/interfaces.js';
+import { checkConfig, changeConfigFileVolumes } from 'conhos-vscode/dist/lib.js';
 import Yaml from '../utils/yaml.js';
+import { PROTOCOL_CLI, WEBSOCKET_ADDRESS } from 'conhos-vscode/dist/constants.js';
 
 const __filenameNew = fileURLToPath(import.meta.url);
 
@@ -31,16 +26,16 @@ const crypto = new Crypto();
 const yaml = new Yaml();
 
 /**
- * @typedef {import('../types/interfaces.js').DeployData} DeployData
- * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
- * @typedef {import('../types/interfaces.js').ConfigFile} ConfigFile
+ * @typedef {import('conhos-vscode').DeployData} DeployData
+ * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('http').request} HttpRequest
  * @typedef {import('https').request} HttpsRequest
- * @typedef {import('../types/interfaces.js').Volumes} Volumes
+ * @typedef {import('conhos-vscode').Volumes} Volumes
  */
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('conhos-vscode').WSMessageCli<T>} WSMessageCli<T>
  */
 
 /**
@@ -141,6 +136,11 @@ export default class WS {
    * @type {string}
    */
   connId = '';
+
+  /**
+   * @type {string}
+   */
+  configText = '';
 
   /**
    * @type {WebSocket | null}
@@ -416,6 +416,7 @@ export default class WS {
     }
     const _data = readFileSync(this.configFile).toString();
     const data = changeVars ? this.changeVariables(_data) : _data;
+    this.configText = data;
     let config = yaml.parse(data);
     if (!config) {
       process.exit(1);
@@ -426,10 +427,17 @@ export default class WS {
       console.error(changeRes.error, '');
       process.exit(1);
     }
+    if (!this.deployData) {
+      console.error('Deploy data is missing', 'Try again later');
+      process.exit(1);
+    }
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
     if (!withoutCheck) {
-      const checkErr = await checkConfig(config, { deployData: this.deployData, isServer: false });
+      const checkErr = await checkConfig(
+        { config, configText: data },
+        { deployData: this.deployData, isServer: false }
+      );
       let checkExit = false;
       checkErr.forEach((item) => {
         if (!withoutWarns) {

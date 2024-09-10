@@ -10,7 +10,7 @@
 name: name-of-project # Название проекта
 services:
   node1:
-    type: node # Среда исполнения Node.js
+    image: node # Среда исполнения Node.js
     size: mili # Размер сервиса (влияет на цену)
     active: true # Сервис запущен
     version: latest # Версия контейнера
@@ -60,7 +60,7 @@ services:
 От этого зависит образ операционной системы и перечень установленных зависимостей сервиса
 
 ```yml
-type: node
+image: node
 ```
 
 Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
