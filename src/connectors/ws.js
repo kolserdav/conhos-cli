@@ -9,16 +9,25 @@
  * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WebSocket from 'ws';
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync, statSync } from 'fs';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX } from '../utils/constants.js';
-import { getPackagePath, console, getConfigFilePath, as } from '../utils/lib.js';
+import { getPackagePath, console, getConfigFilePath, as, getFile } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import { checkConfig, changeConfigFileVolumes } from 'conhos-vscode/dist/lib.js';
+import { checkConfig, getPosition } from 'conhos-vscode/dist/lib.js';
 import Yaml from '../utils/yaml.js';
-import { PROTOCOL_CLI, WEBSOCKET_ADDRESS } from 'conhos-vscode/dist/constants.js';
+import {
+  PROTOCOL_CLI,
+  VOLUME_LOCAL_POSTFIX_REGEX,
+  VOLUME_LOCAL_REGEX,
+  VOLUME_REMOTE_PREFIX_REGEX,
+  VOLUME_REMOTE_REGEX,
+  VOLUME_UPLOAD_MAX_SIZE,
+  WEBSOCKET_ADDRESS,
+} from 'conhos-vscode/dist/constants.js';
+import { tmpdir } from 'os';
 
 const __filenameNew = fileURLToPath(import.meta.url);
 
@@ -32,6 +41,7 @@ const yaml = new Yaml();
  * @typedef {import('http').request} HttpRequest
  * @typedef {import('https').request} HttpsRequest
  * @typedef {import('conhos-vscode').Volumes} Volumes
+ * @typedef {import('conhos-vscode').CheckConfigResult} CheckConfigResult
  */
 /**
  * @template {keyof WSMessageDataCli} T
@@ -422,7 +432,7 @@ export default class WS {
       process.exit(1);
     }
 
-    const changeRes = await changeConfigFileVolumes({ config, userId: this.userId });
+    const changeRes = await this.changeConfigFileVolumes({ config, userId: this.userId });
     if (changeRes.error) {
       console.error(changeRes.error, '');
       process.exit(1);
@@ -434,10 +444,11 @@ export default class WS {
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
     if (!withoutCheck) {
-      const checkErr = await checkConfig(
+      let checkErr = await checkConfig(
         { config, configText: data },
         { deployData: this.deployData, isServer: false }
       );
+      checkErr = checkErr.concat(this.checkVolumes({ config, configText: data }));
       let checkExit = false;
       checkErr.forEach((item) => {
         if (!withoutWarns) {
@@ -455,6 +466,102 @@ export default class WS {
     }
 
     return { config, volumes };
+  }
+
+  /**
+   *
+   * @param {{userId: string; config: ConfigFile}} param0
+   * @returns {Promise<{config: ConfigFile; error: string | null; volumes: Volumes}>}
+   */
+  async changeConfigFileVolumes({ userId, config }) {
+    const { services } = config;
+    const _config = structuredClone(config);
+    /**
+     * @type {Volumes}
+     */
+    const volumes = {};
+
+    if (!services) {
+      return { config, error: 'Serfices not found in config', volumes };
+    }
+
+    /**
+     * @type {string | null}
+     */
+    let error = null;
+    if (!userId) {
+      return {
+        config,
+        volumes,
+        error: 'User id is missing in changeVolumes',
+      };
+    }
+
+    const serviceKeys = Object.keys(services);
+
+    for (let i = 0; serviceKeys[i]; i++) {
+      if (error) {
+        break;
+      }
+      const serviceKey = serviceKeys[i];
+      const { volumes: __volumes, active } = services[serviceKey];
+
+      if (!active) {
+        continue;
+      }
+
+      if (__volumes) {
+        _config.services[serviceKey].volumes = [];
+        volumes[serviceKey] = [];
+        for (let _i = 0; __volumes[_i]; _i++) {
+          let volume = __volumes[_i];
+
+          const httpM = volume.match(/^https?:\/\//);
+          if (!httpM) {
+            _config.services[serviceKey].volumes?.push(volume);
+            continue;
+          }
+          const http = httpM[0];
+          volume = volume.replace(http, '');
+
+          const localM = volume.match(VOLUME_LOCAL_REGEX);
+          if (!localM) {
+            error = `Volume local in service "${serviceKey}" has wrong value '${volume}'`;
+            break;
+          }
+          const local = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
+          const filenameReg = /\/?[a-zA-Z_0-9\-\\.]+$/;
+          const filenameM = local.match(filenameReg);
+          if (!filenameM) {
+            error = `Local value of volume '${volume}' has wrong filename in service "${serviceKey}"`;
+            break;
+          }
+          const filename = filenameM[0].replace(/^\//, '');
+          const remoteM = volume.match(VOLUME_REMOTE_REGEX);
+          if (!remoteM) {
+            error = `Volume remote in service "${serviceKey}" has wrong value '${volume}'`;
+            break;
+          }
+          const remote = remoteM[0].replace(VOLUME_REMOTE_PREFIX_REGEX, '');
+
+          const file = await getFile({
+            url: `${http}${local}`,
+            maxSize: VOLUME_UPLOAD_MAX_SIZE,
+          }).catch((e) => {
+            error = e.message;
+          });
+          if (file === undefined) {
+            break;
+          }
+
+          const tmpFilePath = resolve(tmpdir(), `${userId}_${name}_${serviceKey}_${filename}`);
+          writeFileSync(tmpFilePath, file);
+          _config.services[serviceKey].volumes?.push(`${tmpFilePath}:${remote}`);
+          volumes[serviceKey].push(`${http}${volume}`);
+        }
+      }
+    }
+    return { config: _config, volumes, error };
   }
 
   /**
@@ -540,6 +647,90 @@ export default class WS {
     } else {
       this.handler({ failedLogin: false, sessionExists: false });
     }
+  }
+
+  /**
+   * @private
+   * @param {{config: ConfigFile; configText: string}} param0
+   * @returns {CheckConfigResult[]}
+   */
+  checkVolumes({ config, configText }) {
+    /**
+     * @type {CheckConfigResult[]}
+     */
+    const res = [];
+    const { services } = config;
+    if (!services) {
+      return res;
+    }
+    Object.keys(services).forEach((item) => {
+      const { volumes, active } = services[item];
+      if (!active || !volumes) {
+        return;
+      }
+      volumes.forEach((_item) => {
+        const localM = _item.match(VOLUME_LOCAL_REGEX);
+        if (!localM) {
+          return;
+        }
+        const localPath = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
+        if (!existsSync(localPath)) {
+          res.push({
+            msg: `Service "${item}" has wrong volume "${_item}". Local path is not exists:`,
+            data: localPath,
+            exit: true,
+            position: getPosition({
+              config,
+              configText,
+              field: 'services',
+              service: {
+                name: item,
+                property: 'volumes',
+                value: _item,
+              },
+            }),
+          });
+        } else {
+          const stats = statSync(localPath);
+          if (stats.isDirectory()) {
+            res.push({
+              msg: `Service "${item}" has wrong volume "${_item}".`,
+              data: "Directory can't be a volume, only files",
+              exit: true,
+              position: getPosition({
+                config,
+                configText,
+                field: 'services',
+                service: {
+                  name: item,
+                  property: 'volumes',
+                  value: _item,
+                },
+              }),
+            });
+          }
+          if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
+            res.push({
+              msg: `Volume file '${localPath}' of service "${item}" is too big.`,
+              data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
+              exit: true,
+              position: getPosition({
+                config,
+                configText,
+                field: 'services',
+                service: {
+                  name: item,
+                  property: 'volumes',
+                  value: localPath,
+                },
+              }),
+            });
+          }
+        }
+      });
+    });
+
+    return res;
   }
 
   /**

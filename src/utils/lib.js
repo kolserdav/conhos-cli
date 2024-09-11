@@ -204,3 +204,56 @@ export function getPHPCommandDefault(port, fpm) {
  * @returns
  */
 export const filterUnique = (value, index, array) => array.indexOf(value) === index;
+
+/**
+ * @param {{ url: string; maxSize: number }} param0
+ * @returns {Promise<string>}
+ */
+export async function getFile({ url, maxSize }) {
+  return new Promise((_resolve, reject) => {
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          return reject(new Error(`HTTP error! status: ${response.status}`));
+        }
+
+        let totalBytes = 0;
+        /**
+         * @type {string[]}
+         */
+        const chunks = [];
+        const decoder = new TextDecoder();
+        const { body } = response;
+
+        if (!body) {
+          reject(new Error('Response body is unused'));
+          return;
+        }
+
+        const reader = body.getReader();
+
+        const readStream = () => {
+          reader
+            .read()
+            .then(({ done, value }) => {
+              if (done) {
+                const finalString = chunks.join('') + decoder.decode();
+                return _resolve(finalString);
+              }
+
+              totalBytes += value.length;
+              if (totalBytes > maxSize) {
+                return reject(
+                  new Error(`Response size exceeds the maximum limit of ${maxSize} bytes`)
+                );
+              }
+              chunks.push(decoder.decode(value, { stream: true }));
+              readStream();
+            })
+            .catch(reject);
+        };
+        readStream();
+      })
+      .catch(reject);
+  });
+}
