@@ -446,7 +446,7 @@ export default class WS {
     if (!withoutCheck) {
       let checkErr = await checkConfig(
         { config, configText: data },
-        { deployData: this.deployData, isServer: false }
+        { deployData: this.deployData }
       );
       checkErr = checkErr.concat(this.checkVolumes({ config, configText: data }));
       let checkExit = false;
