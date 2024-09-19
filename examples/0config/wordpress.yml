@@ -1,7 +1,7 @@
 name: wordpress
 services:
   mariadb0:
-    type: mariadb
+    image: mariadb
     size: micro
     active: true
     version: 11.5.1-ubi9-rc
@@ -11,9 +11,9 @@ services:
       - MARIADB_PASSWORD=pass
       - MARIADB_DATABASE=db_name
     domains:
-      "3306": a5d54636-39d6-436f-bc4a-fb1abc90fafa
+      '3306': a5d54636-39d6-436f-bc4a-fb1abc90fafa
   php1:
-    type: php
+    image: php
     size: nano
     active: true
     version: 8.4-rc-fpm-bookworm

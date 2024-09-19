@@ -1,7 +1,7 @@
 name: phpmyadmin
 services:
   mysql0:
-    type: mysql
+    image: mysql
     size: mili
     active: true
     version: latest
@@ -13,7 +13,7 @@ services:
       - MYSQL_PASSWORD=pass
       - MYSQL_DATABASE=db_name
   phpmyadmin0:
-    type: phpmyadmin
+    image: phpmyadmin
     size: mili
     active: true
     version: latest

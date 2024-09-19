@@ -1,7 +1,7 @@
 name: node
 services:
   node0:
-    type: node
+    image: node
     size: mili
     active: true
     git:

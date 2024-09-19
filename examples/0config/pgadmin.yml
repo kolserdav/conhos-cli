@@ -1,7 +1,7 @@
 name: pgadmin
 services:
   postgres0:
-    type: postgres
+    image: postgres
     size: mili
     active: true
     version: 17beta2
@@ -10,7 +10,7 @@ services:
       - POSTGRES_PASSWORD=pass
       - POSTGRES_DB=db_name
   pgadmin1:
-    type: pgadmin
+    image: pgadmin
     size: mili
     active: true
     version: latest

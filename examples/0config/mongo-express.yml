@@ -1,7 +1,7 @@
 name: mongo-express
 services:
   mongo0:
-    type: mongo
+    image: mongo
     size: mili
     active: true
     version: latest
@@ -9,7 +9,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=user
       - MONGO_INITDB_ROOT_PASSWORD=pass
   mongo_express0:
-    type: mongo_express
+    image: mongo_express
     size: mili
     active: true
     version: latest
