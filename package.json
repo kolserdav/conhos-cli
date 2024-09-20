@@ -13,8 +13,7 @@
   },
   "scripts": {
     "build": "tsc -p ./jsconfig.json",
-    "script:create-docs": "node src/scripts/create-docs.js",
-    "fhead": "fhead"
+    "script:create-docs": "node src/scripts/create-docs.js"
   },
   "keywords": [],
   "author": "kolserdav",
@@ -44,7 +43,6 @@
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
-    "fhead": "^3.2.8",
     "typescript": "^5.4.5"
   },
   "fhead": {
