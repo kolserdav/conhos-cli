@@ -1,31 +1,42 @@
-name: wordpress
+name: conhos
 services:
-  mariadb0:
-    image: mariadb
-    size: micro
-    active: true
-    version: 11.5.1-ubi9-rc
-    environment:
-      - MARIADB_ROOT_PASSWORD=root
-      - MARIADB_USER=user
-      - MARIADB_PASSWORD=pass
-      - MARIADB_DATABASE=db_name
-    domains:
-      '3306': a5d54636-39d6-436f-bc4a-fb1abc90fafa
   php1:
     image: php
-    size: nano
+    size: mili
     active: true
     version: 8.4-rc-fpm-bookworm
-    pwd: ./examples/wordpress
+    pwd: ./
     no_restart: true
-    exclude:
-      - vendor
-    command: sh examples/php/install-extensions.sh && php-fpm
+    git:
+      url: https://github.com/kolserdav/conhos-wordpress
+      branch: master
+      untracked: checkout
+    entrypoint: ['sh', './install-extensions.sh']
+    command: php-fpm
     depends_on:
-      - mariadb0
+      - mysql0
     ports:
       - port: 9000
         type: php
     environment:
       - PORT=9000
+  mysql0:
+    image: mysql
+    size: micro
+    active: true
+    version: latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pass
+      - MYSQL_DATABASE=db_name
+  ftp0:
+    image: ftp
+    size: mili
+    active: true
+    version: latest
+    depends_on:
+      - php1
+    environment:
+      - 'FTP_USER_NAME=user'
+      - 'FTP_USER_PASS=pass'

@@ -86,6 +86,11 @@ export default class Deploy extends WS {
   isNewUpload = false;
 
   /**
+   * @type {Record<string, true>}
+   */
+  waitGitUpload = {};
+
+  /**
    * @public
    * @type {WS['listener']}
    */
@@ -188,6 +193,17 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'deployDeleteFilesCli'>} param0
    */
   async deleteFiles({ data: { service, files, cwd, last, url }, status }) {
+    if (this.waitGitUpload[service]) {
+      console.info('Waiting to git upload', service);
+      await new Promise((resolve) => {
+        setInterval(() => {
+          if (this.waitGitUpload[service]) {
+            return;
+          }
+          resolve(0);
+        }, 100);
+      });
+    }
     if (files.length !== 0) {
       console[status](`Files deleted "${service}":\n`, files.map((item) => item).join('\n'));
     }
@@ -317,6 +333,7 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'deployGitCli'>} param0
    */
   async gitCli({ data: { service, last } }) {
+    delete this.waitGitUpload[service];
     if (!this.config) {
       return;
     }
@@ -357,15 +374,17 @@ export default class Deploy extends WS {
 
     const { services } = this.config;
     const activeServices = this.getActiveServices(services);
-    const last = activeServices.length === this.uploadedServices.length;
+    const last = activeServices.length <= this.uploadedServices.length;
 
     if (git) {
-      console.info(
-        'Starting synchronyze git',
-        `Url: ${git.url}, branch: ${git.branch}, untracked: ${
-          git.untracked || Object.keys(GIT_UNTRACKED_POLICY)[0]
-        }`
-      );
+      if (active) {
+        console.info(
+          'Starting synchronyze git',
+          `Url: ${git.url}, branch: ${git.branch}, untracked: ${
+            git.untracked || Object.keys(GIT_UNTRACKED_POLICY)[0]
+          }`
+        );
+      }
       this.sendMessage({
         token: this.token,
         message: '',
@@ -382,6 +401,7 @@ export default class Deploy extends WS {
         status: 'info',
         connId: this.connId,
       });
+      this.waitGitUpload[service] = true;
       return;
     }
 
