@@ -2,7 +2,7 @@ name: wordpress
 services:
   php1:
     image: php
-    size: mili
+    size: micro
     active: true
     version: 8.4-rc-fpm-bookworm
     pwd: ./
@@ -22,7 +22,7 @@ services:
       - PORT=9000
   mysql0:
     image: mysql
-    size: micro
+    size: mili
     active: true
     version: latest
     environment:
@@ -32,7 +32,7 @@ services:
       - MYSQL_DATABASE=db_name
   ftp0:
     image: ftp
-    size: mili
+    size: pico
     active: true
     version: latest
     depends_on:
