@@ -1,4 +1,4 @@
-name: conhos
+name: wordpress
 services:
   php1:
     image: php
