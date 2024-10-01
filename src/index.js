@@ -19,6 +19,10 @@ import Init from './core/init.js';
 import Logs from './core/logs.js';
 import IP from './core/ip.js';
 
+process.on('SIGABRT', () => {
+  process.exit(1);
+});
+
 const packageHomeDir = getPackagePath();
 if (!fs.existsSync(packageHomeDir)) {
   fs.mkdirSync(packageHomeDir);
