@@ -120,8 +120,9 @@ export default class Logs extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    if (!this.config) {
-      return;
+    let project = this.options.project || 'no-project';
+    if (this.config && !this.options.project) {
+      project = this.config.name;
     }
 
     if (this.options.clear) {
@@ -136,7 +137,6 @@ export default class Logs extends WS {
       }
     }
 
-    const { name } = this.config;
     this.sendMessage({
       token: this.token,
       type: 'getLogsServer',
@@ -146,7 +146,7 @@ export default class Logs extends WS {
         watch: this.options.follow || false,
         timestamps: this.options.timestamps || false,
         serviceName: this.serviceName,
-        project: name,
+        project,
         since: this.options.since,
         until: this.options.until,
         tail: this.options.tail,
@@ -180,7 +180,6 @@ export default class Logs extends WS {
     const percentUpload = 0;
 
     const fn = await this.setRequest(url);
-    const date = new Date().getTime();
     return new Promise((resolve) => {
       const req = fn(
         url,

@@ -74,6 +74,7 @@ const yaml = new Yaml();
  *  clear?: boolean;
  *  clearCache?: boolean;
  *  interractive?: boolean;
+ *  project?: string;
  * }} Options
  */
 
@@ -303,11 +304,14 @@ export default class WS {
     this.setUserId(userId);
 
     if (!skipSetProject) {
-      const { config, volumes } = await this.getConfig();
-      if (config) {
-        this.setProject(config.name);
-        this.config = config;
-        this.volumes = volumes;
+      const conf = await this.getConfig();
+      if (conf) {
+        const { config, volumes } = conf;
+        if (config) {
+          this.setProject(config.name);
+          this.config = config;
+          this.volumes = volumes;
+        }
       }
     }
 
@@ -411,7 +415,7 @@ export default class WS {
    *  changeVars?: boolean;
    *  withoutCheck?: boolean;
    * }} [param0={ withoutWarns: false, changeVars: true, withoutCheck: false }]
-   * @returns {Promise<{config: ConfigFile; volumes: Volumes}>}
+   * @returns {Promise<{config: ConfigFile; volumes: Volumes} | null>}
    */
   async getConfig(
     { withoutWarns, changeVars, withoutCheck } = {
@@ -421,8 +425,16 @@ export default class WS {
     }
   ) {
     if (!existsSync(this.configFile)) {
-      console.warn('Config file is not exists, run', `"${PACKAGE_NAME} init" first`);
-      process.exit(1);
+      if (!this.options.project) {
+        console.warn(
+          'Config file is not exists, run',
+          `"${PACKAGE_NAME} init" first`,
+          'Or try add "-p [project-name]" option'
+        );
+        process.exit(1);
+      } else {
+        return null;
+      }
     }
     const _data = readFileSync(this.configFile).toString();
     const data = changeVars ? this.changeVariables(_data) : _data;

@@ -105,7 +105,18 @@ program
     '--until <time>',
     'Show logs before a timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)'
   )
-  .option('-n, --tail <number_of_lines>', 'Number of lines to show from the end of the logs')
+  .option('-n, --tail <number>', 'Number of lines to show from the end of the logs', (value) => {
+    const num = parseInt(value, 10);
+    if (isNaN(num)) {
+      console.error('The value for -n|--tail must be a number', value);
+      process.exit(1);
+    }
+    return num;
+  })
+  .option(
+    '-p, --project <string>',
+    'Project name. If conhos.yml file is not exists that it is required.'
+  )
   .argument('<service_name>', 'The name of target service')
   .action(async (arg, options) => {
     new Logs(options, arg);
