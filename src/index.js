@@ -19,8 +19,19 @@ import Init from './core/init.js';
 import Logs from './core/logs.js';
 import IP from './core/ip.js';
 
-process.on('SIGABRT', () => {
+process.on('SIGABRT', (sig) => {
+  console.warn('Received abort signal', sig);
   process.exit(1);
+});
+
+process.on('SIGTERM', (sig) => {
+  console.warn('Received term signal', sig);
+  process.exit(1);
+});
+
+process.on('SIGTERM', (sig) => {
+  console.warn('Received signal', sig);
+  //process.exit(1);
 });
 
 const packageHomeDir = getPackagePath();
