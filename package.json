@@ -23,7 +23,7 @@
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "conhos": "^2.1.0",
-    "conhos-vscode": "^0.0.17",
+    "conhos-vscode": "file:../conhos-vscode",
     "dotenv": "^16.3.1",
     "filesize": "^10.1.4",
     "inquirer": "^9.2.22",
