@@ -13,10 +13,10 @@ import readline from 'readline';
 import WS from '../connectors/ws.js';
 import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console } from '../utils/lib.js';
+import { as, console, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 import { parseMessageCli } from 'conhos-vscode/dist/lib.js';
-import { stdin, stdout } from 'process';
+import Console from 'console';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
@@ -32,13 +32,22 @@ import { stdin, stdout } from 'process';
 const inquirer = new Inquirer();
 
 export default class Exec extends WS {
-  num = 0;
-
   /**
    * @private
    * @type {string}
    */
   serviceName;
+
+  /**
+   * @private
+   * @type {string[]}
+   */
+  history = [];
+
+  /**
+   * @private
+   */
+  historyIndex = 0;
 
   /**
    * @public
@@ -77,20 +86,59 @@ export default class Exec extends WS {
 
   /**
    * @private
+   */
+  showStartLine() {
+    stdoutWriteStart(`${this.serviceName}# `);
+  }
+
+  /**
+   * @private
    * @param {WSMessageCli<'execCli'>} msg
    */
   async execCli({ data: { url } }) {
     console.info(EXEC_CONNECT_URL_MESSAGE, url);
     const socket = new WebSocket(url, ['test']);
-    stdout.write(`${this.serviceName}# `);
+
+    socket.on('close', () => {
+      console.warn('Connection aborting', 'Try again later');
+      process.exit(1);
+    });
+
+    socket.on('message', (d) => {
+      const str = d.toString();
+      if (str) {
+        stdoutWriteStart('');
+        Console.log(str.replace(/\n$/, ''));
+      }
+      this.showStartLine();
+    });
+
+    this.showStartLine();
 
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
       terminal: true,
     });
-    stdin.on('data', (data) => {
-      console.info(1, data);
+
+    rl.on('line', (input) => {
+      this.history.push();
+      socket.send(input);
+    });
+
+    rl.on('close', () => {
+      stdoutWriteStart('');
+      console.info('Terminal exited', this.serviceName);
+      process.exit(0);
+    });
+
+    /**
+     * @type {NodeJS.ReadStream}
+     */
+    const readStream = as(rl).input;
+    readStream.on('data', (key) => {
+      // const up = key[2] === 65;
+      // const donw = key[2] === 66;
     });
   }
 
