@@ -131,15 +131,6 @@ export default class Exec extends WS {
       console.info('Terminal exited', this.serviceName);
       process.exit(0);
     });
-
-    /**
-     * @type {NodeJS.ReadStream}
-     */
-    const readStream = as(rl).input;
-    readStream.on('data', (key) => {
-      // const up = key[2] === 65;
-      // const donw = key[2] === 66;
-    });
   }
 
   /**
