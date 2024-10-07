@@ -117,7 +117,7 @@ export default class Exec extends WS {
 
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout,
+      output: this.options.interractive ? process.stdout : undefined,
       terminal: true,
     });
 

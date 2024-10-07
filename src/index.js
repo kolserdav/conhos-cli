@@ -98,6 +98,10 @@ program
     '-p, --project <string>',
     'Project name. If conhos.yml file is not exists that it is required.'
   )
+  .option(
+    '--no-interractive',
+    "It used to run in docker container. When it's no interractive you can't see what do you write."
+  )
   .argument('<service_name>', 'The name of target service')
   .action(async (arg, options) => {
     new Exec(options, arg);
