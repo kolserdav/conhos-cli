@@ -567,7 +567,10 @@ export default class WS {
             break;
           }
 
-          const tmpFilePath = resolve(tmpdir(), `${userId}_${name}_${serviceKey}_${filename}`);
+          const tmpFilePath = resolve(
+            tmpdir(),
+            `${userId}_${config.name}_${serviceKey}_${filename}`
+          );
           writeFileSync(tmpFilePath, file);
           _config.services[serviceKey].volumes?.push(`${tmpFilePath}:${remote}`);
           volumes[serviceKey].push(`${http}${volume}`);
