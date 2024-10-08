@@ -601,6 +601,7 @@ export default class Deploy extends WS {
           volumes: this.volumes,
           interractive: this.options.interractive || false,
           configText: this.configText,
+          ssl: this.options.ssl || false,
         },
         status: 'info',
         connId: this.connId,

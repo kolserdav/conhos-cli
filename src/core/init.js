@@ -152,12 +152,15 @@ export default class Init extends WS {
               }
             }
           } else {
-            const { config } = await this.getConfig({
+            const res = await this.getConfig({
               withoutCheck: this.addNewService || this.overwrite,
             });
-            this.config = config;
-            this.project = config.name;
-            this.services = this.config.services;
+            if (res !== null) {
+              const { config } = res;
+              this.config = config;
+              this.project = config.name;
+              this.services = this.config.services;
+            }
           }
           if (this.config) {
             this.config.name = this.project;
@@ -485,8 +488,11 @@ export default class Init extends WS {
       }
     }
 
-    const { config } = await this.getConfig({ withoutCheck: this.overwrite || this.addNewService });
-    this.config = config;
+    const res = await this.getConfig({ withoutCheck: this.overwrite || this.addNewService });
+    if (res !== null) {
+      const { config } = res;
+      this.config = config;
+    }
 
     /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
       token: this.token,

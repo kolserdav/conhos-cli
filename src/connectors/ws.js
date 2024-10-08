@@ -74,6 +74,7 @@ const yaml = new Yaml();
  *  clear?: boolean;
  *  clearCache?: boolean;
  *  interractive?: boolean;
+ *  ssl?: boolean;
  *  project?: string;
  * }} Options
  */
