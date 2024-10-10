@@ -136,7 +136,7 @@ export default class Deploy extends WS {
    * @private
    * @param {WSMessageCli<'deployPrepareVolumeUploadCli'>} msg
    */
-  async prepareVolumeUpload({ data: { url, serviceName } }) {
+  async prepareVolumeUpload({ data: { url: _url, serviceName } }) {
     if (!this.config) {
       return;
     }
@@ -168,16 +168,17 @@ export default class Deploy extends WS {
           }
           const filePath = fileM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
           const file = basename(filePath);
+          const url = `${_url}/${file}`;
           const { message, status } = await this.uploadFileRequest({
             filePath,
-            url: `${url}/${file}`,
+            url,
             service: serviceName,
             fileName: file,
             connId: this.connId,
             tarball: false,
           });
           stdoutWriteStart('');
-          console[status](message, serviceName, file);
+          console[status](message, serviceName, url);
           if (status === 'error') {
             console.warn(`Failed to upload volume for service "${key}"`, filePath);
             process.exit(1);
