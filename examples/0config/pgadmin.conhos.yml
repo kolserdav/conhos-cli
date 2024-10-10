@@ -11,7 +11,7 @@ services:
       - POSTGRES_DB=db_name
   pgadmin1:
     image: pgadmin
-    size: mili
+    size: micro
     active: true
     version: latest
     environment:

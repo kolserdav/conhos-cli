@@ -2,7 +2,7 @@ name: mongo-express
 services:
   mongo0:
     image: mongo
-    size: mili
+    size: micro
     active: true
     version: latest
     environment:
@@ -10,7 +10,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=pass
   mongo_express0:
     image: mongo_express
-    size: mili
+    size: pico
     active: true
     version: latest
     depends_on:

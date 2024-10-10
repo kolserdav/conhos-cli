@@ -2,7 +2,7 @@ name: phpmyadmin
 services:
   mysql0:
     image: mysql
-    size: mili
+    size: micro
     active: true
     version: latest
     volumes:
@@ -14,7 +14,7 @@ services:
       - MYSQL_DATABASE=db_name
   phpmyadmin0:
     image: phpmyadmin
-    size: mili
+    size: pico
     active: true
     version: latest
     depends_on:

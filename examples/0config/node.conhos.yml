@@ -2,7 +2,7 @@ name: node
 services:
   node0:
     image: node
-    size: mili
+    size: nano
     active: true
     git:
       url: https://github.com/kolserdav/conhos-test-git.git
