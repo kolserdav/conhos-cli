@@ -257,3 +257,18 @@ export async function getFile({ url, maxSize }) {
       .catch(reject);
   });
 }
+
+/**
+ * @template {keyof import('../connectors/ws.js').WSMessageDataCli} T
+ * @param {string} msg
+ * @returns {import('../connectors/ws.js').WSMessageCli<T> | null}
+ */
+export function parseMessageCli(msg) {
+  let data = null;
+  try {
+    data = JSON.parse(msg);
+  } catch (e) {
+    console.error('error', 'Failed parse message', e);
+  }
+  return data;
+}

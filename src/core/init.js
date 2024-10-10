@@ -18,12 +18,7 @@ import {
   PACKAGE_NAME,
   EXCLUDE_DEFAULT,
 } from '../utils/constants.js';
-import {
-  parseMessageCli,
-  computeCostService,
-  isCustomService,
-  isCommonService,
-} from 'conhos-vscode/dist/lib.js';
+import { computeCostService, isCustomService, isCommonService } from 'conhos-vscode/dist/lib.js';
 import {
   getConfigFilePath,
   console,
@@ -32,13 +27,14 @@ import {
   filterUnique,
   getPHPCommandDefault,
   as,
+  parseMessageCli,
 } from '../utils/lib.js';
 import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants.js';
 
 /**
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
- * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('../connectors/ws.js').Session} Session
  * @typedef {import('conhos-vscode').ServiceType} ServiceType
@@ -48,7 +44,7 @@ import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants
  */
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('../connectors/ws.js').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();

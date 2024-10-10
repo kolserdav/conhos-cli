@@ -15,7 +15,7 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import { as, console, getPackagePath, stdoutWriteStart } from '../utils/lib.js';
+import { as, console, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -37,20 +37,20 @@ import {
   VOLUME_LOCAL_REGEX,
 } from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
-import { isCustomService, parseMessageCli } from 'conhos-vscode/dist/lib.js';
+import { isCustomService } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
- * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('cache-changed').CacheItem} CacheItem
  * @typedef {import('conhos-vscode').Status} Status
  */
 
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('../connectors/ws.js').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();

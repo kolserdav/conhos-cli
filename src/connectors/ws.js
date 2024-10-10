@@ -36,7 +36,7 @@ const yaml = new Yaml();
 
 /**
  * @typedef {import('conhos-vscode').DeployData} DeployData
- * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('http').request} HttpRequest
  * @typedef {import('https').request} HttpsRequest
@@ -45,7 +45,7 @@ const yaml = new Yaml();
  */
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('conhos-vscode').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 /**

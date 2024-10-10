@@ -10,7 +10,7 @@
  ******************************************************************************************/
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import WS from '../connectors/ws.js';
-import { console, getPackagePath, openBrowser } from '../utils/lib.js';
+import { console, getPackagePath, openBrowser, parseMessageCli } from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
   LOGIN_PAGE,
@@ -19,12 +19,11 @@ import {
 } from '../utils/constants.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import { parseMessageCli } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
- * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../connectors/ws.js').Session} Session
  * @typedef {{userId: string;}} Identity
  */

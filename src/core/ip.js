@@ -9,17 +9,16 @@
  * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WS from '../connectors/ws.js';
-import { parseMessageCli } from 'conhos-vscode/dist/lib.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console } from '../utils/lib.js';
+import { console, parseMessageCli } from '../utils/lib.js';
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
- * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('conhos-vscode').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 export default class IP extends WS {

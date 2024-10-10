@@ -13,20 +13,19 @@ import readline from 'readline';
 import WS from '../connectors/ws.js';
 import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { as, console, stdoutWriteStart } from '../utils/lib.js';
+import { as, console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
-import { parseMessageCli } from 'conhos-vscode/dist/lib.js';
 import Console from 'console';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
- * @typedef {import('conhos-vscode').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').Status} Status
  */
 
 /**
  * @template {keyof WSMessageDataCli} T
- * @typedef {import('conhos-vscode').WSMessageCli<T>} WSMessageCli<T>
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();
