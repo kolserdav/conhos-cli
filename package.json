@@ -15,7 +15,7 @@
     "build": "tsc -p ./jsconfig.json",
     "script:create-docs": "node src/scripts/create-docs.js"
   },
-  "keywords": [],
+  "keywords": ["container", "hosting", "cloud", "docker", "deploy"],
   "author": "kolserdav",
   "license": "MIT",
   "dependencies": {
