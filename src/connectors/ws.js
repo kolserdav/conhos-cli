@@ -787,7 +787,7 @@ export default class WS {
     const interval = setInterval(() => {
       if (this.canClose) {
         clearInterval(interval);
-        process.exit(!data ? 1 : 0);
+        process.exit(!data ? 1 : data?.code !== undefined ? data.code : 0);
       }
     }, 0);
   }
