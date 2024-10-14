@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   python1:
-    type: python
+    image: python
     size: mili
     active: true
     version: latest
@@ -37,7 +37,7 @@ services:
       - MYSQL_PASSWORD=value2
       - MYSQL_DATABASE=value3
   mysql0:
-    type: mysql
+    image: mysql
     size: mili
     active: true
     version: latest

@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   rust1:
-    type: rust
+    image: rust
     size: mili
     active: true
     version: latest
@@ -36,7 +36,7 @@ services:
       - POSTGRES_USER=value1
       - POSTGRES_DB=value2
   postgres0:
-    type: postgres
+    image: postgres
     size: mili
     active: true
     version: latest

@@ -16,7 +16,7 @@ Configuration file for creating a `Rust` service in Container Hosting with a `Po
 name: name-of-project
 services:
   rust1:
-    type: rust
+    image: rust
     size: mili
     active: true
     version: ${{VERSION}}

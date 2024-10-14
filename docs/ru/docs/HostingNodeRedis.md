@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   node1:
-    type: node
+    image: node
     size: mili
     active: true
     version: latest
@@ -34,7 +34,7 @@ services:
       # Далее пробрасываем переменные для подключения
       - REDIS_PASSWORD=value0
   redis0:
-    type: redis
+    image: redis
     size: mili
     active: true
     version: latest

@@ -26,7 +26,7 @@
 name: my-awesome-project
 services:
   python0:
-    type: python
+    image: python
     size: mili
     active: true
     pwd: examples/python

@@ -16,7 +16,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Rab
 name: name-of-project
 services:
   php1:
-    type: php
+    image: php
     size: mili
     active: true
     version: ${{VERSION}}

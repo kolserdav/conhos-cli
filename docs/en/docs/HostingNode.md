@@ -26,7 +26,7 @@ Configuration file for creating the `Node` service in Container Hosting. More de
 name: my-awesome-project
 services:
   node0:
-    type: node
+    image: node
     size: mili
     active: true
     pwd: examples/node

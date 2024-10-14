@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   php1:
-    type: php
+    image: php
     size: mili
     active: true
     version: latest
@@ -35,7 +35,7 @@ services:
       - RABBITMQ_DEFAULT_PASS=value0
       - RABBITMQ_DEFAULT_USER=value1
   rabbitmq0:
-    type: rabbitmq
+    image: rabbitmq
     size: mili
     active: true
     version: latest

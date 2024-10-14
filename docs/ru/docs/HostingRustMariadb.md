@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   rust1:
-    type: rust
+    image: rust
     size: mili
     active: true
     version: latest
@@ -37,7 +37,7 @@ services:
       - MARIADB_PASSWORD=value2
       - MARIADB_DATABASE=value3
   mariadb0:
-    type: mariadb
+    image: mariadb
     size: mili
     active: true
     version: latest

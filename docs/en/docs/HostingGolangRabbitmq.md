@@ -16,7 +16,7 @@ Configuration file for creating a `Golang` service in Container Hosting with a `
 name: name-of-project
 services:
   golang1:
-    type: golang
+    image: golang
     size: mili
     active: true
     version: ${{VERSION}}

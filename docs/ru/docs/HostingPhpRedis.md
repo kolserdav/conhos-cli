@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   php1:
-    type: php
+    image: php
     size: mili
     active: true
     version: latest
@@ -34,7 +34,7 @@ services:
       # Далее пробрасываем переменные для подключения
       - REDIS_PASSWORD=value0
   redis0:
-    type: redis
+    image: redis
     size: mili
     active: true
     version: latest

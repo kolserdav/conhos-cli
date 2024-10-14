@@ -26,7 +26,7 @@ Configuration file for creating the `Python` service in Container Hosting. More 
 name: my-awesome-project
 services:
   python0:
-    type: python
+    image: python
     size: mili
     active: true
     pwd: examples/python

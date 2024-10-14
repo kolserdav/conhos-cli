@@ -16,7 +16,7 @@ Configuration file for creating a `Node` service in Container Hosting with a `Re
 name: name-of-project
 services:
   node1:
-    type: node
+    image: node
     size: mili
     active: true
     version: ${{VERSION}}

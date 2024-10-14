@@ -16,7 +16,7 @@ Configuration file for creating a `Python` service in Container Hosting with a `
 name: name-of-project
 services:
   python1:
-    type: python
+    image: python
     size: mili
     active: true
     version: ${{VERSION}}

@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   rust1:
-    type: rust
+    image: rust
     size: mili
     active: true
     version: latest
@@ -37,7 +37,7 @@ services:
       - MYSQL_PASSWORD=value2
       - MYSQL_DATABASE=value3
   mysql0:
-    type: mysql
+    image: mysql
     size: mili
     active: true
     version: latest

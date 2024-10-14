@@ -26,7 +26,7 @@ Configuration file for creating the `Rust` service in Container Hosting. More de
 name: my-awesome-project
 services:
   rust0:
-    type: rust
+    image: rust
     size: mili
     active: true
     pwd: examples/rust

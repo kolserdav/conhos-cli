@@ -26,7 +26,7 @@
 name: my-awesome-project
 services:
   golang0:
-    type: golang
+    image: golang
     size: mili
     active: true
     pwd: examples/golang

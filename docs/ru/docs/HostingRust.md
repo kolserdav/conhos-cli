@@ -26,7 +26,7 @@
 name: my-awesome-project
 services:
   rust0:
-    type: rust
+    image: rust
     size: mili
     active: true
     pwd: examples/rust

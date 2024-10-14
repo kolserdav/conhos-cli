@@ -26,7 +26,7 @@
 name: my-awesome-project
 services:
   node0:
-    type: node
+    image: node
     size: mili
     active: true
     pwd: examples/node

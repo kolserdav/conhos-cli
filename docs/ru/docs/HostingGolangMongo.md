@@ -16,7 +16,7 @@
 name: name-of-project
 services:
   golang1:
-    type: golang
+    image: golang
     size: mili
     active: true
     version: latest
@@ -35,7 +35,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=value0
       - MONGO_INITDB_ROOT_PASSWORD=value1
   mongo0:
-    type: mongo
+    image: mongo
     size: mili
     active: true
     version: latest

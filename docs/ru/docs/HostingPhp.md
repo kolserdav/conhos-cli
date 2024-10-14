@@ -26,7 +26,7 @@
 name: my-awesome-project
 services:
   php0:
-    type: php
+    image: php
     size: mili
     active: true
     pwd: examples/php
