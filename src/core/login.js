@@ -149,7 +149,7 @@ export default class Login extends WS {
       message: '',
       packageName: PACKAGE_NAME,
       data: this.connId,
-      token: null,
+      token: this.token,
       userId: this.userId,
       connId: this.connId,
     });

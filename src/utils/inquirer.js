@@ -104,7 +104,7 @@ export default class Inquirer {
    * @public
    * @param {string} name
    * @param {boolean} def
-   * @returns {Promise<string>}
+   * @returns {Promise<boolean>}
    */
   async confirm(name, def) {
     const prompt = inquirer.createPromptModule();

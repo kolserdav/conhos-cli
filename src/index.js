@@ -19,6 +19,7 @@ import Init from './core/init.js';
 import Logs from './core/logs.js';
 import IP from './core/ip.js';
 import Exec from './core/exec.js';
+import Project from './core/project.js';
 
 process.on('SIGABRT', (sig) => {
   console.warn('Received abort signal', sig);
@@ -90,6 +91,18 @@ program
   .description('Get project node IP')
   .action(async (options) => {
     new IP(options);
+  });
+
+program
+  .command('project')
+  .description('Project management')
+  .option(
+    '-p, --project <string>',
+    'Project name. If conhos.yml file is not exists that it is required.'
+  )
+  .option('-d, --delete', 'Delete project')
+  .action(async (options) => {
+    new Project(options);
   });
 
 program

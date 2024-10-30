@@ -155,6 +155,19 @@ export const EXEC_CONNECT_URL_MESSAGE = 'Connection url';
  * @property {{
  *   url: string;
  * }} execCli
+ * @property {{
+ *   name: string;
+ * }} projectDeleteServer
+ * @property {{
+ *   value: boolean;
+ *   name: string;
+ * }} projectDeleteAcceptServer
+ * @property {{
+ *   name: string;
+ * }} projectDeleteAcceptCli
+ *  @property {{
+ *   msg: string;
+ * }} projectDeleteProgressCli
  */
 
 /**

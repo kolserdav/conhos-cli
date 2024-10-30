@@ -76,6 +76,7 @@ const yaml = new Yaml();
  *  interractive?: boolean;
  *  ssl?: boolean;
  *  project?: string;
+ *  delete?: boolean;
  * }} Options
  */
 
@@ -205,7 +206,7 @@ export default class WS {
     this.options = options;
     this.userId = '';
     this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
-    this.token = null;
+    this.token = '';
     this.start();
     this.listener();
     this.configFile = getConfigFilePath();
@@ -283,7 +284,7 @@ export default class WS {
           version,
         },
         connId: ws.connId,
-        token: null,
+        token: this.token,
         userId: ws.userId,
       });
     });
