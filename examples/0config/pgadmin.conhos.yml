@@ -4,7 +4,7 @@ services:
     image: postgres
     size: mili
     active: true
-    version: 17beta2
+    version: latest
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=pass
