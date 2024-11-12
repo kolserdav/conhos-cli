@@ -15,14 +15,17 @@ services:
   active: true # Service started
   version: latest # Container version
   pwd: examples/postgres # Path to the working folder (files and folders from this path will be uploaded to the cloud)
-  exclude: # Exclude files and folders (path relative to root "pwd")
+  volumes: # [OPTIONAL] Upload additional files to the container
+    - https://raw.githubusercontent.com/kolserdav/conhos-cli/master/examples/php/install-extensions.sh:install-extensions.sh
+  entrypoint: ['install-extensions.sh'] # [OPTIONAL] Scripts to run when creating the container
+  exclude: # [OPTIONAL] Exclude files and folders (path relative to root "pwd")
     - tmp
     - node_modules
   command: npm i && npm run start # Command to start the container
-  ports: # List of external ports
+  ports: # [OPTIONAL] List of external ports
     - port: 3000
       type: http
-  environment: # Environment variables
+  environment: # [OPTIONAL] Environment variables
     - PORT=3000
 ```
 
@@ -206,6 +209,23 @@ For overwriting configuration files inside the container.
 volumes:
   # - [absolute or relative path to file]:[absolute path to file inside container]
   - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
+```
+
+### Running a script when creating a container
+
+> Except for the `postgres` service, where you don't need to pass `entrypoint` to run scripts when creating, instead we pass the `/docker-entrypoint-initdb.d/init.sql` file inside the container via `volumes` with approximate contents:
+
+```sh
+#!/bin/sh
+config_path=/var/lib/postgresql/data/postgresql.conf
+echo "Add include dir to config $config_path"
+echo "include_dir='/etc/postgresql'" >> $config_path
+
+```
+
+```yml
+# Optional
+entrypoint: ['install-extensions.sh']
 ```
 
 ## Using your own domain

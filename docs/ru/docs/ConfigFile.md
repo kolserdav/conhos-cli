@@ -15,14 +15,17 @@ services:
     active: true # Сервис запущен
     version: latest # Версия контейнера
     pwd: examples/postgres # Путь до рабочей папки (файлы и папки из этого пути будут загружены в облако)
-    exclude: # Файлы и папки исключения (путь относительно корня "pwd")
+    volumes: # [ОПЦИОНАЛЬНО] Загрузка дополнительных файлов в контейнер
+      - https://raw.githubusercontent.com/kolserdav/conhos-cli/master/examples/php/install-extensions.sh:install-extensions.sh
+    entrypoint: ['install-extensions.sh'] # [ОПЦИОНАЛЬНО] Скрипты запускаемые при создании контейнера
+    exclude: # [ОПЦИОНАЛЬНО] Файлы и папки исключения (путь относительно корня "pwd")
       - tmp
       - node_modules
     command: npm i && npm run start # Команда при старте контейнера
-    ports: # Список внешних портов
+    ports: # [ОПЦИОНАЛЬНО] Список внешних портов
       - port: 3000
         type: http
-    environment: # Переменные окружения
+    environment: # [ОПЦИОНАЛЬНО] Переменные окружения
       - PORT=3000
 ```
 
@@ -206,6 +209,23 @@ exclude:
 volumes:
   # - [абсолютный или относительный путь до файла]:[абсолютный путь до файла внутри контейнера]
   - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
+```
+
+### Запуск скрипта при создании контейнера
+
+> За исключением сервиса `postgres`, в котором для запуска скриптов при создании не нужно передавать `entrypoint` вместо этого передаем через `volumes` внутрь контейнера файл `/docker-entrypoint-initdb.d/init.sql` с примерным содержанием:
+
+```sh
+#!/bin/sh
+config_path=/var/lib/postgresql/data/postgresql.conf
+echo "Add include dir to config $config_path"
+echo "include_dir='/etc/postgresql'" >> $config_path
+
+```
+
+```yml
+# Опционально
+entrypoint: ['install-extensions.sh']
 ```
 
 ## Использование своего домена
