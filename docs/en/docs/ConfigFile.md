@@ -230,18 +230,7 @@ entrypoint: ['install-extensions.sh']
 
 ## Using your own domain
 
-After each launch, the program updates the configuration file by adding the `domains` field to each service:
-
-```yml
-domains:
-  '3000': unsoldered.cloud.conhos.ru
-```
-
-_Where `3000` is an external port, and `unsoldered.cloud.conhos.ru` is a domain that is generated automatically._
-
-### Set up your domain
-
-To set up your domain, simply change this value to the one you need:
+To set up your domain, simply add the following field to the service configuration:
 
 ```yml
 domains:
