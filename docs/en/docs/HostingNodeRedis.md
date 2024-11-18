@@ -4,9 +4,13 @@ To host `Node` on Container Hosting and connect to the `Redis` database from it,
 
 ## 1. Installing the project management utility
 
+> If your project files are in a Git repository, then installing the utility is not necessary, since you can run the project from the browser.
+
 If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility earlier, then simply proceed to the next step. If you have not installed it, then use the [Instructions](./GettingStarted.md) to install it.
 
 ## 2. Creating a configuration file
+
+> If your project files are in a Git repository, you can create a configuration file from your browser.
 
 Configuration file for creating a `Node` service in Container Hosting with a `Redis` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md#example_configuration_file).
 

@@ -14,9 +14,13 @@ To host an application on Container Hosting `Golang`, you must complete the foll
 
 ## 1. Installing the project management utility
 
+> If your project files are in a Git repository, then installing the utility is not necessary, since you can run the project from the browser.
+
 If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earlier, then simply proceed to the next step. If not installed, then use [Instructions](./GettingStarted.md#introduction) to install.
 
 ## 2. Create a configuration file
+
+> If your project files are in a Git repository, you can create a configuration file from your browser.
 
 Configuration file for creating the `Golang` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
