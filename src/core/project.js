@@ -68,7 +68,7 @@ export default class Project extends WS {
    * @private
    * @param {WSMessageCli<'projectDeleteAcceptCli'>} msg
    */
-  async acceptDelete({ status, message, data: { name } }) {
+  async acceptDelete({ message, data: { name } }) {
     const value = await inquirer.confirm(message, false);
     this.sendMessage({
       token: this.token,
@@ -102,6 +102,7 @@ export default class Project extends WS {
       packageName: PACKAGE_NAME,
       data: {
         name,
+        interractive: this.options.interractive || false,
       },
       connId: this.connId,
       status: 'info',
