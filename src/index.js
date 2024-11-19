@@ -101,6 +101,10 @@ program
     'Project name. If conhos.yml file is not exists that it is required.'
   )
   .option('-d, --delete', 'Delete project')
+  .option(
+    '--no-interractive',
+    'If you are asked to confirm the deletion of the project, the script will automatically answer "yes"'
+  )
   .action(async (options) => {
     new Project(options);
   });
