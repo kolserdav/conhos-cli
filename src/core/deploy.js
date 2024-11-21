@@ -21,6 +21,7 @@ import {
   CONFIG_FILE_NAME,
   CONFIG_FILE_NAME_A,
   CWD,
+  METADATA_FILE_NAME,
   PACKAGE_NAME,
   UPLOAD_CHUNK_SIZE,
   UPLOAD_PERCENT_DIFF,
@@ -38,6 +39,8 @@ import {
 } from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
 import { isCustomService } from 'conhos-vscode/dist/lib.js';
+import { readFile, writeFile } from 'fs/promises';
+import { ENV_VARIABLE_REGEX, ENV_VARIABLES_CLEAN_REGEX } from '../types/interfaces.js';
 
 /**
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
@@ -51,6 +54,15 @@ import { isCustomService } from 'conhos-vscode/dist/lib.js';
 /**
  * @template {keyof WSMessageDataCli} T
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
+ */
+
+/**
+ * @typedef {{
+ *  projects: {
+ *    path: string;
+ *    name: string;
+ *  }[]
+ * }} Metadata
  */
 
 const inquirer = new Inquirer();
@@ -574,6 +586,8 @@ export default class Deploy extends WS {
       return;
     }
 
+    await this.checkMetadata();
+
     const { name, services } = this.config;
 
     const packageProjectPath = getPackagePath(name);
@@ -589,6 +603,8 @@ export default class Deploy extends WS {
       console.info('Starting deploy project', name);
     }
 
+    const env = this.getEnvVariables();
+
     this
       /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
         token: this.token,
@@ -603,6 +619,7 @@ export default class Deploy extends WS {
           interractive: this.options.interractive || false,
           configText: this.configText,
           ssl: this.options.ssl || false,
+          env,
         },
         status: 'info',
         connId: this.connId,
@@ -942,5 +959,122 @@ export default class Deploy extends WS {
         clearInterval(interval2);
       });
     });
+  }
+
+  /**
+   * @private
+   */
+  getMetadataFilePath() {
+    return getPackagePath(METADATA_FILE_NAME);
+  }
+
+  /**
+   * @private
+   * @param {string} metadataFilePath
+   * @returns {Promise<Metadata | null>}
+   */
+  async readMetadataFile(metadataFilePath) {
+    const res = await readFile(metadataFilePath).catch((error) => {
+      console.error('Failed to read metadata file', error);
+    });
+    /**
+     * @type {Metadata | null}
+     */
+    if (!res) {
+      return null;
+    }
+    let data = null;
+    try {
+      data = JSON.parse(res.toString());
+    } catch (error) {
+      console.error('Failed to parse metadata file', { error, metadataFilePath });
+    }
+    return data;
+  }
+
+  /**
+   * @private
+   * @param {string} metadataFilePath
+   * @param {Metadata} data
+   */
+  async wtiteMetadataFile(metadataFilePath, data) {
+    await writeFile(metadataFilePath, JSON.stringify(data)).catch((error) => {
+      console.error('Failed to write metadata file', error);
+    });
+  }
+
+  /**
+   * @private
+   * @returns
+   */
+  async checkMetadata() {
+    if (!this.config) {
+      return;
+    }
+    const metadataFilePath = this.getMetadataFilePath();
+    /**
+     * @type {Metadata | null}
+     */
+    let metadata = null;
+    if (existsSync(metadataFilePath)) {
+      metadata = await this.readMetadataFile(metadataFilePath);
+    }
+
+    /**
+     * @type {string | null}
+     */
+    let oldName = null;
+    if (metadata) {
+      const currentPath = metadata.projects.find((item) => item.path === CWD);
+      if (currentPath) {
+        oldName = currentPath.name;
+      } else {
+        metadata.projects = metadata.projects.concat([{ path: CWD, name: this.config.name }]);
+        await this.wtiteMetadataFile(metadataFilePath, metadata);
+      }
+    } else {
+      await this.wtiteMetadataFile(metadataFilePath, {
+        projects: [
+          {
+            path: CWD,
+            name: this.config.name,
+          },
+        ],
+      });
+    }
+
+    if (oldName && oldName !== this.config.name) {
+      console.warn('Ingnoring to rename projects', { oldName, newName: this.config.name });
+      this.config.name = oldName;
+      this.project = oldName;
+    }
+  }
+
+  /**
+   * @private
+   * @returns {WSMessageDataCli['prepareDeployServer']['env']}
+   */
+  getEnvVariables() {
+    if (!this.config) {
+      return {};
+    }
+    /**
+     * @type {WSMessageDataCli['prepareDeployServer']['env']}
+     */
+    const res = {};
+    const configStr = this.yaml.stringify(this.config);
+    const { env } = process;
+    let envsM = configStr.match(ENV_VARIABLE_REGEX);
+    if (!envsM) {
+      return res;
+    }
+    const envs = envsM.map((item) => item.replace(ENV_VARIABLES_CLEAN_REGEX, ''));
+    envs.forEach((item) => {
+      const value = env[item];
+      if (value) {
+        res[item] = value;
+      }
+    });
+    return res;
   }
 }

@@ -32,7 +32,6 @@ import { tmpdir } from 'os';
 const __filenameNew = fileURLToPath(import.meta.url);
 
 const crypto = new Crypto();
-const yaml = new Yaml();
 
 /**
  * @typedef {import('conhos-vscode').DeployData} DeployData
@@ -116,6 +115,11 @@ export class WSInterface {
  * @implements WSInterface
  */
 export default class WS {
+  /**
+   * @protected
+   */
+  yaml = new Yaml();
+
   /**
    * @private
    * @type {HttpRequest | null}
@@ -358,27 +362,6 @@ export default class WS {
   }
 
   /**
-   * @private
-   * @param {string} data
-   */
-  changeVariables(data) {
-    const envs = data.match(/\${?[a-zA-Z0-9_]+}?/g);
-    let res = `${data}`;
-    if (envs) {
-      envs.forEach((item) => {
-        const key = item.replace(/[\\$\\{\\}]+/g, '');
-        const val = process.env[key];
-        if (val) {
-          res = res.replace(item, val);
-        } else {
-          console.warn('Undefined environment variable', item);
-        }
-      });
-    }
-    return res;
-  }
-
-  /**
    * @protected
    * @param {string} url
    * @returns {Promise<HttpRequest | HttpsRequest>}
@@ -414,15 +397,13 @@ export default class WS {
    * @protected
    * @param {{
    *  withoutWarns?: boolean;
-   *  changeVars?: boolean;
    *  withoutCheck?: boolean;
    * }} [param0={ withoutWarns: false, changeVars: true, withoutCheck: false }]
    * @returns {Promise<{config: ConfigFile; volumes: Volumes} | null>}
    */
   async getConfig(
-    { withoutWarns, changeVars, withoutCheck } = {
+    { withoutWarns, withoutCheck } = {
       withoutWarns: false,
-      changeVars: true,
       withoutCheck: false,
     }
   ) {
@@ -438,10 +419,9 @@ export default class WS {
         return null;
       }
     }
-    const _data = readFileSync(this.configFile).toString();
-    const data = changeVars ? this.changeVariables(_data) : _data;
+    const data = readFileSync(this.configFile).toString();
     this.configText = data;
-    let config = yaml.parse(data);
+    let config = this.yaml.parse(data);
     if (!config) {
       process.exit(1);
     }
@@ -587,7 +567,7 @@ export default class WS {
    * @param {ConfigFile} config
    */
   writeConfigFile(config) {
-    writeFileSync(this.configFile, yaml.stringify(config));
+    writeFileSync(this.configFile, this.yaml.stringify(config));
   }
 
   /**

@@ -1,5 +1,19 @@
 export const EXEC_CONNECT_URL_MESSAGE = 'Connection url';
 
+///////////// Env variables /////////////
+// Depends conhos-app/src/utils/constants.ts ENV_VARIABLE_KEY_REGEX
+export const ENV_VARIABLE_REGEX = /\$\{[a-zA-Z0-9_]+\}/g;
+
+export const ENV_VARIABLES_CLEAN_REGEX = /[\$\{\}]+/g;
+
+/**
+ * @param {string} name
+ */
+export function getEnvVariableRegex(name) {
+  return new RegExp(`\\$\\{${name}\\}`, 'g');
+}
+///////////// Env variables /////////////
+
 /**
  * @typedef {import("conhos-vscode").DeployData} DeployData
  * @typedef {import("conhos-vscode").ConfigFile} ConfigFile
@@ -59,6 +73,7 @@ export const EXEC_CONNECT_URL_MESSAGE = 'Connection url';
  *   volumes: Volumes;
  *   interractive: boolean;
  *   ssl: boolean;
+ *   env: Record<string, string>
  * }} prepareDeployServer
  * @property {{
  *   url: string;
