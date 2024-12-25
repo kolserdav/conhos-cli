@@ -58,10 +58,7 @@ import { ENV_VARIABLE_REGEX, ENV_VARIABLES_CLEAN_REGEX } from '../types/interfac
 
 /**
  * @typedef {{
- *  projects: {
- *    path: string;
- *    name: string;
- *  }[]
+ *  projects: Record<string, ConfigFile>
  * }} Metadata
  */
 
@@ -997,7 +994,7 @@ export default class Deploy extends WS {
    * @param {string} metadataFilePath
    * @param {Metadata} data
    */
-  async wtiteMetadataFile(metadataFilePath, data) {
+  async writeMetadataFile(metadataFilePath, data) {
     await writeFile(metadataFilePath, JSON.stringify(data)).catch((error) => {
       console.error('Failed to write metadata file', error);
     });
@@ -1020,34 +1017,118 @@ export default class Deploy extends WS {
       metadata = await this.readMetadataFile(metadataFilePath);
     }
 
-    /**
-     * @type {string | null}
-     */
-    let oldName = null;
     if (metadata) {
-      const currentPath = metadata.projects.find((item) => item.path === CWD);
-      if (currentPath) {
-        oldName = currentPath.name;
+      const metadataProject = metadata.projects[CWD];
+      if (metadataProject) {
+        this.checkRenameProject({ metadataProject });
+        const newServices = this.checkChangeImage({ metadataProject });
+        Object.keys(newServices).forEach((item) => {
+          metadata.projects[CWD].services[item] = newServices[item];
+        });
+
+        const deletedServices = this.checkMetadataDeletedservices({ metadataProject });
+        deletedServices.forEach((item) => {
+          delete metadata.projects[CWD].services[item];
+        });
+
+        await this.writeMetadataFile(metadataFilePath, metadata);
       } else {
-        metadata.projects = metadata.projects.concat([{ path: CWD, name: this.config.name }]);
-        await this.wtiteMetadataFile(metadataFilePath, metadata);
+        metadata.projects[CWD] = this.config;
+        await this.writeMetadataFile(metadataFilePath, metadata);
       }
     } else {
-      await this.wtiteMetadataFile(metadataFilePath, {
-        projects: [
-          {
-            path: CWD,
-            name: this.config.name,
-          },
-        ],
+      await this.writeMetadataFile(metadataFilePath, {
+        projects: {
+          [CWD]: this.config,
+        },
       });
     }
+  }
 
-    if (oldName && oldName !== this.config.name) {
-      console.warn('Ingnoring to rename projects', { oldName, newName: this.config.name });
+  /**
+   * @private
+   * @param {{
+   *  metadataProject: ConfigFile
+   * }} param0
+   * @returns
+   */
+  checkRenameProject({ metadataProject }) {
+    if (!this.config) {
+      return;
+    }
+    const oldName = metadataProject.name;
+
+    if (metadataProject.name !== this.config.name) {
+      console.warn('Ingnoring to rename project', `${oldName} != ${this.config.name}`);
       this.config.name = oldName;
       this.project = oldName;
     }
+  }
+
+  /**
+   * @private
+   * @param {{
+   *  metadataProject: ConfigFile
+   * }} param0
+   * @returns
+   */
+  checkChangeImage({ metadataProject }) {
+    /**
+     * @type {ConfigFile['services']}
+     */
+    const res = {};
+    if (!this.config) {
+      return res;
+    }
+
+    const { services } = this.config;
+
+    Object.keys(services).forEach((item) => {
+      const service = services[item];
+      const mService = metadataProject.services[item];
+      if (mService) {
+        if (mService.image !== service.image) {
+          console.warn(
+            `Ignoring change image for service "${item}"`,
+            `${mService.image} != ${service.image}. Using cached service data.`
+          );
+          if (!this.config) {
+            return;
+          }
+          this.config.services[item] = mService;
+        }
+      } else {
+        res[item] = service;
+      }
+    });
+
+    return res;
+  }
+
+  /**
+   * @private
+   * @param {{
+   *  metadataProject: ConfigFile
+   * }} param0
+   * @returns
+   */
+  checkMetadataDeletedservices({ metadataProject }) {
+    /**
+     * @type {string[]}
+     */
+    const res = [];
+    if (!this.config) {
+      return res;
+    }
+    Object.keys(metadataProject.services).forEach((item) => {
+      if (!this.config) {
+        return;
+      }
+      if (!this.config.services[item]) {
+        res.push(item);
+      }
+    });
+    return res;
   }
 
   /**

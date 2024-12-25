@@ -2,7 +2,7 @@ name: phpmyadmin
 services:
   mysql0:
     image: mysql
-    size: micro
+    size: mili
     active: true
     version: latest
     volumes:
