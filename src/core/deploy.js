@@ -389,7 +389,7 @@ export default class Deploy extends WS {
     if (git) {
       if (active) {
         console.info(
-          'Starting synchronyze git',
+          'Starting synchronize git',
           `Url: ${git.url}, branch: ${git.branch}, untracked: ${
             git.untracked || Object.keys(GIT_UNTRACKED_POLICY)[0]
           }`
