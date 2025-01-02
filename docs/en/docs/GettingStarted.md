@@ -4,6 +4,8 @@
 
 The **conhos** utility is an open source program that is the official client of the **Container Hosting** service.
 
+> Installation of the utility is required only if you want to download files from your device. If your project is in a Git repository, then **you can manage the project through the browser**.
+
 ## System requirements
 
 To work with the utility, you will need to install **Node.js** version **20** and higher on your computer. Official Node.js download page: https://nodejs.org or use the **Node Version Manager** https://github.com/nvm-sh/nvm.
