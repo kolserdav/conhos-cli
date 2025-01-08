@@ -121,7 +121,7 @@ The following are examples of port parameters that are not primitive types
 
 - ​​**HEADERS**
 
-```conf
+```nginx
 proxy_set_header Header-Name "Neader-Value"; # proxy
 add_header Header-Name "Neader-Value"; # php
 ```
@@ -130,7 +130,7 @@ add_header Header-Name "Neader-Value"; # php
 
 - ​​**STATIC**
 
-```conf
+```nginx
 location /location {
     alias /path;
     index index.html;
