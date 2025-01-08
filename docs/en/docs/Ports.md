@@ -115,7 +115,7 @@ server {
 
 ### Composite parameters
 
-The following are examples of port parameters that are not primitive types
+Parameters that are not primitive types
 
 ---
 
@@ -135,6 +135,25 @@ location /location {
     alias /path;
     index index.html;
 }
+```
+
+---
+
+## Magic parameters
+
+Parameters that create configuration assemblies
+
+---
+
+- ​​**ws**
+
+  Configuration for websocket, _the following fields are added:_
+
+```nginx
+proxy_http_version 1.0;
+proxy_set_header Upgrade $http_upgrade;
+proxy_set_header Connection "Upgrade";
+
 ```
 
 ---
