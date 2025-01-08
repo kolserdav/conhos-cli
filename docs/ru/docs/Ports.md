@@ -33,8 +33,8 @@ ports:
       'Header-Name': 'Header-Value'
     # Опционально
     static:
-      - location: /static
-        path: static
+      - location: /location
+        path: /path
         # Опционально
         index: index.html
 ```
@@ -47,7 +47,7 @@ ports:
 
 - **proxy**:
 
-```conf
+```nginx
 server  {
     # Статические расположения
     ${STATIC} # Подробнее ниже на странице
@@ -83,7 +83,7 @@ server  {
 
 - **php**
 
-```conf
+```nginx
 server  {
     # Статические расположения кроме /
     ${STATIC} # Подробнее ниже на странице
@@ -124,6 +124,17 @@ server  {
 ```conf
 proxy_set_header Header-Name "Neader-Value"; # proxy
 add_header Header-Name "Neader-Value"; # php
+```
+
+---
+
+- **STATIC**
+
+```conf
+location /location {
+    alias /path;
+    index index.html;
+}
 ```
 
 ---
