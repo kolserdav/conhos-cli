@@ -30,7 +30,7 @@ services:
     command: pip install -r requirements.txt && python main.py
     ports:
       - port: 3000
-        type: http
+        type: proxy
     depends_on: # Specify that the service should have internal links to
       - mysql0 # mysql0 service
     environment:

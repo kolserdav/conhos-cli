@@ -40,7 +40,7 @@ services:
     command: go build -o main && ./main
     ports:
       - port: 3000
-        type: http
+        type: proxy
     environment:
       - PORT=3000
 ```

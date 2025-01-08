@@ -40,7 +40,7 @@ services:
     command: cargo build --release && ./target/release/main
     ports:
       - port: 3000
-        type: http
+        type: proxy
     environment:
       - PORT=3000
 ```

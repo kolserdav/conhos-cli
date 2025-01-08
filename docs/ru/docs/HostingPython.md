@@ -40,7 +40,7 @@ services:
     command: pip install -r requirements.txt && python main.py
     ports:
       - port: 3000
-        type: http
+        type: proxy
     environment:
       - PORT=3000
 ```

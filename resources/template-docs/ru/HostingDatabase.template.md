@@ -30,7 +30,7 @@ services:
     command: ${{COMMAND}}
     ports:
       - port: 3000
-        type: http
+        type: proxy
     depends_on: # Указываем, что сервис должен иметь внутрениие ссылки на
       - ${{DATABASE}}0 # сервис ${{DATABASE}}0
     environment:

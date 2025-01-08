@@ -30,7 +30,7 @@ services:
     command: php-fpm
     ports:
       - port: 3000
-        type: http
+        type: proxy
     depends_on: # Указываем, что сервис должен иметь внутрениие ссылки на
       - redis0 # сервис redis0
     environment:

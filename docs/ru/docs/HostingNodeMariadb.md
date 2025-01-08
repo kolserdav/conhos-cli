@@ -30,7 +30,7 @@ services:
     command: npm i && npm run start
     ports:
       - port: 3000
-        type: http
+        type: proxy
     depends_on: # Указываем, что сервис должен иметь внутрениие ссылки на
       - mariadb0 # сервис mariadb0
     environment:
