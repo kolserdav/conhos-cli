@@ -131,6 +131,9 @@ ports:
     # Optional
     http_version: '1.1' # Default 1.0
     # Optional
+    headers:
+      'Header-Name': 'Header-Value'
+    # Optional
     static:
       - location: /static
         path: static
