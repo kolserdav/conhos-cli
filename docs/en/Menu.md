@@ -21,6 +21,13 @@
 </details>
 
 <details>
+<summary>Ports</summary>
+
+- [Configuration](docs/Ports.md#configuration)
+- [Web server setup](docs/Ports.md#web_server_setup)
+</details>
+
+<details>
   <summary>Hosting</summary>
   
 - [Node.js](docs/HostingNode.md)

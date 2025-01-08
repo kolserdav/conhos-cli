@@ -24,7 +24,7 @@ services:
     command: npm i && npm run start # Команда при старте контейнера
     ports: # [ОПЦИОНАЛЬНО] Список внешних портов
       - port: 3000
-        type: http
+        type: proxy
     environment: # [ОПЦИОНАЛЬНО] Переменные окружения
       - PORT=3000
 ```
@@ -108,37 +108,7 @@ command: npm i && npm run start
 
 > `ports` указывает что порт должен быть открытым для интернета по доменному имени, а иначе доступ к сервису можно получить только через [Внутренние ссылки](./ConfigFile.md#внутренние_ссылки) для других сервисов проекта.
 
-```yml
-ports:
-  - port: 3000
-    type: http
-    # Опционально
-    ws: true # По умолчанию false
-    # Опционально
-    location: /path-url # По умолчанию "/"
-    # Опционально
-    proxy_path: / # По умолчанию ""
-    # Опционально
-    timeout: 60s
-    # Опционально
-    buffer_size: 64k
-    # Опционально
-    client_max_body_size: 1m
-    # Опционально
-    request_buffering: off # По умолчанию on
-    # Опционально
-    buffering: off # По умолчанию on
-    # Опционально
-    http_version: '1.1' # По умолчанию 1.0
-    # Опционально
-    static:
-      - location: /static
-        path: static
-        # Опционально
-        index: index.html
-```
-
-Поддерживаемые типы портов: _'proxy'| 'php'_
+[**Подробнее о портах**](./Ports.md)
 
 ### Переменные среды
 

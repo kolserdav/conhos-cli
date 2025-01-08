@@ -21,6 +21,13 @@
 </details>
 
 <details>
+  <summary>Порты</summary>
+
+- [Конфигурация](docs/Ports.md#конфигурация)
+- [Устройство веб сервера](docs/Ports.md#устройство_веб_сервера)
+</details>
+
+<details>
   <summary>Хостинг</summary>
 
 - [Node.js](docs/HostingNode.md)

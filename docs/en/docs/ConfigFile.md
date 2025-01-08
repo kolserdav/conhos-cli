@@ -24,7 +24,7 @@ services:
   command: npm i && npm run start # Command to start the container
   ports: # [OPTIONAL] List of external ports
     - port: 3000
-      type: http
+      type: proxy
   environment: # [OPTIONAL] Environment variables
     - PORT=3000
 ```
@@ -108,40 +108,7 @@ Ports that must be forwarded for public services to the outside; for each port, 
 
 > `ports` specifies that the port should be exposed to the Internet via the domain name, otherwise the service can only be accessed via [Internal Links](./ConfigFile.md#internal_links) for other services in the project.
 
-```yml
-ports:
-  - port: 3000
-    type: http
-    # Optional
-    ws: true # Default false
-    # Optional
-    location: /path-url # Default "/"
-    # Optional
-    proxy_path: / # Default ""
-    # Optional
-    timeout: 60s
-    # Optional
-    buffer_size: 64k
-    # Optional
-    client_max_body_size: 1m
-    # Optional
-    request_buffering: off # Default on
-    # Optional
-    buffering: off # Default on
-    # Optional
-    http_version: '1.1' # Default 1.0
-    # Optional
-    headers:
-      'Header-Name': 'Header-Value'
-    # Optional
-    static:
-      - location: /static
-        path: static
-        # Optional
-        index: index.html
-```
-
-Supported port types: _'proxy | 'php'_
+[**More about ports**](./Ports.md)
 
 ### Environment Variables
 
