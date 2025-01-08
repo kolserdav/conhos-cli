@@ -113,13 +113,23 @@ ports:
   - port: 3000
     type: http
     # Опционально
+    ws: true # По умолчанию false
+    # Опционально
     location: /path-url # По умолчанию "/"
     # Опционально
     proxy_path: / # По умолчанию ""
     # Опционально
-    timeout: 30s
+    timeout: 60s
     # Опционально
     buffer_size: 64k
+    # Опционально
+    client_max_body_size: 1m
+    # Опционально
+    request_buffering: off # По умолчанию on
+    # Опционально
+    buffering: off # По умолчанию on
+    # Опционально
+    http_version: '1.1' # По умолчанию 1.0
     # Опционально
     static:
       - location: /static
@@ -128,7 +138,7 @@ ports:
         index: index.html
 ```
 
-Поддерживаемые типы портов: _'http' | 'ws' | 'chunked' | 'php'_
+Поддерживаемые типы портов: _'proxy'| 'php'_
 
 ### Переменные среды
 

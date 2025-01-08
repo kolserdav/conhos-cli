@@ -113,13 +113,23 @@ ports:
   - port: 3000
     type: http
     # Optional
+    ws: true # Default false
+    # Optional
     location: /path-url # Default "/"
     # Optional
     proxy_path: / # Default ""
     # Optional
-    timeout: 30s
+    timeout: 60s
     # Optional
     buffer_size: 64k
+    # Optional
+    client_max_body_size: 1m
+    # Optional
+    request_buffering: off # Default on
+    # Optional
+    buffering: off # Default on
+    # Optional
+    http_version: '1.1' # Default 1.0
     # Optional
     static:
       - location: /static
@@ -128,7 +138,7 @@ ports:
         index: index.html
 ```
 
-Supported port types: _'http' | 'ws' | 'chunked' | 'php'_
+Supported port types: _'proxy | 'php'_
 
 ### Environment Variables
 
