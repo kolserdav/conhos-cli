@@ -6,7 +6,7 @@
 
 > Для автоматического создания базового файла конфигурации вы можете обратиться к [Инициализация проекта](./GettingStarted.md#инициализация_проекта)
 
-## Пример файла конфигурации [![якорь](http://conhos.ru/images/icons/link.svg)](#config-file-ex)
+## Пример файла конфигурации [![якорь](https://conhos.ru/images/icons/link.svg)](#config-file-ex)
 
 ```yml
 name: name-of-project # Название проекта
@@ -31,7 +31,7 @@ services:
       - PORT=3000
 ```
 
-## Поля файла конфигурации верхнего уровня [![якорь](http://conhos.ru/images/icons/link.svg)](#top-level-props)
+## Поля файла конфигурации верхнего уровня [![якорь](https://conhos.ru/images/icons/link.svg)](#top-level-props)
 
 ### Название проекта:
 
@@ -56,7 +56,7 @@ services:
 
 Подробнее о сервисах смотрите в [Поля конфигурации сервиса](./ConfigFile.md#поля_конфигурации_сервиса)
 
-## Поля конфигурации сервиса [![якорь](http://conhos.ru/images/icons/link.svg)](#service-level-props)
+## Поля конфигурации сервиса [![якорь](https://conhos.ru/images/icons/link.svg)](#service-level-props)
 
 Поле верхнего уровня **services** должно иметь корневое поле с произвольным уникальным названием и вложенный перечень обязательных и опциональных полей.
 
@@ -80,7 +80,7 @@ size: mili
 
 Поддерживаемые типы размеров: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo'_
 
-### Активный сервис [![якорь](http://conhos.ru/images/icons/link.svg)](#service-active)
+### Активный сервис [![якорь](https://conhos.ru/images/icons/link.svg)](#service-active)
 
 Чтобы сервис был добавлен или обновлен необходимо указать **true**. Если указано **false** то сервис будет удален из облака
 
@@ -210,7 +210,7 @@ echo "include_dir='/etc/postgresql'" >> $config_path
 entrypoint: ['install-extensions.sh']
 ```
 
-## Использование своего домена [![якорь](http://conhos.ru/images/icons/link.svg)](#custom-domain)
+## Использование своего домена [![якорь](https://conhos.ru/images/icons/link.svg)](#custom-domain)
 
 Для установки своего домена просто добавьте такое поле в конфигурацию сервиса:
 

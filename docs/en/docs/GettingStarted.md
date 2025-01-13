@@ -1,16 +1,16 @@
 # Getting started with the Container Hosting service
 
-## Introduction [![anchor](http://conhos.ru/images/icons/link.svg)](#intro)
+## Introduction [![anchor](https://conhos.ru/images/icons/link.svg)](#intro)
 
 The **conhos** utility is an open source program that is the official client of the **Container Hosting** service.
 
 > Installation of the utility is required only if you want to download files from your device. If your project is in a Git repository, then **you can manage the project through the browser**.
 
-## System requirements [![anchor](http://conhos.ru/images/icons/link.svg)](#requirements)
+## System requirements [![anchor](https://conhos.ru/images/icons/link.svg)](#requirements)
 
 To work with the utility, you will need to install **Node.js** version **20** and higher on your computer. Official Node.js download page: https://nodejs.org or use the **Node Version Manager** https://github.com/nvm-sh/nvm.
 
-## Installation [![anchor](http://conhos.ru/images/icons/link.svg)](#install)
+## Installation [![anchor](https://conhos.ru/images/icons/link.svg)](#install)
 
 Install **conhos** globally on the system:
 
@@ -26,7 +26,7 @@ conhos -v
 
 If the installation was successful, you will see the program version.
 
-## Login [![anchor](http://conhos.ru/images/icons/link.svg)](#login)
+## Login [![anchor](https://conhos.ru/images/icons/link.svg)](#login)
 
 To interact with the service using the **conhos** utility, you must first log in through your browser.
 To start the authorization procedure, run in the console:
@@ -47,7 +47,7 @@ conhos login -c
 
 Additionally, you will need to enter the token encryption password, and in the future, each time you use the token, you will need to enter the encryption password.
 
-## Project Initialization [![anchor](http://conhos.ru/images/icons/link.svg)](#init)
+## Project Initialization [![anchor](https://conhos.ru/images/icons/link.svg)](#init)
 
 To do this, in the console, go to the folder of the project that you want to run in the cloud:
 
@@ -72,7 +72,7 @@ conhos init -y
 
 > More information about the configuration file can be found in [Configuration File](./ConfigFile.md#example_configuration_file)
 
-## Launching a project in the cloud [![anchor](http://conhos.ru/images/icons/link.svg)](#deploy)
+## Launching a project in the cloud [![anchor](https://conhos.ru/images/icons/link.svg)](#deploy)
 
 After the configuration file is configured, you can upload the project files to the cloud and launch all the necessary services.
 To do this, run the command:
