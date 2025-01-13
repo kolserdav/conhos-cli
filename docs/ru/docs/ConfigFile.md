@@ -80,7 +80,7 @@ size: mili
 
 Поддерживаемые типы размеров: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo'_
 
-### [Активный сервис](#active-service)
+### Активный сервис [![Ссылка](http://conhos.ru/images/icons/link.svg)](#service-active)
 
 Чтобы сервис был добавлен или обновлен необходимо указать **true**. Если указано **false** то сервис будет удален из облака
 
