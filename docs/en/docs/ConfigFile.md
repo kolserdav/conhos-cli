@@ -6,7 +6,7 @@ The project configuration file is a mandatory file that is used to configure the
 
 > To automatically create a basic configuration file, you can refer to [Project Initialization](./GettingStarted.md#project_initialization)
 
-## Example configuration file
+## Example configuration file [![anchor](http://conhos.ru/images/icons/link.svg)](#config-file-ex)
 
 ```yml
 name: name-of-project # Project name
@@ -31,7 +31,7 @@ services:
     - PORT=3000
 ```
 
-## Top level configuration file fields
+## Top level configuration file fields [![anchor](http://conhos.ru/images/icons/link.svg)](#top-level-props)
 
 ### Project name:
 
@@ -56,7 +56,7 @@ services:
 
 For more information about services, see [Service configuration fields](./ConfigFile.md#service_configuration_fields)
 
-## Service configuration fields
+## Service configuration fields [![anchor](http://conhos.ru/images/icons/link.svg)](#service-level-props)
 
 The top-level field **services** must have a root field with an arbitrary unique name and a nested list of required and optional fields.
 
@@ -80,7 +80,7 @@ size: mili
 
 Supported size types: _'pico' | 'nano' | 'micro' | 'mili' | 'santi' | 'deci' | 'deca' | 'hecto' | 'kilo'_
 
-### Active service
+### Active service [![anchor](http://conhos.ru/images/icons/link.svg)](#service-active)
 
 For a service to be added or updated, you must specify **true**. If **false** is specified, the service will be removed from the cloud
 
@@ -210,7 +210,7 @@ echo "include_dir='/etc/postgresql'" >> $config_path
 entrypoint: ['install-extensions.sh']
 ```
 
-## Using your own domain
+## Using your own domain [![anchor](http://conhos.ru/images/icons/link.svg)](#custom-domain)
 
 To set up your domain, simply add the following field to the service configuration:
 

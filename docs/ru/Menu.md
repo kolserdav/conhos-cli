@@ -3,28 +3,28 @@
 <details>
   <summary>Начало</summary>
 
-- [Введение](docs/GettingStarted.md#введение)
-- [Системные требования](docs/GettingStarted.md#системные_требования)
-- [Установка](docs/GettingStarted.md#установка)
-- [Вход в систему](docs/GettingStarted.md#вход_в_систему)
-- [Инициализация проекта](docs/GettingStarted.md#инициализация_проекта)
-- [Запуск проекта в облаке](docs/GettingStarted.md#запуск_проекта_в_облаке)
+- [Введение](docs/GettingStarted.md#intro)
+- [Системные требования](docs/GettingStarted.md#requirements)
+- [Установка](docs/GettingStarted.md#install)
+- [Вход в систему](docs/GettingStarted.md#login)
+- [Инициализация проекта](docs/GettingStarted.md#init)
+- [Запуск проекта в облаке](docs/GettingStarted.md#deploy)
 </details>
 
 <details>
   <summary>Файл конфигурации</summary>
 
-- [Пример файла конфигурации](docs/ConfigFile.md#пример_файла_конфигурации)
-- [Поля конфигурации верхнего уровня](docs/ConfigFile.md#поля_конфигурации_верхнего_уровня)
-- [Поля конфигурации сервиса](docs/ConfigFile.md#поля_конфигурации_сервиса)
-- [Использование своего домена](docs/ConfigFile.md#использование_своего_домена)
+- [Пример файла конфигурации](docs/ConfigFile.md#config-file-ex)
+- [Поля конфигурации верхнего уровня](docs/ConfigFile.md#top-level-props)
+- [Поля конфигурации сервиса](docs/ConfigFile.md#service-level-props)
+- [Использование своего домена](docs/ConfigFile.md#custom-domain)
 </details>
 
 <details>
   <summary>Порты</summary>
 
-- [Конфигурация](docs/Ports.md#конфигурация)
-- [Устройство веб сервера](docs/Ports.md#устройство_веб_сервера)
+- [Конфигурация](docs/Ports.md#config)
+- [Устройство веб сервера](docs/Ports.md#web-server)
 </details>
 
 <details>

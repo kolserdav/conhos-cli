@@ -2,7 +2,7 @@
 
 Ports are used to configure a web server in the hosting that will output the required port of your service to the Internet.
 
-## Configuration
+## Configuration [![anchor](http://conhos.ru/images/icons/link.svg)](#config)
 
 Ports are a parameter of the `service` level:
 
@@ -39,7 +39,7 @@ ports:
         index: index.html
 ```
 
-## Web server setup
+## Web server setup [![anchor](http://conhos.ru/images/icons/link.svg)](#web-server)
 
 Here are examples for each port type, what kind of `Nginx` configuration these parameters create:
 

@@ -3,28 +3,28 @@
 <details>
   <summary>Getting started</summary>
 
-- [Introduction](docs/GettingStarted.md#introduction)
-- [System requirements](docs/GettingStarted.md#system_requirements)
-- [Installation](docs/GettingStarted.md#installation)
+- [Introduction](docs/GettingStarted.md#intro)
+- [System requirements](docs/GettingStarted.md#requirements)
+- [Installation](docs/GettingStarted.md#install)
 - [Login](docs/GettingStarted.md#login)
-- [Project Initialization](docs/GettingStarted.md#project_initialization)
-- [Launching a project in the cloud](docs/GettingStarted.md#launching_a_project_in_the_cloud)
+- [Project Initialization](docs/GettingStarted.md#init)
+- [Launching a project in the cloud](docs/GettingStarted.md#deploy)
 </details>
 
 <details>
   <summary>Configuration file</summary>
 
-- [Example configuration file](docs/ConfigFile.md#example_configuration_file)
-- [Top level configuration file fields](docs/ConfigFile.md#top_level_configuration_file_fields)
-- [Service configuration fields](docs/ConfigFile.md#service_configuration_fields)
-- [Using your own domain](docs/ConfigFile.md#using_your_own_domain)
+- [Example configuration file](docs/ConfigFile.md#config-file-ex)
+- [Top level configuration file fields](docs/ConfigFile.md#top-level-props)
+- [Service configuration fields](docs/ConfigFile.md#service-level-props)
+- [Using your own domain](docs/ConfigFile.md#custom-domain)
 </details>
 
 <details>
 <summary>Ports</summary>
 
 - [Configuration](docs/Ports.md#configuration)
-- [Web server setup](docs/Ports.md#web_server_setup)
+- [Web server setup](docs/Ports.md#web-server)
 </details>
 
 <details>
