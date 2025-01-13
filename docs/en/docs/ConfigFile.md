@@ -4,7 +4,7 @@ The project configuration file is a mandatory file that is used to configure the
 
 > If your project is in a Git repository, you can customize the configuration file directly from the browser.
 
-> To automatically create a basic configuration file, you can refer to [Project Initialization](./GettingStarted.md#project_initialization)
+> To automatically create a basic configuration file, you can refer to [Project Initialization](./GettingStarted.md#init)
 
 ## Example configuration file [![anchor](https://conhos.ru/images/icons/link.svg)](#config-file-ex)
 
@@ -33,7 +33,7 @@ services:
 
 ## Top level configuration file fields [![anchor](https://conhos.ru/images/icons/link.svg)](#top-level-props)
 
-### Project name:
+### Project name [![anchor](https://conhos.ru/images/icons/link.svg)](#project-name)
 
 Cloud Project ID
 
@@ -43,7 +43,7 @@ name: my-awesome-project
 
 **You strictly need to ensure that this field is unique between different projects, otherwise one of your projects will overwrite another project in the cloud.**
 
-### Services:
+### Services [![anchor](https://conhos.ru/images/icons/link.svg)](#services)
 
 List of services that are necessary for the operation of the project application
 
@@ -60,7 +60,7 @@ For more information about services, see [Service configuration fields](./Config
 
 The top-level field **services** must have a root field with an arbitrary unique name and a nested list of required and optional fields.
 
-### Service Type
+### Service Image [![anchor](https://conhos.ru/images/icons/link.svg)](#service-image)
 
 The image of the operating system and the list of installed service dependencies depend on this
 
@@ -70,7 +70,7 @@ image: node
 
 Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
 
-### Service size
+### Service size [![anchor](https://conhos.ru/images/icons/link.svg)](#service-size)
 
 The allocation of cloud server resources for the operation of a specific service depends on this
 
@@ -88,7 +88,7 @@ For a service to be added or updated, you must specify **true**. If **false** is
 active: true
 ```
 
-### Service version
+### Service version [![anchor](https://conhos.ru/images/icons/link.svg)](#service-version)
 
 Service version taken from the official DockerHub repository. For example, for Node.js one of the currently supported tags https://hub.docker.com/_/node will be valid
 
@@ -96,7 +96,17 @@ Service version taken from the official DockerHub repository. For example, for N
 version: latest
 ```
 
-### Starting command
+### No restart [![anchor](https://conhos.ru/images/icons/link.svg)](#service-no-restart)
+
+To prevent the service from restarting when the project is restarted - **true**
+
+> Used where restarting the container is not required after updating the application files. For example, for services running on `php-fpm`.
+
+```yml
+no_restart: true
+```
+
+### Starting command [![anchor](https://conhos.ru/images/icons/link.svg)](#service-command)
 
 The command executed when the service starts. Should contain installation and build commands before running the program if necessary.
 
@@ -104,15 +114,15 @@ The command executed when the service starts. Should contain installation and bu
 command: npm i && npm run start
 ```
 
-### Ports
+### Ports [![anchor](https://conhos.ru/images/icons/link.svg)](#service-ports)
 
 Ports that must be forwarded for public services to the outside; for each port, a separate network address will be used on ports 80 and 443.
 
-> `ports` specifies that the port should be exposed to the Internet via the domain name, otherwise the service can only be accessed via [Internal Links](./ConfigFile.md#internal_links) for other services in the project.
+> `ports` specifies that the port should be exposed to the Internet via the domain name, otherwise the service can only be accessed via [Internal Links](./ConfigFile.md#internal-links) for other services in the project.
 
 [**More about ports**](./Ports.md)
 
-### Environment Variables
+### Environment Variables [![anchor](https://conhos.ru/images/icons/link.svg)](#service-environment)
 
 An array of environment variables that will be available to processes within the service
 
@@ -123,7 +133,7 @@ environment:
   - PORT=3000
 ```
 
-### Internal links
+### Internal links [![anchor](https://conhos.ru/images/icons/link.svg)](#internal-links)
 
 An array of service names to which this service will have access via internal links.
 
@@ -134,7 +144,7 @@ depends_on:
 
 > When one of the connected services, for example **postgres**, is specified as an internal link, then an environment variable with the address of this link will be automatically added to the service during the operation of the **deploy** command
 
-### Downloading files from Git
+### Downloading files from Git [![anchor](https://conhos.ru/images/icons/link.svg)](#git)
 
 This parameter downloads files from the Git repository and monitors changes in the specified branch, updating the service if necessary.
 
@@ -150,7 +160,7 @@ git:
   untracked: merge # Merger Policy
 ```
 
-#### Supported merge policies
+#### Supported merge policies [![anchor](https://conhos.ru/images/icons/link.svg)](#git-untracked)
 
 In case of changes on disk, `git pull` works according to the following rules:
 
@@ -158,7 +168,7 @@ In case of changes on disk, `git pull` works according to the following rules:
 - `push`: changes on the server are immediately pushed to the new branch, and the service continues working with the files from the working branch.
 - `checkout`: local changes on the server are discarded, and the service continues working with the files from the working branch.
 
-### Work folder
+### Work folder [![anchor](https://conhos.ru/images/icons/link.svg)](#pwd)
 
 This directory will be uploaded to the cloud and will become the working directory of the service
 
@@ -168,7 +178,7 @@ This directory will be uploaded to the cloud and will become the working directo
 pwd: ./ # Relative path only
 ```
 
-### Excludes
+### Excludes [![anchor](https://conhos.ru/images/icons/link.svg)](#exclude)
 
 List of child files or folders that should not be uploaded to the cloud
 
@@ -180,7 +190,7 @@ exclude:
   - some/nested
 ```
 
-### Configuration injection
+### Configuration injection [![anchor](https://conhos.ru/images/icons/link.svg)](#volumes)
 
 For overwriting configuration files inside the container.
 
@@ -193,7 +203,7 @@ volumes:
   - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
 ```
 
-### Running a script when creating a container
+### Running a script when creating a container [![anchor](https://conhos.ru/images/icons/link.svg)](#entrypoint)
 
 > Except for the `postgres` service, where you don't need to pass `entrypoint` to run scripts when creating, instead we pass the `/docker-entrypoint-initdb.d/init.sql` file inside the container via `volumes` with approximate contents:
 

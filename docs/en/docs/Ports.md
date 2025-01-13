@@ -2,7 +2,7 @@
 
 Ports are used to configure a web server in the hosting that will output the required port of your service to the Internet.
 
-## Configuration [![anchor](http://conhos.ru/images/icons/link.svg)](#config)
+## Configuration [![anchor](https://conhos.ru/images/icons/link.svg)](#config)
 
 Ports are a parameter of the `service` level:
 
@@ -39,7 +39,7 @@ ports:
         index: index.html
 ```
 
-## Web server setup [![anchor](http://conhos.ru/images/icons/link.svg)](#web-server)
+## Web server setup [![anchor](https://conhos.ru/images/icons/link.svg)](#web-server)
 
 Here are examples for each port type, what kind of `Nginx` configuration these parameters create:
 
@@ -119,7 +119,9 @@ Parameters that are not primitive types
 
 ---
 
-- ​​**HEADERS**
+- ​​**HEADERS** [![anchor](https://conhos.ru/images/icons/link.svg)](#web-headers)
+
+If a header object is passed, the following configurations are added to the server, depending on the port type.
 
 ```nginx
 proxy_set_header Header-Name "Neader-Value"; # proxy
@@ -128,7 +130,9 @@ add_header Header-Name "Neader-Value"; # php
 
 ---
 
-- ​​**STATIC**
+- ​​**STATIC** [![anchor](https://conhos.ru/images/icons/link.svg)](#web-static)
+
+If a static paths object is passed, then the following static file locations will be created on the server
 
 ```nginx
 location /location {
@@ -145,9 +149,9 @@ Parameters that create configuration assemblies
 
 ---
 
-- ​​**ws**
+- ​​**ws** [![anchor](https://conhos.ru/images/icons/link.svg)](#web-socket)
 
-  Configuration for websocket, _the following fields are added:_
+  Configuration for websocket, _when passed `true` the following fields are added:_
 
 ```nginx
 proxy_http_version 1.0;

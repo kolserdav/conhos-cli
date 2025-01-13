@@ -2,7 +2,7 @@
 
 Порты служат для того чтобы настроить в хостинге веб сервер который будет выводить нужный порт вашего сервиса в интернет.
 
-## Конфигурация [![якорь](http://conhos.ru/images/icons/link.svg)](#config)
+## Конфигурация [![якорь](https://conhos.ru/images/icons/link.svg)](#config)
 
 Порты являются параметром уровня `service`:
 
@@ -39,7 +39,7 @@ ports:
         index: index.html
 ```
 
-## Устройство веб сервера [![якорь](http://conhos.ru/images/icons/link.svg)](#web-server)
+## Устройство веб сервера [![якорь](https://conhos.ru/images/icons/link.svg)](#web-server)
 
 Далее приведены примеры для каждого типа порта, какого вида конфигурацию `Nginx` создают эти параметры:
 
@@ -73,7 +73,7 @@ server  {
         # Пользовательские заголовки
         ${HEADERS} # Подробнее ниже на странице
         # Перенаправление на порт контейнера
-        proxy_pass          http://${HOST}:${port}${proxy_path};
+        proxy_pass          https://${HOST}:${port}${proxy_path};
     }
 
 }
@@ -119,7 +119,9 @@ server  {
 
 ---
 
-- **HEADERS**
+- **HEADERS** [![якорь](https://conhos.ru/images/icons/link.svg)](#web-headers)
+
+Если передан объект заголовков, то на сервере добаляются такие конфигурации, в зависимости от типа порта.
 
 ```nginx
 proxy_set_header Header-Name "Neader-Value"; # proxy
@@ -128,7 +130,9 @@ add_header Header-Name "Neader-Value"; # php
 
 ---
 
-- **STATIC**
+- **STATIC** [![якорь](https://conhos.ru/images/icons/link.svg)](#web-static)
+
+  Если передан объект статических путей, то на сервере буду созданы такие локации статичных файлов
 
 ```nginx
 location /location {
@@ -145,9 +149,9 @@ location /location {
 
 ---
 
-- **ws**
+- **ws** [![якорь](https://conhos.ru/images/icons/link.svg)](#web-socket)
 
-  Конфигурация для вебсокета, _добавляются следущие поля:_
+  Конфигурация для вебсокета, _когда передано `true` добавляются следущие поля:_
 
 ```nginx
 proxy_http_version 1.0;
