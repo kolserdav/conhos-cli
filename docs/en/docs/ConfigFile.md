@@ -126,7 +126,7 @@ Ports that must be forwarded for public services to the outside; for each port, 
 
 An array of environment variables that will be available to processes within the service
 
-> It is supported to use your device's environment variables anywhere in the file, for example: `$PORT` or `${PORT}`
+> It is supported to use your device's environment variables anywhere in the file, for example: `${PORT}`
 
 ```yml
 environment:
