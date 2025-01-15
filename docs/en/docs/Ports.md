@@ -4,7 +4,7 @@ Ports are used to configure a web server in the hosting that will output the req
 
 ## Configuration [![anchor](https://conhos.ru/images/icons/link.svg)](#config)
 
-Ports are a parameter of the `service` level:
+Ports are a parameter of the [Service](./ConfigFile.md#services) level:
 
 ```yml
 ports:
@@ -124,8 +124,8 @@ Parameters that are not primitive types
 If a header object is passed, the following configurations are added to the server, depending on the port type.
 
 ```nginx
-proxy_set_header Header-Name "Neader-Value"; # proxy
-add_header Header-Name "Neader-Value"; # php
+proxy_set_header Header-Name "Header-Value"; # proxy
+add_header Header-Name "Header-Value"; # php
 ```
 
 ---

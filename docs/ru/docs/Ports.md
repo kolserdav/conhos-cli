@@ -4,7 +4,7 @@
 
 ## Конфигурация [![якорь](https://conhos.ru/images/icons/link.svg)](#config)
 
-Порты являются параметром уровня `service`:
+Порты являются параметром уровня [Сервиса](./ConfigFile.md#services):
 
 ```yml
 ports:
@@ -124,8 +124,8 @@ server  {
 Если передан объект заголовков, то на сервере добаляются такие конфигурации, в зависимости от типа порта.
 
 ```nginx
-proxy_set_header Header-Name "Neader-Value"; # proxy
-add_header Header-Name "Neader-Value"; # php
+proxy_set_header Header-Name "Header-Value"; # proxy
+add_header Header-Name "Header-Value"; # php
 ```
 
 ---
