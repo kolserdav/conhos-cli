@@ -68,7 +68,7 @@ services:
 image: node
 ```
 
-Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
+Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
 
 ### Размер сервиса [![якорь](https://conhos.ru/images/icons/link.svg)](#service-size)
 

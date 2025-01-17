@@ -68,7 +68,7 @@ The image of the operating system and the list of installed service dependencies
 image: node
 ```
 
-Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
+Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
 
 ### Service size [![anchor](https://conhos.ru/images/icons/link.svg)](#service-size)
 

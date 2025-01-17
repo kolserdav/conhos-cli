@@ -82,6 +82,7 @@ export const COMMAND_DEFAULT = {
   golang: 'go build -o main && ./main',
   php: 'php-fpm',
   rust: 'cargo build --release && ./target/release/main',
+  ruby: 'bundle install && ruby server.rb',
 };
 export const EXPLICIT_EXCLUDE = ['.git', '.vscode'];
 /**
@@ -93,6 +94,7 @@ export const EXCLUDE_DEFAULT = {
   python: ['venv', '.venv'],
   golang: ['vendor'],
   php: ['vendor'],
+  ruby: ['vendor'],
 };
 
 export const SIZE_INDEX_DEFAULT = 3;

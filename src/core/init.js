@@ -326,6 +326,9 @@ export default class Init extends WS {
           )
         );
         break;
+      case 'ruby':
+        command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT.ruby);
+        break;
       default:
         console.log('Default case in create service command', service);
     }
