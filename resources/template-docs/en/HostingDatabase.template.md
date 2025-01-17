@@ -17,7 +17,7 @@ Configuration file for creating a `${{NAME}}` service in Container Hosting with 
 > Check the current version of the `${{DATABASE_NAME}}` container in the [official ${{DATABASE_NAME}} repository](${{HUB}}${{DATABASE}}/tags)
 
 ```yml
-name: name-of-project
+name: my-${{TYPE}}-${{DATABASE}}-project
 services:
   ${{TYPE}}1:
     image: ${{TYPE}}

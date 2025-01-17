@@ -17,7 +17,7 @@
 > Актуальную версию `${{DATABASE_NAME}}` контейнера уточнить в [официальном репозитории ${{DATABASE_NAME}}](${{HUB}}${{DATABASE}}/tags)
 
 ```yml
-name: name-of-project
+name: my-${{TYPE}}-${{DATABASE}}-project
 services:
   ${{TYPE}}1:
     image: ${{TYPE}}
