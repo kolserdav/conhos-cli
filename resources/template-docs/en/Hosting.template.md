@@ -21,7 +21,7 @@ Configuration file for creating the `${{NAME}}` service in Container Hosting. Mo
 > Check the current version of the `${{NAME}}` container in the [official ${{NAME}} repository](${{HUB}}${{TYPE}}/tags)
 
 ```yml
-name: my-awesome-project
+name: my-${{TYPE}}-project
 services:
   ${{TYPE}}0:
     image: ${{TYPE}}

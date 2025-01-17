@@ -21,7 +21,7 @@ ${{LINKS}}
 > Актуальную версию `${{NAME}}` контейнера уточнить в [официальном репозитории ${{NAME}}](${{HUB}}${{TYPE}}/tags)
 
 ```yml
-name: my-awesome-project
+name: my-${{TYPE}}-project
 services:
   ${{TYPE}}0:
     image: ${{TYPE}}
