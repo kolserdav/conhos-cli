@@ -1,6 +1,6 @@
 name: ruby
 services:
-  node0:
+  ruby0:
     image: ruby
     version: latest
     size: nano
