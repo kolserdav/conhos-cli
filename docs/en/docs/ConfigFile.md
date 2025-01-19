@@ -54,7 +54,7 @@ services:
     # ...Service configuration fields
 ```
 
-For more information about services, see [Service configuration fields](./ConfigFile.md#service_configuration_fields)
+For more information about services, see [Service configuration fields](./ConfigFile.md#service-level-props)
 
 ## Service configuration fields [![anchor](https://conhos.ru/images/icons/link.svg)](#service-level-props)
 
