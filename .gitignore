@@ -6,3 +6,4 @@ hosting-cli.yml
 conhos.yml
 examples/python/venv
 examples/wordpress
+examples/hello-world/package-lock.json
