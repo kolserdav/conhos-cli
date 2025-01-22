@@ -76,6 +76,7 @@ const crypto = new Crypto();
  *  ssl?: boolean;
  *  project?: string;
  *  delete?: boolean;
+ *  repl?: number;
  * }} Options
  */
 

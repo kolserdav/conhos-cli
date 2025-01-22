@@ -282,7 +282,7 @@ export default class Deploy extends WS {
    * @private
    * @param {WSMessageCli<'acceptDeleteCli'>} param0
    */
-  async acceptDelete({ data: { serviceName, serviceType, containerName } }) {
+  async acceptDelete({ data: { serviceName, serviceType } }) {
     console.warn(
       `You want to delete service "${serviceName}" with type "${serviceType}"`,
       'If you have a needed data of it save it before'
@@ -300,7 +300,7 @@ export default class Deploy extends WS {
           userId: this.userId,
           packageName: PACKAGE_NAME,
           data: {
-            containerName,
+            serviceName,
             accept: true,
           },
           status: 'info',
