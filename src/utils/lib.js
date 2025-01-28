@@ -141,7 +141,13 @@ export function stdoutWriteStart(title) {
   }
   process.stdout.clearLine(0);
   process.stdout.cursorTo(0);
-  process.stdout.write(title);
+  let output = title;
+  const { columns } = process.stdout;
+  if (output.length > columns) {
+    output = output.substring(0, columns > 4 ? columns - 4 : columns);
+    output += ' ...';
+  }
+  process.stdout.write(output);
 }
 
 /**

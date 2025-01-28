@@ -13,7 +13,15 @@ import { readFileSync, existsSync, writeFileSync, statSync } from 'fs';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX } from '../utils/constants.js';
-import { getPackagePath, console, getConfigFilePath, as, getFile, wait } from '../utils/lib.js';
+import {
+  getPackagePath,
+  console,
+  getConfigFilePath,
+  as,
+  getFile,
+  wait,
+  stdoutWriteStart,
+} from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
 import { checkConfig, getPosition } from 'conhos-vscode/dist/lib.js';
@@ -751,6 +759,7 @@ export default class WS {
         await this.listenCheckToken(msg);
         break;
       case 'message':
+        stdoutWriteStart('');
         console[status](`${CLOUD_LOG_PREFIX} ${message}`, data.msg);
         if (status === 'error' || data.end) {
           this.closeIfCan(data);

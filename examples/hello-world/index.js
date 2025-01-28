@@ -5,9 +5,12 @@ import http from 'http';
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'application/json' });
   console.info('Request', req.headers);
+  if (req.url === '/ds') {
+    process.exit(0);
+  }
   res.end(
     JSON.stringify({
-      data: 'Hello World!',
+      data: 'Hello World 48!',
     })
   );
 });

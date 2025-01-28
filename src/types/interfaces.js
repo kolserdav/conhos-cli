@@ -184,6 +184,9 @@ export function getEnvVariableRegex(name) {
  *  @property {{
  *   msg: string;
  * }} projectDeleteProgressCli
+ * @property {{
+ *  msg: string
+ * }} deployProgressCli
  */
 
 /**
