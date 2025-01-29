@@ -12,6 +12,7 @@ export const ENV_VARIABLES_CLEAN_REGEX = /[\$\{\}]+/g;
 export function getEnvVariableRegex(name) {
   return new RegExp(`\\$\\{${name}\\}`, 'g');
 }
+
 ///////////// Env variables /////////////
 
 /**

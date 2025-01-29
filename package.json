@@ -15,7 +15,13 @@
     "build": "tsc -p ./jsconfig.json",
     "script:create-docs": "node src/scripts/create-docs.js"
   },
-  "keywords": ["container", "hosting", "cloud", "docker", "deploy"],
+  "keywords": [
+    "container",
+    "hosting",
+    "cloud",
+    "docker",
+    "deploy"
+  ],
   "author": "kolserdav",
   "license": "MIT",
   "dependencies": {
@@ -23,7 +29,7 @@
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "conhos": "^2.1.0",
-    "conhos-vscode": "^1.2.2",
+    "conhos-vscode": "file:../conhos-vscode",
     "dotenv": "^16.3.1",
     "filesize": "^10.1.4",
     "inquirer": "^9.2.22",
