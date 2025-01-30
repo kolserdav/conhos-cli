@@ -120,6 +120,14 @@ program
     '--no-interractive',
     "It used to run in docker container. When it's no interractive you can't see what do you write."
   )
+  .option('--repl <number>', 'Replaca number', (value) => {
+    const num = parseInt(value, 10);
+    if (isNaN(num)) {
+      console.error('The value for --repl must be a number', value);
+      process.exit(1);
+    }
+    return num;
+  })
   .argument('<service_name>', 'The name of target service')
   .action(async (arg, options) => {
     new Exec(options, arg);

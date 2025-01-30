@@ -115,6 +115,7 @@ export default class Exec extends WS {
     this.showStartLine();
 
     const rl = readline.createInterface({
+      // @ts-ignore
       input: process.stdin,
       output: this.options.interractive ? process.stdout : undefined,
       terminal: true,
@@ -161,6 +162,7 @@ export default class Exec extends WS {
       data: {
         service: this.serviceName,
         project,
+        repl: this.options.repl || 1,
       },
       connId: this.connId,
       status: 'info',

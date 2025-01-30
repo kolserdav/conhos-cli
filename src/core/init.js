@@ -177,11 +177,14 @@ export default class Init extends WS {
    * @returns
    */
   getCostString(item, { sizes, baseCost, baseValue }) {
-    const cost = computeCostService(/** @type {typeof as<ServiceSize>} */ (as)(item.name), {
-      sizes,
-      baseCost,
-      baseValue,
-    });
+    const cost = computeCostService(
+      { serviceSize: /** @type {typeof as<ServiceSize>} */ (as)(item.name), replicas: 1 },
+      {
+        sizes,
+        baseCost,
+        baseValue,
+      }
+    );
     if (!cost) {
       console.error(`"${item.name}" is not allowed here`);
       process.exit(1);

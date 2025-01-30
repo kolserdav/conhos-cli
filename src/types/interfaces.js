@@ -12,6 +12,7 @@ export const ENV_VARIABLES_CLEAN_REGEX = /[\$\{\}]+/g;
 export function getEnvVariableRegex(name) {
   return new RegExp(`\\$\\{${name}\\}`, 'g');
 }
+
 ///////////// Env variables /////////////
 
 /**
@@ -149,12 +150,11 @@ export function getEnvVariableRegex(name) {
  *   project: string;
  * }} remove
  * @property {{
- *   containerName: string;
  *   serviceName: string;
  *   serviceType: ServiceTypeCommon;
  * }} acceptDeleteCli
  * @property {{
- *   containerName: string;
+ *   serviceName: string;
  *   accept: boolean;
  * }} acceptDeleteServer
  * @property {{
@@ -166,6 +166,7 @@ export function getEnvVariableRegex(name) {
  * @property {{
  *   project: string;
  *   service: string;
+ *   repl: number;
  * }} execServer
  * @property {{
  *   url: string;
@@ -184,6 +185,9 @@ export function getEnvVariableRegex(name) {
  *  @property {{
  *   msg: string;
  * }} projectDeleteProgressCli
+ * @property {{
+ *  msg: string
+ * }} deployProgressCli
  */
 
 /**
