@@ -154,7 +154,7 @@ Parameters that create configuration assemblies
   Configuration for websocket, _when passed `true` the following fields are added:_
 
 ```nginx
-proxy_http_version 1.0;
+proxy_http_version 1.1;
 proxy_set_header Upgrade $http_upgrade;
 proxy_set_header Connection "Upgrade";
 
