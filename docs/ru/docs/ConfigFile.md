@@ -27,6 +27,11 @@ services:
     ports: # [ОПЦИОНАЛЬНО] Список внешних портов
       - port: 3000
         type: proxy
+    deploy: # [ОПЦИОНАЛЬНО] Параметры развертывания
+      replicas: 2 # [ОПЦИОНАЛЬНО] Количество реплик (каждая реплика оплачивается как отдельная единица)
+      update_config: # [ОПЦИОНАЛЬНО] Параметры обновления
+        parallelism: 1 # [ОПЦИОНАЛЬНО] Количество одновременно обновляемых реплик
+        delay: 3s # [ОПЦИОНАЛЬНО] Задержка после обновления реплики перед обновлением следующей
     environment: # [ОПЦИОНАЛЬНО] Переменные окружения
       - PORT=3000
 ```
@@ -121,6 +126,53 @@ command: npm i && npm run start
 > `ports` указывает что порт должен быть открытым для интернета по доменному имени, а иначе доступ к сервису можно получить только через [Внутренние ссылки](./ConfigFile.md#internal-links) для других сервисов проекта.
 
 [**Подробнее о портах**](./Ports.md)
+
+### Развертывание [![якорь](https://conhos.ru/images/icons/link.svg)](#service-deploy)
+
+Настройка горизонтального масштабирования сервиса
+
+```yml
+deploy:
+  replicas: 2
+  update_config:
+    parallelism: 1
+    delay: 3s
+```
+
+### Реплики [![якорь](https://conhos.ru/images/icons/link.svg)](#service-deploy-replicas)
+
+Количество экземпляров (контейнеров) сервиса, которые будут отвечать через балансировщик нагрузки.
+
+> Данный параметр допустим только для исполняемых сервисов
+
+```yml
+deploy:
+  replicas: 2
+```
+
+#### Настройка обновления [![якорь](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config)
+
+Настройки политики обновления сервиса.
+
+##### Параллелизм [![якорь](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config-parallelism)
+
+Устанавливает количество одновременно перезапускаемых реплик сервиса, во время обновления и перезапуска.
+
+```yml
+deploy:
+  update_config:
+    parallelism: 1
+```
+
+##### Задержка [![якорь](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config-delay)
+
+Время задержки после перезапуска реплики до начала запуска следующей.
+
+```yml
+deploy:
+  update_config:
+    delay: 3s
+```
 
 ### Переменные среды [![якорь](https://conhos.ru/images/icons/link.svg)](#service-environment)
 

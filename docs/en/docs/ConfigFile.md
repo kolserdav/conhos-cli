@@ -27,6 +27,11 @@ services:
   ports: # [OPTIONAL] List of external ports
     - port: 3000
       type: proxy
+  deploy: # [OPTIONAL] Deployment options
+    replicas: 2 # [OPTIONAL] Number of replicas (each replica is billed as a separate unit)
+    update_config: # [OPTIONAL] Update options
+      parallelism: 1 # [OPTIONAL] Number of simultaneously updated replicas
+      delay: 3s # [OPTIONAL] Delay after updating a replica before updating the next one
   environment: # [OPTIONAL] Environment variables
     - PORT=3000
 ```
@@ -121,6 +126,53 @@ Ports that must be forwarded for public services to the outside; for each port, 
 > `ports` specifies that the port should be exposed to the Internet via the domain name, otherwise the service can only be accessed via [Internal Links](./ConfigFile.md#internal-links) for other services in the project.
 
 [**More about ports**](./Ports.md)
+
+### Deployment [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy)
+
+Configuring horizontal scaling of the service
+
+```yml
+deploy:
+  replicas: 2
+  update_config:
+    parallelism: 1
+    delay: 3s
+```
+
+### Replicas [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy-replicas)
+
+The number of service instances (containers) that will respond via the load balancer.
+
+> This parameter is valid only for executable services
+
+```yml
+deploy:
+  replicas: 2
+```
+
+#### Update configuration [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config)
+
+Service update policy settings.
+
+##### Parallelism [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config-parallelism)
+
+Sets the number of simultaneously restarted service replicas during update and restart.
+
+```yml
+deploy:
+  update_config:
+    parallelism: 1
+```
+
+##### Delay [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config-delay)
+
+Delay time after restarting a replica before starting the next one.
+
+```yml
+deploy:
+  update_config:
+    delay: 3s
+```
 
 ### Environment Variables [![anchor](https://conhos.ru/images/icons/link.svg)](#service-environment)
 
