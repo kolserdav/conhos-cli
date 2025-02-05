@@ -13,9 +13,10 @@ import readline from 'readline';
 import WS from '../connectors/ws.js';
 import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { as, console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 import Console from 'console';
+import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
@@ -106,14 +107,16 @@ export default class Exec extends WS {
     socket.on('message', (d) => {
       const str = d.toString();
       if (str) {
-        stdoutWriteStart('');
-        Console.log(str.replace(/\n$/, ''));
+        if (isLastStreamMessage(str)) {
+          this.showStartLine();
+        } else {
+          stdoutWriteStart('');
+          Console.log(str.replace(/\n$/, ''));
+        }
       }
-      this.showStartLine();
     });
 
     this.showStartLine();
-
     const rl = readline.createInterface({
       // @ts-ignore
       input: process.stdin,
@@ -130,17 +133,6 @@ export default class Exec extends WS {
       stdoutWriteStart('');
       console.info('Terminal exited', this.serviceName);
       process.exit(0);
-    });
-
-    /**
-     * @type {NodeJS.ReadStream}
-     */
-    const readStream = as(rl).input;
-    readStream.on('data', (key) => {
-      const enter = key[0] === 10 || key[0] === 13;
-      if (enter) {
-        this.showStartLine();
-      }
     });
   }
 
