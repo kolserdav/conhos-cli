@@ -107,7 +107,7 @@ export default class Exec extends WS {
     socket.on('message', (d) => {
       const str = d.toString();
       if (str) {
-        if (isLastStreamMessage(str)) {
+        if (isLastStreamMessage(str) && this.options.interractive) {
           this.showStartLine();
         } else {
           stdoutWriteStart('');
