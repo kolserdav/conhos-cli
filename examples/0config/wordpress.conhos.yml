@@ -11,7 +11,7 @@ services:
       url: https://github.com/kolserdav/conhos-wordpress
       branch: master
       untracked: checkout
-    entrypoint: ['sh', './install-extensions.sh']
+    entrypoint: ['sh', './entrypoint/install-extensions.sh', './entrypoint/chown-uploads.sh']
     command: php-fpm
     depends_on:
       - mariadb0
