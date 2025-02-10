@@ -14,7 +14,7 @@ services:
     entrypoint:
       - sh
       - ./entrypoint/install-extensions.sh
-      - ./entrypoint/chown-uploads.sh
+      - ./entrypoint/chown.sh
     command: php-fpm
     depends_on:
       - mariadb0
