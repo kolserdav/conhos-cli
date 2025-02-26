@@ -17,7 +17,7 @@ Configuration file for creating a `Ruby` service in Container Hosting with a `Po
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-name: name-of-project
+name: my-ruby-postgres-project
 services:
   ruby1:
     image: ruby

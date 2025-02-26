@@ -27,7 +27,7 @@ Configuration file for creating the `Python` service in Container Hosting. More 
 > Check the current version of the `Python` container in the [official Python repository](https://hub.docker.com/_/python/tags)
 
 ```yml
-name: my-awesome-project
+name: my-python-project
 services:
   python0:
     image: python

@@ -17,7 +17,7 @@ Configuration file for creating a `Golang` service in Container Hosting with a `
 > Check the current version of the `Mongo` container in the [official Mongo repository](https://hub.docker.com/_/mongo/tags)
 
 ```yml
-name: name-of-project
+name: my-golang-mongo-project
 services:
   golang1:
     image: golang

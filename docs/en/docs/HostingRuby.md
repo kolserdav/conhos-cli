@@ -27,7 +27,7 @@ Configuration file for creating the `Ruby` service in Container Hosting. More de
 > Check the current version of the `Ruby` container in the [official Ruby repository](https://hub.docker.com/_/ruby/tags)
 
 ```yml
-name: my-awesome-project
+name: my-ruby-project
 services:
   ruby0:
     image: ruby

@@ -17,7 +17,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Mon
 > Check the current version of the `Mongo` container in the [official Mongo repository](https://hub.docker.com/_/mongo/tags)
 
 ```yml
-name: name-of-project
+name: my-php-mongo-project
 services:
   php1:
     image: php

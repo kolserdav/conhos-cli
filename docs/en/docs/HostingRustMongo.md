@@ -17,7 +17,7 @@ Configuration file for creating a `Rust` service in Container Hosting with a `Mo
 > Check the current version of the `Mongo` container in the [official Mongo repository](https://hub.docker.com/_/mongo/tags)
 
 ```yml
-name: name-of-project
+name: my-rust-mongo-project
 services:
   rust1:
     image: rust

@@ -17,7 +17,7 @@ Configuration file for creating a `Rust` service in Container Hosting with a `Re
 > Check the current version of the `Redis` container in the [official Redis repository](https://hub.docker.com/_/redis/tags)
 
 ```yml
-name: name-of-project
+name: my-rust-redis-project
 services:
   rust1:
     image: rust

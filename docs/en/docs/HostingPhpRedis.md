@@ -17,7 +17,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Red
 > Check the current version of the `Redis` container in the [official Redis repository](https://hub.docker.com/_/redis/tags)
 
 ```yml
-name: name-of-project
+name: my-php-redis-project
 services:
   php1:
     image: php

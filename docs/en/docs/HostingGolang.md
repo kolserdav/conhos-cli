@@ -27,7 +27,7 @@ Configuration file for creating the `Golang` service in Container Hosting. More 
 > Check the current version of the `Golang` container in the [official Golang repository](https://hub.docker.com/_/golang/tags)
 
 ```yml
-name: my-awesome-project
+name: my-golang-project
 services:
   golang0:
     image: golang

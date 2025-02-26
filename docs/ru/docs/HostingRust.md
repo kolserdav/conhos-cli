@@ -27,7 +27,7 @@
 > Актуальную версию `Rust` контейнера уточнить в [официальном репозитории Rust](https://hub.docker.com/_/rust/tags)
 
 ```yml
-name: my-awesome-project
+name: my-rust-project
 services:
   rust0:
     image: rust

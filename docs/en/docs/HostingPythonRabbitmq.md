@@ -17,7 +17,7 @@ Configuration file for creating a `Python` service in Container Hosting with a `
 > Check the current version of the `Rabbitmq` container in the [official Rabbitmq repository](https://hub.docker.com/_/rabbitmq/tags)
 
 ```yml
-name: name-of-project
+name: my-python-rabbitmq-project
 services:
   python1:
     image: python

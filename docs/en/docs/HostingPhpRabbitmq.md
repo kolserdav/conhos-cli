@@ -17,7 +17,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Rab
 > Check the current version of the `Rabbitmq` container in the [official Rabbitmq repository](https://hub.docker.com/_/rabbitmq/tags)
 
 ```yml
-name: name-of-project
+name: my-php-rabbitmq-project
 services:
   php1:
     image: php

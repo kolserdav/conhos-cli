@@ -17,7 +17,7 @@ Configuration file for creating a `Ruby` service in Container Hosting with a `Ra
 > Check the current version of the `Rabbitmq` container in the [official Rabbitmq repository](https://hub.docker.com/_/rabbitmq/tags)
 
 ```yml
-name: name-of-project
+name: my-ruby-rabbitmq-project
 services:
   ruby1:
     image: ruby

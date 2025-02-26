@@ -17,7 +17,7 @@ Configuration file for creating a `Ruby` service in Container Hosting with a `Re
 > Check the current version of the `Redis` container in the [official Redis repository](https://hub.docker.com/_/redis/tags)
 
 ```yml
-name: name-of-project
+name: my-ruby-redis-project
 services:
   ruby1:
     image: ruby

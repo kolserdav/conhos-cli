@@ -17,7 +17,7 @@ Configuration file for creating a `Rust` service in Container Hosting with a `My
 > Check the current version of the `Mysql` container in the [official Mysql repository](https://hub.docker.com/_/mysql/tags)
 
 ```yml
-name: name-of-project
+name: my-rust-mysql-project
 services:
   rust1:
     image: rust

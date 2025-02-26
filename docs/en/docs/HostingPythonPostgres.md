@@ -17,7 +17,7 @@ Configuration file for creating a `Python` service in Container Hosting with a `
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-name: name-of-project
+name: my-python-postgres-project
 services:
   python1:
     image: python

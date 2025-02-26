@@ -17,7 +17,7 @@ Configuration file for creating a `Node` service in Container Hosting with a `Re
 > Check the current version of the `Redis` container in the [official Redis repository](https://hub.docker.com/_/redis/tags)
 
 ```yml
-name: name-of-project
+name: my-node-redis-project
 services:
   node1:
     image: node

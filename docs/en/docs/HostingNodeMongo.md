@@ -17,7 +17,7 @@ Configuration file for creating a `Node` service in Container Hosting with a `Mo
 > Check the current version of the `Mongo` container in the [official Mongo repository](https://hub.docker.com/_/mongo/tags)
 
 ```yml
-name: name-of-project
+name: my-node-mongo-project
 services:
   node1:
     image: node

@@ -17,7 +17,7 @@ Configuration file for creating a `Node` service in Container Hosting with a `Po
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-name: name-of-project
+name: my-node-postgres-project
 services:
   node1:
     image: node

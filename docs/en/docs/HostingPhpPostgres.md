@@ -17,7 +17,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Pos
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-name: name-of-project
+name: my-php-postgres-project
 services:
   php1:
     image: php

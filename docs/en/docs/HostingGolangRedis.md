@@ -17,7 +17,7 @@ Configuration file for creating a `Golang` service in Container Hosting with a `
 > Check the current version of the `Redis` container in the [official Redis repository](https://hub.docker.com/_/redis/tags)
 
 ```yml
-name: name-of-project
+name: my-golang-redis-project
 services:
   golang1:
     image: golang

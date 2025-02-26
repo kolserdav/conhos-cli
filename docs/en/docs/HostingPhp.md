@@ -27,7 +27,7 @@ Configuration file for creating the `Php` service in Container Hosting. More det
 > Check the current version of the `Php` container in the [official Php repository](https://hub.docker.com/_/php/tags)
 
 ```yml
-name: my-awesome-project
+name: my-php-project
 services:
   php0:
     image: php

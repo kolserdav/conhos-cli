@@ -27,7 +27,7 @@
 > Актуальную версию `Php` контейнера уточнить в [официальном репозитории Php](https://hub.docker.com/_/php/tags)
 
 ```yml
-name: my-awesome-project
+name: my-php-project
 services:
   php0:
     image: php

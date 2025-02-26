@@ -17,7 +17,7 @@ Configuration file for creating a `Golang` service in Container Hosting with a `
 > Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-name: name-of-project
+name: my-golang-postgres-project
 services:
   golang1:
     image: golang

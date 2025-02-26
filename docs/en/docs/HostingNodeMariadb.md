@@ -17,7 +17,7 @@ Configuration file for creating a `Node` service in Container Hosting with a `Ma
 > Check the current version of the `Mariadb` container in the [official Mariadb repository](https://hub.docker.com/_/mariadb/tags)
 
 ```yml
-name: name-of-project
+name: my-node-mariadb-project
 services:
   node1:
     image: node

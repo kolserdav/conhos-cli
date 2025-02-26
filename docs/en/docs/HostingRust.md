@@ -27,7 +27,7 @@ Configuration file for creating the `Rust` service in Container Hosting. More de
 > Check the current version of the `Rust` container in the [official Rust repository](https://hub.docker.com/_/rust/tags)
 
 ```yml
-name: my-awesome-project
+name: my-rust-project
 services:
   rust0:
     image: rust

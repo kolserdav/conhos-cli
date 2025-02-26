@@ -17,7 +17,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Mar
 > Check the current version of the `Mariadb` container in the [official Mariadb repository](https://hub.docker.com/_/mariadb/tags)
 
 ```yml
-name: name-of-project
+name: my-php-mariadb-project
 services:
   php1:
     image: php

@@ -17,7 +17,7 @@ Configuration file for creating a `Php` service in Container Hosting with a `Mys
 > Check the current version of the `Mysql` container in the [official Mysql repository](https://hub.docker.com/_/mysql/tags)
 
 ```yml
-name: name-of-project
+name: my-php-mysql-project
 services:
   php1:
     image: php

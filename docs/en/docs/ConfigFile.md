@@ -185,16 +185,14 @@ environment:
   - PORT=3000
 ```
 
-### Internal links [![anchor](https://conhos.ru/images/icons/link.svg)](#internal-links)
+### Startup order [![anchor](https://conhos.ru/images/icons/link.svg)](#depends-on)
 
-An array of service names to which this service will have access via internal links.
+Array of service names that must be started before this service.
 
 ```yml
 depends_on:
   - postgres0
 ```
-
-> When one of the connected services, for example **postgres**, is specified as an internal link, then an environment variable with the address of this link will be automatically added to the service during the operation of the **deploy** command
 
 ### Downloading files from Git [![anchor](https://conhos.ru/images/icons/link.svg)](#git)
 

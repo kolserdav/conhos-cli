@@ -17,7 +17,7 @@
 > Актуальную версию `Postgres` контейнера уточнить в [официальном репозитории Postgres](https://hub.docker.com/_/postgres/tags)
 
 ```yml
-name: name-of-project
+name: my-golang-postgres-project
 services:
   golang1:
     image: golang
@@ -51,7 +51,7 @@ services:
       - POSTGRES_DB=value2
 ```
 
-> Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `postgres0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `POSTGRES0_HOST`
+> Хост базы данных будет доступен в контейнере приложения по названию сервиса`postgres0`.
 
 ### 3. Запуск проекта в облаке
 

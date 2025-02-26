@@ -17,7 +17,7 @@ Configuration file for creating a `Rust` service in Container Hosting with a `Ra
 > Check the current version of the `Rabbitmq` container in the [official Rabbitmq repository](https://hub.docker.com/_/rabbitmq/tags)
 
 ```yml
-name: name-of-project
+name: my-rust-rabbitmq-project
 services:
   rust1:
     image: rust

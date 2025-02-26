@@ -27,7 +27,7 @@
 > Актуальную версию `Ruby` контейнера уточнить в [официальном репозитории Ruby](https://hub.docker.com/_/ruby/tags)
 
 ```yml
-name: my-awesome-project
+name: my-ruby-project
 services:
   ruby0:
     image: ruby

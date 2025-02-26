@@ -27,7 +27,7 @@
 > Актуальную версию `Golang` контейнера уточнить в [официальном репозитории Golang](https://hub.docker.com/_/golang/tags)
 
 ```yml
-name: my-awesome-project
+name: my-golang-project
 services:
   golang0:
     image: golang

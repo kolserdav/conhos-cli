@@ -27,7 +27,7 @@ Configuration file for creating the `Node` service in Container Hosting. More de
 > Check the current version of the `Node` container in the [official Node repository](https://hub.docker.com/_/node/tags)
 
 ```yml
-name: my-awesome-project
+name: my-node-project
 services:
   node0:
     image: node

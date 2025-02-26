@@ -17,7 +17,7 @@ Configuration file for creating a `Golang` service in Container Hosting with a `
 > Check the current version of the `Mariadb` container in the [official Mariadb repository](https://hub.docker.com/_/mariadb/tags)
 
 ```yml
-name: name-of-project
+name: my-golang-mariadb-project
 services:
   golang1:
     image: golang

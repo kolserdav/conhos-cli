@@ -17,7 +17,7 @@ Configuration file for creating a `Python` service in Container Hosting with a `
 > Check the current version of the `Mariadb` container in the [official Mariadb repository](https://hub.docker.com/_/mariadb/tags)
 
 ```yml
-name: name-of-project
+name: my-python-mariadb-project
 services:
   python1:
     image: python

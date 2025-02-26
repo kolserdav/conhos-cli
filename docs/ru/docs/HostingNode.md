@@ -27,7 +27,7 @@
 > Актуальную версию `Node` контейнера уточнить в [официальном репозитории Node](https://hub.docker.com/_/node/tags)
 
 ```yml
-name: my-awesome-project
+name: my-node-project
 services:
   node0:
     image: node

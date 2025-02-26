@@ -17,7 +17,7 @@ Configuration file for creating a `Python` service in Container Hosting with a `
 > Check the current version of the `Mongo` container in the [official Mongo repository](https://hub.docker.com/_/mongo/tags)
 
 ```yml
-name: name-of-project
+name: my-python-mongo-project
 services:
   python1:
     image: python

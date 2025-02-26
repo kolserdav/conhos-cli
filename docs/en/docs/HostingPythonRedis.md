@@ -17,7 +17,7 @@ Configuration file for creating a `Python` service in Container Hosting with a `
 > Check the current version of the `Redis` container in the [official Redis repository](https://hub.docker.com/_/redis/tags)
 
 ```yml
-name: name-of-project
+name: my-python-redis-project
 services:
   python1:
     image: python

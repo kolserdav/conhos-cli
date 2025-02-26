@@ -17,7 +17,7 @@
 > Актуальную версию `Rabbitmq` контейнера уточнить в [официальном репозитории Rabbitmq](https://hub.docker.com/_/rabbitmq/tags)
 
 ```yml
-name: name-of-project
+name: my-php-rabbitmq-project
 services:
   php1:
     image: php
@@ -49,7 +49,7 @@ services:
       - RABBITMQ_DEFAULT_USER=value1
 ```
 
-> Хост базы данных будет доступен в контейнере приложения по переменной окружения `[НАЗВАНИЕ_СЕРВИСА]_HOST`, например для сервиса `rabbitmq0` название переменной хоста внутри контейнера который ссылается на этот сервис через `depends_on` будет `RABBITMQ0_HOST`
+> Хост базы данных будет доступен в контейнере приложения по названию сервиса`rabbitmq0`.
 
 ### 3. Запуск проекта в облаке
 
