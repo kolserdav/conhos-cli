@@ -31,7 +31,7 @@ services:
     ports:
       - port: 3000
         type: proxy
-    depends_on: # Указываем, что сервис должен иметь внутрениие ссылки на
+    depends_on: # Сервис должен запускаться только после следующих сервисов
       - postgres0 # сервис postgres0
     environment:
       - PORT=3000

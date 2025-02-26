@@ -31,7 +31,7 @@ services:
     ports:
       - port: 3000
         type: proxy
-    depends_on: # Specify that the service should have internal links to
+    depends_on: # The service should only start after the following services
       - rabbitmq0 # rabbitmq0 service
     environment:
       - PORT=3000
