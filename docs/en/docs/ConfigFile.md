@@ -77,7 +77,7 @@ Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python'
 
 #### Custom container [![anchor](https://conhos.ru/images/icons/link.svg)](#custom-container)
 
-To run a service based on any of the images on Docker Hub, you need to specify `custom` and in `version` specify _'author/title:version'_ of the image.
+To run a service based on any of the images on Docker Hub, you need to specify `custom` and in `version` specify _'author/name:version'_ of the image.
 
 ```yml
 image: custom
