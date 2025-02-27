@@ -83,6 +83,7 @@ export const COMMAND_DEFAULT = {
   php: 'php-fpm',
   rust: 'cargo build --release && ./target/release/main',
   ruby: 'bundle install && ruby server.rb',
+  custom: 'tail -f /dev/null',
 };
 export const EXPLICIT_EXCLUDE = ['.git', '.vscode'];
 /**
@@ -95,6 +96,7 @@ export const EXCLUDE_DEFAULT = {
   golang: ['vendor'],
   php: ['vendor'],
   ruby: ['vendor'],
+  custom: ['tmp'],
 };
 
 export const SIZE_INDEX_DEFAULT = 3;
