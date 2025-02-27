@@ -73,7 +73,16 @@ services:
 image: node
 ```
 
-Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
+Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin' | 'custom'_
+
+#### Кастомный контейнер [![якорь](https://conhos.ru/images/icons/link.svg)](#custom-container)
+
+Чтобы запустить сервис на основе любого из образов на Docker Hub нужно указать `custom` а в `version` прописать _'автор/название:версия'_ образа.
+
+```yml
+image: custom
+version: dart # Будет устаовлено из официального репозитория Dart версия latest (по умолчанию)
+```
 
 ### Размер сервиса [![якорь](https://conhos.ru/images/icons/link.svg)](#service-size)
 
@@ -253,7 +262,7 @@ volumes:
   - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
 ```
 
-### Запуск скрипта при создании контейнера [![якорь](https://conhos.ru/images/icons/link.svg)](#entrypoint)
+### Запуск скрипта при старте контейнера [![якорь](https://conhos.ru/images/icons/link.svg)](#entrypoint)
 
 > За исключением сервиса `postgres`, в котором для запуска скриптов при создании не нужно передавать `entrypoint` вместо этого передаем через `volumes` внутрь контейнера файл `/docker-entrypoint-initdb.d/init.sql` с примерным содержанием:
 

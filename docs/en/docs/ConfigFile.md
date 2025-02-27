@@ -73,7 +73,16 @@ The image of the operating system and the list of installed service dependencies
 image: node
 ```
 
-Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin'_
+Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin' | 'custom'_
+
+#### Custom container [![anchor](https://conhos.ru/images/icons/link.svg)](#custom-container)
+
+To run a service based on any of the images on Docker Hub, you need to specify `custom` and in `version` specify _'author/title:version'_ of the image.
+
+```yml
+image: custom
+version: dart # Will be installed from the official Dart repository latest (default) version
+```
 
 ### Service size [![anchor](https://conhos.ru/images/icons/link.svg)](#service-size)
 
@@ -253,7 +262,7 @@ volumes:
   - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
 ```
 
-### Running a script when creating a container [![anchor](https://conhos.ru/images/icons/link.svg)](#entrypoint)
+### Running a script when starting a container [![anchor](https://conhos.ru/images/icons/link.svg)](#entrypoint)
 
 > Except for the `postgres` service, where you don't need to pass `entrypoint` to run scripts when creating, instead we pass the `/docker-entrypoint-initdb.d/init.sql` file inside the container via `volumes` with approximate contents:
 
