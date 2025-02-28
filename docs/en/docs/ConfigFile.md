@@ -91,8 +91,9 @@ Build a custom image for the service from `Dockerfile`. Only works with the `con
 > After changing the Dockerfile in the repository, if you want the container to rebuild, you need to run the `deploy` command manually.
 
 ```yml
+image: custom # This value is required to use build
 build:
-dockerfile: Dockerfile # Relative path to Dockerfile in the context of "project-path/pwd"
+  dockerfile: Dockerfile # Relative path to Dockerfile in the context of "project-path/pwd"
 ```
 
 ### Service size [![anchor](https://conhos.ru/images/icons/link.svg)](#service-size)
