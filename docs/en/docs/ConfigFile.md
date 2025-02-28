@@ -84,6 +84,17 @@ image: custom
 version: dart # Will be installed from the official Dart repository latest (default) version
 ```
 
+#### Build container from Dockerfile [![anchor](https://conhos.ru/images/icons/link.svg)](#custom-container-build)
+
+Build a custom image for the service from `Dockerfile`. Only works with the `conhos deploy` command.
+
+> After changing the Dockerfile in the repository, if you want the container to rebuild, you need to run the `deploy` command manually.
+
+```yml
+build:
+dockerfile: Dockerfile # Relative path to Dockerfile in the context of "project-path/pwd"
+```
+
 ### Service size [![anchor](https://conhos.ru/images/icons/link.svg)](#service-size)
 
 The allocation of cloud server resources for the operation of a specific service depends on this

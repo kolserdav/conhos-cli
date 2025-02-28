@@ -84,6 +84,17 @@ image: custom
 version: dart # Будет устаовлено из официального репозитория Dart версия latest (по умолчанию)
 ```
 
+#### Собрать контейнер из Dockerfile [![якорь](https://conhos.ru/images/icons/link.svg)](#custom-container-build)
+
+Собрать специальный образ для сервиса из `Dockerfile`. Срабатывает только при команде `conhos deploy`.
+
+> После изменения Dockerfile в репозитории если нужно чтобы контейнер пересобрался, нужно запустить команду `deploy` вручную.
+
+```yml
+build:
+  dockerfile: Dockerfile # Относительный путь до Dockerfile в контексте "project-path/pwd"
+```
+
 ### Размер сервиса [![якорь](https://conhos.ru/images/icons/link.svg)](#service-size)
 
 От этого зависит выделение ресуров облачного сервера для работы конкретного сервиса
