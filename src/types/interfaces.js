@@ -188,6 +188,13 @@ export function getEnvVariableRegex(name) {
  * @property {{
  *  msg: string
  * }} deployProgressCli
+ * @property {{
+ *  project: string;
+ *  service: string;
+ * }} serviceRestartServer
+ * @property {{
+ *  msg: string;
+ * }} serviceRestartProgressCli
  */
 
 /**

@@ -85,6 +85,8 @@ const crypto = new Crypto();
  *  project?: string;
  *  delete?: boolean;
  *  repl?: number;
+ *  name?: string;
+ *  restart?: boolean;
  * }} Options
  */
 
@@ -604,6 +606,7 @@ export default class WS {
 
     if (authData) {
       this.setUserId(authData.uid);
+
       if (authData.iv !== '') {
         console.info('Session token was encrypted', '');
 

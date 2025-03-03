@@ -95,18 +95,24 @@ export default class Project extends WS {
       name = this.config.name;
     }
 
-    this.sendMessage({
-      token: this.token,
-      type: 'projectDeleteServer',
-      message: '',
-      packageName: PACKAGE_NAME,
-      data: {
-        name,
-        interractive: this.options.interractive || false,
-      },
-      connId: this.connId,
-      status: 'info',
-      userId: this.userId,
-    });
+    if (this.options.delete) {
+      this.sendMessage({
+        token: this.token,
+        type: 'projectDeleteServer',
+        message: '',
+        packageName: PACKAGE_NAME,
+        data: {
+          name,
+          interractive: this.options.interractive || false,
+        },
+        connId: this.connId,
+        status: 'info',
+        userId: this.userId,
+      });
+      return;
+    }
+
+    console.warn('No command', '');
+    process.exit();
   }
 }

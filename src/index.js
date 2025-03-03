@@ -20,6 +20,7 @@ import Logs from './core/logs.js';
 import IP from './core/ip.js';
 import Exec from './core/exec.js';
 import Project from './core/project.js';
+import Service from './core/service.js';
 
 process.on('SIGABRT', (sig) => {
   console.warn('Received abort signal', sig);
@@ -107,6 +108,23 @@ program
   )
   .action(async (options) => {
     new Project(options);
+  });
+
+program
+  .command('service')
+  .description('Service management')
+  .option(
+    '-p, --project <string>',
+    'Project name. If conhos.yml file is not exists that it is required.'
+  )
+  .requiredOption('-n --name <string>', 'Service name')
+  .option(
+    '--no-interractive',
+    'If you are asked to confirm the deletion of the project, the script will automatically answer "yes"'
+  )
+  .option('-r --restart', 'Restart service')
+  .action(async (options) => {
+    new Service(options);
   });
 
 program
