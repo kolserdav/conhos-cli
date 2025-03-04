@@ -19,6 +19,8 @@ services:
   pwd: examples/postgres # Path to the working folder (files and folders from this path will be uploaded to the cloud)
   volumes: # [OPTIONAL] Upload additional files to the container
     - https://raw.githubusercontent.com/kolserdav/conhos-cli/master/examples/php/install-extensions.sh:install-extensions.sh
+    # Mount local volume
+    - local:/path
   entrypoint: ['install-extensions.sh'] # [OPTIONAL] Scripts to run when creating the container
   exclude: # [OPTIONAL] Exclude files and folders (path relative to root "pwd")
     - tmp
@@ -34,6 +36,10 @@ services:
       delay: 3s # [OPTIONAL] Delay after updating a replica before updating the next one
   environment: # [OPTIONAL] Environment variables
     - PORT=3000
+# Local volumes
+volumes:
+  localVolume:
+    name: local
 ```
 
 ## Top level configuration file fields [![anchor](https://conhos.ru/images/icons/link.svg)](#top-level-props)
@@ -44,6 +50,26 @@ Cloud Project ID
 
 ```yml
 name: my-awesome-project
+```
+
+### Local volumes [![anchor](https://conhos.ru/images/icons/link.svg)](#volumes)
+
+Local volumes are used to save files between service restarts, as well as to access service files from another service.
+
+```yml
+volumes:
+  key:
+    name: 'name'
+```
+
+After creating a local volume in `volumes`, you must also add this volume to `service.volumes`, for example:
+
+```yml
+services:
+  node:
+    volumes:
+      # Specify the volume name and path
+      - name:/path
 ```
 
 **You strictly need to ensure that this field is unique between different projects, otherwise one of your projects will overwrite another project in the cloud.**

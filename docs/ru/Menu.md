@@ -1,5 +1,7 @@
 ## Меню
 
+- [Список изменений](docs/CHANGELOG.md)
+
 <details>
   <summary>Начало</summary>
 

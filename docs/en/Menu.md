@@ -1,5 +1,7 @@
 ## Menu
 
+- [List of changes](docs/CHANGELOG.md)
+
 <details>
   <summary>Getting started</summary>
 

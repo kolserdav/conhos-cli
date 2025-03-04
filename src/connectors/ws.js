@@ -24,7 +24,7 @@ import {
 } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import { checkConfig, getPosition } from 'conhos-vscode/dist/lib.js';
+import { checkConfig, findVolumeByName, getPosition } from 'conhos-vscode/dist/lib.js';
 import Yaml from '../utils/yaml.js';
 import {
   PROTOCOL_CLI,
@@ -480,7 +480,7 @@ export default class WS {
    * @returns {Promise<{config: ConfigFile; error: string | null; volumes: Volumes}>}
    */
   async changeConfigFileVolumes({ userId, config }) {
-    const { services } = config;
+    const { services, volumes: volumesGlobal } = config;
     const _config = structuredClone(config);
     /**
      * @type {Volumes}
@@ -521,9 +521,11 @@ export default class WS {
         volumes[serviceKey] = [];
         for (let _i = 0; __volumes[_i]; _i++) {
           let volume = __volumes[_i];
+          const name = volume.split(':')[0];
+          const vol = findVolumeByName({ volumes: volumesGlobal, name });
 
           const httpM = volume.match(/^https?:\/\//);
-          if (!httpM) {
+          if (!httpM || vol) {
             _config.services[serviceKey].volumes?.push(volume);
             continue;
           }
@@ -669,7 +671,7 @@ export default class WS {
      * @type {CheckConfigResult[]}
      */
     const res = [];
-    const { services } = config;
+    const { services, volumes: volumesGlobal } = config;
     if (!services) {
       return res;
     }
@@ -679,6 +681,12 @@ export default class WS {
         return;
       }
       volumes.forEach((_item) => {
+        const name = _item.split(':')[0];
+        const vol = findVolumeByName({ volumes: volumesGlobal, name });
+        if (vol) {
+          return;
+        }
+
         const localM = _item.match(VOLUME_LOCAL_REGEX);
         if (!localM) {
           return;

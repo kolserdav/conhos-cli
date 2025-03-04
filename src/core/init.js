@@ -97,6 +97,11 @@ export default class Init extends WS {
   project = getPackageName();
 
   /**
+   * @type {ConfigFile['volumes']}
+   */
+  localVolumes = undefined;
+
+  /**
    * @param {Options} options
    */
   constructor(options) {
@@ -161,6 +166,7 @@ export default class Init extends WS {
           if (this.config) {
             this.config.name = this.project;
             this.server = this.config.server;
+            this.localVolumes = this.config.volumes;
           }
           await this.handleDeployData(rawMessage);
           break;
@@ -245,6 +251,7 @@ export default class Init extends WS {
             environment: [`PORT=${PORT_DEFAULT.port}`],
           },
         },
+        volumes: undefined,
       });
 
       console.info('Project successfully initialized', this.configFile);
@@ -359,6 +366,7 @@ export default class Init extends WS {
       name: this.project,
       server: this.server,
       services: this.services,
+      volumes: this.localVolumes,
     });
 
     const addAnother = await inquirer.confirm('Do you want to add another service?', false);

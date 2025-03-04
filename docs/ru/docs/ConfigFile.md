@@ -19,6 +19,8 @@ services:
     pwd: examples/postgres # Путь до рабочей папки (файлы и папки из этого пути будут загружены в облако)
     volumes: # [ОПЦИОНАЛЬНО] Загрузка дополнительных файлов в контейнер
       - https://raw.githubusercontent.com/kolserdav/conhos-cli/master/examples/php/install-extensions.sh:install-extensions.sh
+      # Подключение локальномо тома
+      - local:/path
     entrypoint: ['install-extensions.sh'] # [ОПЦИОНАЛЬНО] Скрипты запускаемые при создании контейнера
     exclude: # [ОПЦИОНАЛЬНО] Файлы и папки исключения (путь относительно корня "pwd")
       - tmp
@@ -34,6 +36,10 @@ services:
         delay: 3s # [ОПЦИОНАЛЬНО] Задержка после обновления реплики перед обновлением следующей
     environment: # [ОПЦИОНАЛЬНО] Переменные окружения
       - PORT=3000
+# Локальные тома
+volumes:
+  localVolume:
+    name: local
 ```
 
 ## Поля файла конфигурации верхнего уровня [![якорь](https://conhos.ru/images/icons/link.svg)](#top-level-props)
@@ -47,6 +53,27 @@ name: my-awesome-project
 ```
 
 **Вам строго необходимо следить за уникальностью этого поля между разными проектами, иначе один ваш проект перезапишет другой проект в облаке.**
+
+### Локальные тома [![якорь](https://conhos.ru/images/icons/link.svg)](#volumes)
+
+Локальные тома служат для сохранения файлов между перезапусками сервиса, а также для доступа к файлам сервиса из другого сервиса.
+
+```yml
+volumes:
+  key:
+    name: 'name'
+```
+
+После создания локального тома в `volumes` необходимо также добавить данный том в `service.volumes` например:
+
+```yml
+services:
+  node:
+    volumes:
+      # Указываем имя тома и путь
+      - name:/path
+    ...
+```
 
 ### Сервисы [![якорь](https://conhos.ru/images/icons/link.svg)](#services)
 

@@ -38,7 +38,7 @@ import {
   VOLUME_LOCAL_REGEX,
 } from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
-import { isCustomService } from 'conhos-vscode/dist/lib.js';
+import { findVolumeByName, isCustomService } from 'conhos-vscode/dist/lib.js';
 import { readFile, writeFile } from 'fs/promises';
 import { ENV_VARIABLE_REGEX, ENV_VARIABLES_CLEAN_REGEX } from '../types/interfaces.js';
 
@@ -160,7 +160,7 @@ export default class Deploy extends WS {
     if (!this.config) {
       return;
     }
-    const { services } = this.config;
+    const { services, volumes: volumesGlobal } = this.config;
     const servKeys = Object.keys(services);
     for (let i = 0; servKeys[i]; i++) {
       const key = servKeys[i];
@@ -178,6 +178,12 @@ export default class Deploy extends WS {
 
         for (let _i = 0; volumes[_i]; _i++) {
           const volume = volumes[_i];
+          const name = volume.split(':')[0];
+          const vol = findVolumeByName({ volumes: volumesGlobal, name });
+          if (vol) {
+            continue;
+          }
+
           const fileM = volume.match(VOLUME_LOCAL_REGEX);
           if (!fileM) {
             console.error(
