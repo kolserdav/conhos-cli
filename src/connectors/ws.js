@@ -526,6 +526,9 @@ export default class WS {
 
           const httpM = volume.match(/^https?:\/\//);
           if (!httpM || vol) {
+            if (vol) {
+              volumes[serviceKey].push(volume);
+            }
             _config.services[serviceKey].volumes?.push(volume);
             continue;
           }
