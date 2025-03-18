@@ -600,6 +600,10 @@ export default class Deploy extends WS {
       return;
     }
 
+    if (this.options.clearCache) {
+      await this.removeMetadata();
+    }
+
     await this.checkMetadata();
 
     const { name, services } = this.config;
@@ -729,6 +733,21 @@ export default class Deploy extends WS {
     }
 
     return { files: this.filterUnique(files), needUpload, deleted: this.filterUnique(deleted) };
+  }
+
+  async removeMetadata() {
+    const metadataPath = this.getMetadataFilePath();
+    const metadata = await this.readMetadataFile(metadataPath);
+    if (!metadata) {
+      return;
+    }
+    const _metadata = structuredClone(metadata);
+
+    console.info(1, { CWD, _metadata });
+
+    delete _metadata.projects[CWD];
+
+    await this.writeMetadataFile(metadataPath, _metadata);
   }
 
   /**
