@@ -1,7 +1,5 @@
 ## Меню
 
-- [Список изменений](docs/CHANGELOG.md)
-
 <details>
   <summary>Начало</summary>
 
@@ -37,4 +35,10 @@
 - [Python](docs/HostingPython.md)
 - [PHP](docs/HostingPhp.md)
 - [Golang](docs/HostingGolang.md)
+</details>
+
+<details>
+  <summary>Подробности</summary>
+
+- [Список изменений](docs/CHANGELOG.md)
 </details>

@@ -1,7 +1,5 @@
 ## Menu
 
-- [List of changes](docs/CHANGELOG.md)
-
 <details>
   <summary>Getting started</summary>
 
@@ -37,4 +35,10 @@
 - [Python](docs/HostingPython.md)
 - [PHP](docs/HostingPhp.md)
 - [Golang](docs/HostingGolang.md)
+</details>
+
+<details>
+<summary>Details</summary>
+
+- [Changelog](docs/CHANGELOG.md)
 </details>
