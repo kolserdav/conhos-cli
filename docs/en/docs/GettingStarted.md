@@ -80,3 +80,9 @@ To do this, run the command:
 ```sh
 conhos deploy
 ```
+
+---
+
+<div style="display: flex; justify-content: center; margin-top: 2rem;">
+  <a href="/dashboard"><button class="button-global">Start using</button></a>
+</div>

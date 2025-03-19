@@ -81,4 +81,8 @@ conhos init -y
 conhos deploy
 ```
 
-<a href="/dashboard"><button class="button-global">Начать использовать</button></a>
+---
+
+<div style="display: flex; justify-content: center; margin-top: 2rem;">
+  <a href="/dashboard"><button class="button-global">Начать использовать</button></a>
+</div>
