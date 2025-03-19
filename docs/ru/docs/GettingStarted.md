@@ -80,3 +80,5 @@ conhos init -y
 ```sh
 conhos deploy
 ```
+
+<a href="/dashboard"><button class="button-global">Начать использовать</button></a>
