@@ -1,5 +1,9 @@
 # List of changes
 
+**4.3.4-21.03.2025**
+
+- Fixed a bug when creating `volumes` starting with 'https://'
+
 **4.3.3-18.03.2025**
 
 - Fixed a bug when creating a custom container, when it did not allow creating without `pwd`
