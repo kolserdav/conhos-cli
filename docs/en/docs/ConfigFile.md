@@ -126,6 +126,8 @@ build:
 
 The allocation of cloud server resources for the operation of a specific service depends on this
 
+> This parameter affects the price. See the price table on the [home page](/#price)
+
 ```yml
 size: mili
 ```
