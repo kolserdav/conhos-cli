@@ -37,4 +37,4 @@
 **4.3.0-04.03.2025**
 
 - `[Extension,Core]` Added local volumes [see](./ConfigFile.md#volumes)
-- `[Documentation]` Added a list of changes by versions [see](./CHANGELOG.md)
+- `[Documentation]` Added a list of changes by versions
