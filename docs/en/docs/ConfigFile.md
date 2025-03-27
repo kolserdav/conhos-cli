@@ -289,18 +289,20 @@ exclude:
   - some/nested
 ```
 
-### Configuration injection [![anchor](https://conhos.ru/images/icons/link.svg)](#volumes)
+### Connecting a volume [![anchor](https://conhos.ru/images/icons/link.svg)](#service-volumes)
 
-For overwriting configuration files inside the container.
+To overwrite configuration files inside the container:
 
-> `volumes` is used only for passing small files inside containers to configure container processes.
+> This method is only suitable for embedding small files, and is used to overwrite the default configuration files inside the container. To load application files, you need to use [pwd](#pwd)
 
 ```yml
 # Optional
 volumes:
-  # - [absolute or relative path to file]:[absolute path to file inside container]
+  # - [absolute or relative path to the file or download link]:[absolute path to the file inside the container]
   - examples/mysql/config/my.cf:/etc/mysql/conf.d/custom.cnf
 ```
+
+> To connect a volume to the host system, use the [local volumes](#volumes) mechanism to save files between changes in the container
 
 ### Running a script when starting a container [![anchor](https://conhos.ru/images/icons/link.svg)](#entrypoint)
 

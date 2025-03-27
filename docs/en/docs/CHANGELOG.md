@@ -1,5 +1,10 @@
 # List of changes
 
+**4.3.6-IN PROGRESS**
+
+- `[Extension]` Fixed documentation link for `service.volumes` field
+- `[Documentation]` Fixed description of volume connection [see](./ConfigFile.md#service-volumes)
+
 **4.3.5-27.03.2025**
 
 - `[Extension]` Fixed a false warning that the value passed to `domains` supposedly has no effect
