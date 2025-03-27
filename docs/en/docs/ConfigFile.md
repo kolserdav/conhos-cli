@@ -328,8 +328,9 @@ domains:
   '3000': example.ru
 ```
 
-> In order for your own domain to work, be sure to make sure that an `A` record from the IP node on which your project is located is added to the hosting zone of this domain.
-> To get the IP of the project node, enter the command:
+> In order for your own domain to work, be sure to make sure that in the hosting zone of this domain **two `A` records** are added from the IP node where your project is located, which refer to the domain itself **as well as to the domain with the `www` prefix**, for example `www.example.ru`.
+
+To get the IP of the project node, enter the command:
 
 ```sh
 conhos ip
