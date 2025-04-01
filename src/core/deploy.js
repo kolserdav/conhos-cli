@@ -346,11 +346,11 @@ export default class Deploy extends WS {
    * @private
    * @param {ConfigFile['services']} services
    */
-  getActiveServices(services) {
+  getNeedUploadServices(services) {
     return Object.keys(services)
       .map((item) => {
-        const { active, image } = services[item];
-        return active && isCustomService(image);
+        const { pwd, image } = services[item];
+        return pwd !== undefined && isCustomService(image);
       })
       .filter((item) => item);
   }
@@ -388,7 +388,9 @@ export default class Deploy extends WS {
    * @public
    * @param {WSMessageCli<'prepareDeployCli'>} param0
    */
-  async prepareUpload({ data: { service, exclude, pwd, active, cache, git } }) {
+  async prepareUpload({ data }) {
+    const { service, exclude, pwd, active, cache, git } = data;
+    console.log('Prepare upload', service);
     if (!this.config) {
       return;
     }
@@ -400,8 +402,8 @@ export default class Deploy extends WS {
     this.uploadedServices.push(service);
 
     const { services } = this.config;
-    const activeServices = this.getActiveServices(services);
-    const last = activeServices.length <= this.uploadedServices.length;
+    const needUploadServices = this.getNeedUploadServices(services);
+    const last = needUploadServices.length <= this.uploadedServices.length;
 
     if (git) {
       if (active) {
@@ -742,8 +744,6 @@ export default class Deploy extends WS {
       return;
     }
     const _metadata = structuredClone(metadata);
-
-    console.info(1, { CWD, _metadata });
 
     delete _metadata.projects[CWD];
 
