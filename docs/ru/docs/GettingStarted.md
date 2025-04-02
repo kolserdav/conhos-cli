@@ -8,7 +8,7 @@
 
 ## Системные требования [![якорь](https://conhos.ru/images/icons/link.svg)](#requirements)
 
-Для работы с утилитой потребуется установить **Node.js** версии **20** и выше на свой компьютер. Официальная страница для скачивания Node.js: https://nodejs.org либо используйте менеджер версий **NVM** https://github.com/nvm-sh/nvm.
+Для работы с утилитой потребуется установить **Node.js** версии **22** и выше на свой компьютер. Официальная страница для скачивания Node.js: https://nodejs.org либо используйте менеджер версий **NVM** https://github.com/nvm-sh/nvm.
 
 ## Установка [![якорь](https://conhos.ru/images/icons/link.svg)](#install)
 
