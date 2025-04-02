@@ -1,0 +1,41 @@
+name: nextjs
+services:
+  next:
+    git:
+      url: https://github.com/kolserdav/conhos-next-example.git
+      branch: master
+      untracked: checkout
+    pwd: ./
+    size: nano
+    image: node
+    ports:
+      - port: 3000
+        type: proxy
+    active: true
+    command: npm run start
+    depends_on:
+      - next_builder
+    version: lts
+    volumes:
+      - build:/home/app/.next
+      - vendor:/home/app/node_modules
+  next_builder:
+    image: node
+    version: lts
+    active: true
+    size: santi
+    restart: no
+    git:
+      url: https://github.com/kolserdav/conhos-next-example.git
+      branch: master
+      untracked: checkout
+    pwd: ./
+    command: npm i && npm run build
+    volumes:
+      - build:/home/app/.next
+      - vendor:/home/app/node_modules
+volumes:
+  build:
+    name: build
+  vendor:
+    name: vendor

@@ -150,14 +150,21 @@ Service version taken from the official DockerHub repository. For example, for N
 version: latest
 ```
 
-### No restart [![anchor](https://conhos.ru/images/icons/link.svg)](#service-no-restart)
+### Restart service [![anchor](https://conhos.ru/images/icons/link.svg)](#service-restart)
 
-To prevent the service from restarting when the project is restarted - **true**
+Sets the automatic service restart policy.
 
-> Used where restarting the container is not required after updating the application files. For example, for services running on `php-fpm`.
+#### Possible values:
+
+- `always` [Default] - Restarts on crash and on `deploy` command if there were changes in `pwd` files
+- `on-failure` - Restarts only on crash
+  > This value is preferable for services that do not need to be restarted when files change, such as those running on `php-fpm`.
+- `no` - never restarts (temporary service)
+  > This value is preferable for temporary services. Which can be used, for example, together with [depends_on](#depends-on), to build a project in a more powerful service.
 
 ```yml
-no_restart: true
+# Optional
+restart: always
 ```
 
 ### Starting command [![anchor](https://conhos.ru/images/icons/link.svg)](#service-command)
@@ -237,6 +244,8 @@ environment:
 ### Startup order [![anchor](https://conhos.ru/images/icons/link.svg)](#depends-on)
 
 Array of service names that must be started before this service.
+
+> When a service depends on another service that has [restart](#service-restart) set to `no` (temporary service), then after the temporary service finishes working, this service will be restarted.
 
 ```yml
 depends_on:

@@ -6,7 +6,7 @@ services:
     active: true
     version: 8.4-rc-fpm-bookworm
     pwd: ./
-    no_restart: true
+    restart: on-failure
     git:
       url: https://github.com/kolserdav/conhos-wordpress
       branch: master
