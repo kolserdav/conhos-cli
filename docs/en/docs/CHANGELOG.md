@@ -1,5 +1,10 @@
 # List of changes
 
+**4.3.7-IN-PROGRESS**
+
+- `[Core]` Fixed a bug when using `restart: no` (services.service.deploy.labels.restart must be a string, number or null)
+- `[Core,Server]` Fixed erroneous stopping of service when it failed to start several times before the service with `restart: no` it depends on finished its work
+
 **4.3.6-02.04.2025**
 
 - `[Extension]` Fixed documentation link for `service.volumes` field
