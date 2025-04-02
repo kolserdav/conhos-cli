@@ -5,7 +5,7 @@
 - `[Extension]` Fixed documentation link for `service.volumes` field
 - `[Documentation]` Fixed description of volume connection [see](./ConfigFile.md#service-volumes)
 - `[Server]` Fixed a bug where the service would not restart when pushing to git if `pwd` referenced './'
-- `[Extension,Core]` The `no_restart` property has been removed and the `restart` property has been added instead [see](./ConfigFile.md#service-restart)
+- `[Extension,Core,Server]` The `no_restart` property has been removed and the `restart` property has been added instead [see](./ConfigFile.md#service-restart)
 
 **4.3.5-27.03.2025**
 
