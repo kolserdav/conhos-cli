@@ -1,6 +1,6 @@
 # List of changes
 
-**4.3.6-IN PROGRESS**
+**4.3.6-02.04.2025**
 
 - `[Extension]` Fixed documentation link for `service.volumes` field
 - `[Documentation]` Fixed description of volume connection [see](./ConfigFile.md#service-volumes)
@@ -9,6 +9,7 @@
 - `[Extension]` Fixed errors of impossibility to use `-` in the project name and impossibility to create a custom service without external ports
 - `[Documentation]` Rewritten usage of `no_restart` to `restart` [see](./ConfigFile.md#service-restart)
 - `[Website,Documentation]` Added an example for running `Next.js` application with assembly in a separate temporary service
+- `[Website]` Fixed scrolling when clicking on a link on [Documentation](./ConfigFile.md) pages, when it scrolled and selected either the link itself or other such links, but not the target anchor
 
 **4.3.5-27.03.2025**
 
