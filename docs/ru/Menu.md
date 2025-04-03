@@ -41,4 +41,5 @@
   <summary>Подробности</summary>
 
 - [Список изменений](docs/CHANGELOG.md)
+- [Известные проблемы](docs/TROUBLESHOOTING.md)
 </details>

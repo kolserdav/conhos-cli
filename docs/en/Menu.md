@@ -41,4 +41,5 @@
 <summary>Details</summary>
 
 - [Changelog](docs/CHANGELOG.md)
+- [Known issues](docs/TROUBLESHOOTING.md)
 </details>
