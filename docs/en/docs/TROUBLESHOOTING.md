@@ -1,6 +1,6 @@
 # Known issues
 
-### Running `deploy` command fails with an error in console or browser
+### Running 'deploy' command fails with an error in console or browser
 
 ---
 
