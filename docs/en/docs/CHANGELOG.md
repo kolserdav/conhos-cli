@@ -5,6 +5,7 @@
 - `[Core]` Fixed a bug when using `restart: no` (services.service.deploy.labels.restart must be a string, number or null)
 - `[Core,Server]` Fixed erroneous stopping of service when it failed to start several times before the service with `restart: no` it depends on finished its work
 - `[Website,API-Websocket]` Added the ability to include time when receiving service logs
+- `[Server]` Fixed a bug with incorrect cost calculation, eliminated the possibility of calculating cost for duplicate containers that completed work with an error
 
 **4.3.6-02.04.2025**
 
