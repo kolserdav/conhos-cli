@@ -7,6 +7,7 @@
 - `[Website,API-Websocket]` Added the ability to include time when receiving service logs
 - `[Server]` Fixed a bug with incorrect cost calculation, eliminated the possibility of calculating cost for duplicate containers that completed work with an error
 - `[Core]` Fixed a bug where the service would not stop when the maximum disk usage was exceeded
+- `[Core]` Added push notification if the service is stopped due to exceeding the maximum disk size
 
 **4.3.6-02.04.2025**
 
