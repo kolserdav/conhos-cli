@@ -1,6 +1,6 @@
 # Known issues
 
-### Running 'deploy' command fails with an error in console or browser
+### The 'deploy' command fails with an error in the console or browser
 
 ---
 
@@ -8,7 +8,26 @@
 rpc error: code = Unknown desc = update out of sequence
 ```
 
+#### What happened:
+
 The order of versions is broken when updating the service, occurs when the previous update was interrupted.
-To fix it, it is usually enough to **run the `deploy` command again**
+
+#### How to fix:
+
+Usually it is enough to **run the `deploy` command again**
+
+---
+
+```sh
+Error response from daemon: service '[id]' not found
+```
+
+#### What happened:
+
+When updating the service, the script cannot find the service by ID. This means that during the update the service was blocked due to exceeding the disk storage limit or for another reason, [see notifications](/notifications).
+
+#### How to fix:
+
+Increase the limit and **run the `deploy` command again**.
 
 ---
