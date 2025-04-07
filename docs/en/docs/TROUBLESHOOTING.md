@@ -1,6 +1,6 @@
 # Known issues
 
-### The 'deploy' command fails with an error in the console or browser
+### Command execution fails with an error in the console or browser
 
 ---
 
@@ -29,5 +29,19 @@ When updating the service, the script cannot find the service by ID. This means 
 #### How to fix:
 
 Increase the limit and **run the `deploy` command again**.
+
+---
+
+```sh
+error: [cloud] One user can run only one instance of the program at the same time End another instance and try again
+```
+
+#### What happened:
+
+Attempt to run a second instance of the program in another window
+
+#### How to fix:
+
+In another browser or console window, close the instance of the program executing the commands: `deploy`, `logs` or `exec`.
 
 ---
