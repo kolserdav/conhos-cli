@@ -44,4 +44,6 @@ Attempt to run a second instance of the program in another window
 
 In another browser or console window, close the instance of the program executing the commands: `deploy`, `logs` or `exec`.
 
+> If something happens that you are absolutely sure you don't have any windows open, but it still happens. Then the process on the server probably froze. If this is still observed an hour after the incident [write to us](/contacts).
+
 ---
