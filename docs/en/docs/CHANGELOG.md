@@ -8,6 +8,8 @@
 - `[Server]` Fixed a bug with incorrect cost calculation, eliminated the possibility of calculating cost for duplicate containers that completed work with an error
 - `[Core]` Fixed a bug where the service would not stop when the maximum disk usage was exceeded
 - `[Core]` Added push notification if the service is stopped due to exceeding the maximum disk size
+- _`[Extension]` Improved tooltips for some fields_
+- `[Core]` Fixed the error of not creating a domain when creating a project, when a custom domain is immediately specified according to [instructions](./ConfigFile.md#custom-domain)
 
 **4.3.6-02.04.2025**
 
