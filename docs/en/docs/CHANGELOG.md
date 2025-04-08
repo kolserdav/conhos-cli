@@ -10,6 +10,7 @@
 - `[Core]` Added push notification if the service is stopped due to exceeding the maximum disk size
 - _`[Extension]` Improved tooltips for some fields_
 - `[Core]` Fixed the error of not creating a domain when creating a project, when a custom domain is immediately specified according to [instructions](./ConfigFile.md#custom-domain)
+- `[Server]` Fixed a bug where `volumes` were not deleted after deleting a project and were the same when starting a new project with the same name
 
 **4.3.6-02.04.2025**
 
