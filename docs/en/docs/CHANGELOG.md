@@ -1,6 +1,6 @@
 # List of changes
 
-**4.3.7-IN-PROGRESS**
+**4.3.7-09.04.2025**
 
 - `[Core]` Fixed a bug when using `restart: no` (services.service.deploy.labels.restart must be a string, number or null)
 - `[Core,Server]` Fixed erroneous stopping of service when it failed to start several times before the service with `restart: no` it depends on finished its work
@@ -8,7 +8,7 @@
 - `[Server]` Fixed a bug with incorrect cost calculation, eliminated the possibility of calculating cost for duplicate containers that completed work with an error
 - `[Core]` Fixed a bug where the service would not stop when the maximum disk usage was exceeded
 - `[Core]` Added push notification if the service is stopped due to exceeding the maximum disk size
-- _`[Extension]` Improved tooltips for some fields_
+- `[Extension]` Improved tooltips for some fields
 - `[Core]` Fixed the error of not creating a domain when creating a project, when a custom domain is immediately specified according to [instructions](./ConfigFile.md#custom-domain)
 - `[Server]` Fixed a bug where `volumes` were not deleted after deleting a project and were the same when starting a new project with the same name
 
