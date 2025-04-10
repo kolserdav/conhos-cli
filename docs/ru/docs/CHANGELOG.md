@@ -1,5 +1,9 @@
 # Список изменений
 
+**4.3.8-В РАБОТЕ**
+
+- `[Ядро,Вебсайт]` Иправлено непредвиденное удаление `service.volumes` из конфигурации, если `service.active: false`
+
 **4.3.7-09.04.2025**
 
 - `[Ядро]` Исправлена ошибка при использовании `restart: no` (services.service.deploy.labels.restart must be a string, number or null)

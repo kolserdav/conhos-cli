@@ -1,5 +1,9 @@
 # List of changes
 
+**4.3.8-IN-PROGRESS**
+
+- `[Core,Website]` Fixed unexpected removal of `service.volumes` from config if `service.active: false`
+
 **4.3.7-09.04.2025**
 
 - `[Core]` Fixed a bug when using `restart: no` (services.service.deploy.labels.restart must be a string, number or null)

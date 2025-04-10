@@ -510,11 +510,7 @@ export default class WS {
         break;
       }
       const serviceKey = serviceKeys[i];
-      const { volumes: __volumes, active } = services[serviceKey];
-
-      if (!active) {
-        continue;
-      }
+      const { volumes: __volumes } = services[serviceKey];
 
       if (__volumes) {
         _config.services[serviceKey].volumes = [];
