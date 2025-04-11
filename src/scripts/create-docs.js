@@ -410,7 +410,7 @@ function getEnvironmentRegexp(name) {
  */
 function createSitemapRecord({ filename }) {
   return `<url>
-  <loc>https://conhos.ru/ru-RU/docs/${filename}</loc>
+  <loc>https://conhos.ru/docs/${filename}</loc>
   <xhtml:link rel="alternate" hreflang="en" href="https://conhos.ru/en-US/docs/${filename}" />
   <lastmod>${format(new Date(), 'yyyy-MM-dd')}</lastmod>
   <changefreq>weekly</changefreq>
