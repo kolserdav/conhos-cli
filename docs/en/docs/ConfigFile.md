@@ -188,8 +188,10 @@ Ports that must be forwarded for public services to the outside; for each port, 
 Configuring horizontal scaling of the service
 
 ```yml
+# Optional
 deploy:
   replicas: 2
+  storage: 1.0
   update_config:
     parallelism: 1
     delay: 3s
@@ -199,11 +201,24 @@ deploy:
 
 The number of service instances (containers) that will respond via the load balancer.
 
-> This parameter is valid only for executable services
+> This parameter is only valid for executable services and for [custom container](#custom-container)
 
 ```yml
 deploy:
+  # Optional
   replicas: 2
+```
+
+### Additional disk space [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy-storage)
+
+Number of gigabytes of additional disk space of the service
+
+> Currently, it is possible to connect a volume that is no more than the disk space according to the service tariff, see [tariff table](/#price)
+
+```yml
+deploy:
+  # Optional
+  storage: 1.5
 ```
 
 #### Update configuration [![anchor](https://conhos.ru/images/icons/link.svg)](#service-deploy-update-config)
@@ -216,6 +231,7 @@ Sets the number of simultaneously restarted service replicas during update and r
 
 ```yml
 deploy:
+  # Optional
   update_config:
     parallelism: 1
 ```
@@ -226,6 +242,7 @@ Delay time after restarting a replica before starting the next one.
 
 ```yml
 deploy:
+  # Optional
   update_config:
     delay: 3s
 ```

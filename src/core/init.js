@@ -182,7 +182,7 @@ export default class Init extends WS {
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
    * @returns
    */
-  getCostString(item, { sizes, baseCost, baseValue, baseStorageCostMin }) {
+  getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour }) {
     const cost = computeCostService(
       {
         serviceSize: /** @type {typeof as<ServiceSize>} */ (as)(item.name),
@@ -193,7 +193,7 @@ export default class Init extends WS {
         sizes,
         baseCost,
         baseValue,
-        baseStorageCostMin,
+        baseStorageCostHour,
       }
     );
     if (!cost) {
@@ -229,7 +229,7 @@ export default class Init extends WS {
    */
   async handleDeployData(param0) {
     const {
-      data: { sizes, baseCost, baseValue, services, baseStorageCostMin },
+      data: { sizes, baseCost, baseValue, services, baseStorageCostHour },
     } = param0;
 
     console.info("It's adding service to the config file...", this.configFile);
@@ -289,7 +289,7 @@ export default class Init extends WS {
     const size = await inquirer.list(
       'Select size of service',
       sizes.map((item) =>
-        this.getCostString(item, { sizes, baseCost, baseValue, baseStorageCostMin })
+        this.getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour })
       ),
       SIZE_INDEX_DEFAULT
     );
