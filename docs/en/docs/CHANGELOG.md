@@ -1,11 +1,12 @@
 # List of changes
 
-**4.3.8-IN-PROGRESS**
+**4.3.8-16.04.2025**
 
 - `[Core,Extension]` Added the ability to connect additional disk space to the service [see](./ConfigFile.md#service-deploy-storage)
 - `[Core,Website]` Fixed unexpected removal of `service.volumes` from config if `service.active: false`
 - `[Website]` On the main page, the swipe containing supported services has been fixed to shift when the window is resized.
 - `[Extension]` Fixed erroneous error indication in child fields of services that are objects themselves. Previously, it could highlight the same field, but from another service.
+- `[Extension,Site]` Improved behavior when choosing from auto-completion options
 
 **4.3.7-09.04.2025**
 
