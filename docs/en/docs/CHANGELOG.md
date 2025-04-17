@@ -1,6 +1,10 @@
 # List of changes
 
-**4.3.9-IN PROGRESS**
+**4.3.10-2025-04-17**
+
+- Fixed a bug when deleting a project due to incorrect `volumes` check
+
+**4.3.9-2025-04-17**
 
 - `[Core,Extension]` Fixed a bug where it was impossible to delete a project via the utility or site if local `volumes` remained in the config
 - `[Core]` Fixed calculation of cost forecast, as well as write-off, taking into account additional disk storage
