@@ -1,5 +1,9 @@
 # List of changes
 
+**4.3.9-IN PROGRESS**
+
+- `[Core,Extension]` Fixed a bug where it was impossible to delete a project via the utility or site if local `volumes` remained in the config
+
 **4.3.8-16.04.2025**
 
 - `[Core,Extension]` Added the ability to connect additional disk space to the service [see](./ConfigFile.md#service-deploy-storage)
