@@ -3,6 +3,7 @@
 **4.3.11-IN PROGRESS**
 
 - `[Server]` Fixed premature removal of git listener when `Unable to connect to Git` notification was received if github is temporarily unavailable
+- `[Website]` Added information to the project page indicating the time of creation and last modification of the project
 
 **4.3.10-2025-04-17**
 
