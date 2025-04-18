@@ -1,8 +1,12 @@
 # List of changes
 
+**4.3.11-IN PROGRESS**
+
+- `[Server]` Fixed premature removal of git listener when `Unable to connect to Git` notification was received if github is temporarily unavailable
+
 **4.3.10-2025-04-17**
 
-- Fixed a bug when deleting a project due to incorrect `volumes` check
+- `[Core]` Fixed a bug when deleting a project due to incorrect `volumes` check
 
 **4.3.9-2025-04-17**
 
