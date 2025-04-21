@@ -16,6 +16,8 @@ The order of versions is broken when updating the service, occurs when the previ
 
 Usually it is enough to **run the `deploy` command again**
 
+> If this event occurs on an event from Git in the case when one repository is specified for two different services of one project. For example, one is a worker, and the other is a service for assembly. Then this can be ignored, because it means another service, dependent on this repository, is already building the Docker stack.
+
 ---
 
 ```sh
