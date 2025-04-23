@@ -121,10 +121,6 @@ program
     'Project name. If conhos.yml file is not exists that it is required.'
   )
   .requiredOption('-n --name <string>', 'Service name')
-  .option(
-    '--no-interractive',
-    'If you are asked to confirm the deletion of the project, the script will automatically answer "yes"'
-  )
   .option('-r --restart', 'Restart service')
   .action(async (options) => {
     new Service(options);

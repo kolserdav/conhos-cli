@@ -5,6 +5,7 @@
 - `[Server]` Fixed premature removal of git listener when `Unable to connect to Git` notification was received if github is temporarily unavailable
 - `[Website]` Added information to the project page indicating the time of creation and last modification of the project
 - `[Core,Server]` Added push notifications on the results of service assembly by event from Git
+- `[CLI]` Removed redundant `--no-interractive` flag from `service` command
 
 **4.3.10-2025-04-17**
 
