@@ -6,6 +6,7 @@
 - `[Website]` Added information to the project page indicating the time of creation and last modification of the project
 - `[Core,Server]` Added push notifications on the results of service assembly by event from Git
 - `[CLI]` Removed redundant `--no-interractive` flag from `service` command
+- `[Website]` In the mobile version of the configuration file editor, the tooltip disappears when the user starts typing text
 
 **4.3.10-2025-04-17**
 
