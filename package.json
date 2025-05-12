@@ -13,7 +13,9 @@
   },
   "scripts": {
     "build": "tsc -p ./jsconfig.json",
-    "script:create-docs": "node src/scripts/create-docs.js"
+    "script:create-docs": "node src/scripts/create-docs.js",
+    "docker-publish": "./src/scripts/sh/docker-publish.sh",
+    "pull-image": "docker pull kolserdav/conhos-cli"
   },
   "keywords": [
     "container",

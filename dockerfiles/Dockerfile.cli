@@ -1,0 +1,8 @@
+ARG IMAGE_VERSION=latest
+FROM node:${IMAGE_VERSION}
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+RUN echo "I am running on $BUILDPLATFORM, building for $TARGETPLATFORM" > /log
+
+RUN npm i -g conhos
