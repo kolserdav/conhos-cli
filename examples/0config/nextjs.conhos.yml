@@ -23,7 +23,7 @@ services:
     image: node
     version: lts
     active: true
-    size: santi
+    size: deci
     restart: no
     git:
       url: https://github.com/kolserdav/conhos-next-example.git
