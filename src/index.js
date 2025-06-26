@@ -37,7 +37,7 @@ process.on('SIGTERM', (sig) => {
   //process.exit(1);
 });
 
-const packageHomeDir = getPackagePath();
+const packageHomeDir = getPackagePath(null, '');
 if (!fs.existsSync(packageHomeDir)) {
   fs.mkdirSync(packageHomeDir);
 }
@@ -81,6 +81,7 @@ program
     '--no-interractive',
     'If you are asked to confirm the deletion of the service, the script will automatically answer "yes"'
   )
+  .option('--user-home-folder <string>', 'Custom user home folder')
   .option(
     '-c, --clear-cache',
     'Clear cache and metadata before upload to upload all files, or to create a new project in old dir'
@@ -105,6 +106,7 @@ program
     'Project name. If conhos.yml file is not exists that it is required.'
   )
   .option('-d, --delete', 'Delete project')
+  .option('--user-home-folder <string>', 'Custom user home folder')
   .option(
     '--no-interractive',
     'If you are asked to confirm the deletion of the project, the script will automatically answer "yes"'
@@ -122,6 +124,7 @@ program
   )
   .requiredOption('-n --name <string>', 'Service name')
   .option('-r --restart', 'Restart service')
+  .option('--user-home-folder <string>', 'Custom user home folder')
   .action(async (options) => {
     new Service(options);
   });
@@ -146,6 +149,7 @@ program
     return num;
   })
   .argument('<service_name>', 'The name of target service')
+  .option('--user-home-folder <string>', 'Custom user home folder')
   .action(async (arg, options) => {
     new Exec(options, arg);
   });
@@ -157,6 +161,7 @@ program
   .option('-f, --follow', 'Looking forward to the next logs')
   .option('-t, --timestamps', 'Show timestamps')
   .option('-c, --clear', 'Clear service logs')
+  .option('--user-home-folder <string>', 'Custom user home folder')
   .option(
     '--since <time>',
     'Show logs since timestamp (e.g. 2013-01-02T13:23:37Z) or relative (e.g. 42m for 42 minutes)'

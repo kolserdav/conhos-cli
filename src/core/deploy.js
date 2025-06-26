@@ -334,7 +334,7 @@ export default class Deploy extends WS {
    * @param {{service: string; project: string;}} param0
    */
   setCacheFilePath({ service, project }) {
-    const packagePath = getPackagePath(`${project}/${service}`);
+    const packagePath = getPackagePath(null, `${project}/${service}`);
     if (!existsSync(packagePath)) {
       mkdirSync(packagePath, { recursive: true });
     }
@@ -610,7 +610,7 @@ export default class Deploy extends WS {
 
     const { name, services } = this.config;
 
-    const packageProjectPath = getPackagePath(name);
+    const packageProjectPath = getPackagePath(null, name);
     if (!existsSync(packageProjectPath)) {
       mkdirSync(packageProjectPath, { recursive: true });
     }
@@ -994,7 +994,7 @@ export default class Deploy extends WS {
    * @private
    */
   getMetadataFilePath() {
-    return getPackagePath(METADATA_FILE_NAME);
+    return getPackagePath(null, METADATA_FILE_NAME);
   }
 
   /**

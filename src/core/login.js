@@ -56,7 +56,7 @@ export default class Login extends WS {
     }
 
     if (this.options.remove) {
-      const authPath = getPackagePath(SESSION_FILE_NAME);
+      const authPath = getPackagePath(null, SESSION_FILE_NAME);
       if (existsSync(authPath)) {
         rmSync(authPath);
         console.info('Session token was deleted', authPath);
@@ -132,7 +132,7 @@ export default class Login extends WS {
       const key = crypto.createHash(password);
       session = crypto.encrypt(token, key, userId);
     }
-    const authPath = getPackagePath(SESSION_FILE_NAME);
+    const authPath = getPackagePath(null, SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
     console.info('Successfully logged in', '');
     process.exit(0);

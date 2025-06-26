@@ -124,12 +124,12 @@ export async function wait(timeout) {
 }
 
 /**
- *
+ * @param {string | null} homedir
  * @param {string} postfix
  * @returns
  */
-export function getPackagePath(postfix = '') {
-  return path.normalize(`${HOME_DIR}/.${PACKAGE_NAME}/${postfix}`);
+export function getPackagePath(homedir, postfix) {
+  return path.normalize(`${homedir || HOME_DIR}/.${PACKAGE_NAME}/${postfix}`);
 }
 
 /**

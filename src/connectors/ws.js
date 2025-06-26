@@ -12,7 +12,7 @@ import WebSocket from 'ws';
 import { readFileSync, existsSync, writeFileSync, statSync } from 'fs';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX } from '../utils/constants.js';
+import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX, HOME_DIR } from '../utils/constants.js';
 import {
   getPackagePath,
   console,
@@ -87,6 +87,7 @@ const crypto = new Crypto();
  *  repl?: number;
  *  name?: string;
  *  restart?: boolean;
+ *  userHomeFolder?: string;
  * }} Options
  */
 
@@ -587,7 +588,7 @@ export default class WS {
    * @returns {Session | null}
    */
   readSessionFile() {
-    const sessionFilePath = getPackagePath(SESSION_FILE_NAME);
+    const sessionFilePath = getPackagePath(this.options.userHomeFolder || null, SESSION_FILE_NAME);
     if (!existsSync(sessionFilePath)) {
       return null;
     }
@@ -637,7 +638,7 @@ export default class WS {
           connId: this.connId,
         });
       } else {
-        const authPath = getPackagePath(SESSION_FILE_NAME);
+        const authPath = getPackagePath(this.options.userHomeFolder || null, SESSION_FILE_NAME);
         console.log("Now it's using the saved session token:", authPath);
         /** @type {typeof this.sendMessage<'checkTokenServer'>} */ (this.sendMessage)({
           token: authData.content,
@@ -653,7 +654,10 @@ export default class WS {
         });
       }
     } else if (!this.options.isLogin) {
-      console.warn(`You are not authenticated, run "${PACKAGE_NAME} login" first`);
+      console.warn(
+        `You are not authenticated, run "${PACKAGE_NAME} login" first`,
+        `Home dir: "${this.options.userHomeFolder || HOME_DIR}"`
+      );
       process.exit(1);
     } else {
       this.handler({ failedLogin: false, sessionExists: false });
