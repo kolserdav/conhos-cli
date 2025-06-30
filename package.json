@@ -9,7 +9,7 @@
     "src"
   ],
   "bin": {
-    "conhos": "./bin/cli.js"
+    "conhos": "./bin/conhos"
   },
   "scripts": {
     "build": "tsc -p ./jsconfig.json",
