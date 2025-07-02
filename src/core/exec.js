@@ -108,6 +108,7 @@ export default class Exec extends WS {
       const str = d.toString();
       if (str) {
         if (isLastStreamMessage(str) && this.options.interractive) {
+          process.stdout.write(str);
           this.showStartLine();
         } else {
           stdoutWriteStart('');
