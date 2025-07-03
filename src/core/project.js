@@ -11,7 +11,7 @@
 import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import Inquirer from '../utils/inquirer.js';
-import { console, parseMessageCli } from '../utils/lib.js';
+import { console, exit, parseMessageCli } from '../utils/lib.js';
 
 const inquirer = new Inquirer();
 
@@ -113,6 +113,6 @@ export default class Project extends WS {
     }
 
     console.warn('No command', '');
-    process.exit();
+    exit(undefined);
   }
 }

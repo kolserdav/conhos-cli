@@ -10,7 +10,7 @@
  ******************************************************************************************/
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import WS from '../connectors/ws.js';
-import { console, getPackagePath, openBrowser, parseMessageCli } from '../utils/lib.js';
+import { console, exit, getPackagePath, openBrowser, parseMessageCli } from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
   LOGIN_PAGE,
@@ -63,7 +63,7 @@ export default class Login extends WS {
       } else {
         console.warn('Session token file not found', authPath);
       }
-      process.exit(0);
+      exit(0);
     }
 
     this.conn.on('message', async (d) => {
@@ -100,7 +100,7 @@ export default class Login extends WS {
         this.openNewSession();
       } else {
         console.info('You have already signed in', '');
-        process.exit(0);
+        exit(0);
       }
     }
   }
@@ -114,7 +114,7 @@ export default class Login extends WS {
     if (!token) {
       console.warn("Session token wasn't get from the server", '');
       console.warn(message, '');
-      process.exit(1);
+      exit(1);
       return;
     }
     /**
@@ -135,7 +135,7 @@ export default class Login extends WS {
     const authPath = getPackagePath(null, SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
     console.info('Successfully logged in', '');
-    process.exit(0);
+    exit(0);
   }
 
   /**

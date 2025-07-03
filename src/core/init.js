@@ -28,6 +28,7 @@ import {
   getPHPCommandDefault,
   as,
   parseMessageCli,
+  exit,
 } from '../utils/lib.js';
 import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants.js';
 
@@ -180,7 +181,7 @@ export default class Init extends WS {
    * @private
    * @param {WSMessageDataCli['deployData']['sizes'][0]} item
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
-   * @returns
+   * @returns {string}
    */
   getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour }) {
     const cost = computeCostService(
@@ -198,7 +199,8 @@ export default class Init extends WS {
     );
     if (!cost) {
       console.error(`"${item.name}" is not allowed here`);
-      process.exit(1);
+      exit(1);
+      return '';
     }
     const { month, hour } = cost;
     const costs = `: ${parseFloat((month / 100).toFixed(2))} ${CURRENCY}/month, ${parseFloat(
@@ -260,7 +262,8 @@ export default class Init extends WS {
       });
 
       console.info('Project successfully initialized', this.configFile);
-      process.exit(0);
+      exit(0);
+      return;
     }
 
     /**
@@ -284,7 +287,8 @@ export default class Init extends WS {
     const serv = this.getService(service, services);
     if (!serv) {
       console.error('Unexpected error. Service is temporarily unavailable.', '');
-      process.exit(1);
+      exit(1);
+      return;
     }
     const size = await inquirer.list(
       'Select size of service',
@@ -381,7 +385,7 @@ export default class Init extends WS {
       await this.handleDeployData(param0);
     } else {
       console.info('Project successfully initialized', this.configFile);
-      process.exit(0);
+      exit(0);
     }
   }
 
@@ -504,7 +508,7 @@ export default class Init extends WS {
         console.info('Config file will be overwrite', this.configFile);
       } else {
         console.info('This project has been initialized before');
-        process.exit(0);
+        exit(0);
       }
     }
 

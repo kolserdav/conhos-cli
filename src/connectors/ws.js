@@ -21,6 +21,7 @@ import {
   getFile,
   wait,
   stdoutWriteStart,
+  exit,
 } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
@@ -284,7 +285,7 @@ export default class WS {
     }
     this.conn.on('error', (error) => {
       console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
-      process.exit(1);
+      exit(1);
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
@@ -306,7 +307,7 @@ export default class WS {
     });
     this.conn.on('close', (d) => {
       console.warn(`Connection closed with code ${d}`, 'Try again later');
-      process.exit();
+      exit();
     });
   }
 
@@ -335,7 +336,8 @@ export default class WS {
 
     if ((!data && !this.options.isLogin) || !token) {
       console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
-      process.exit(1);
+      exit(1);
+      return;
     }
 
     this.setToken(token);
@@ -350,11 +352,11 @@ export default class WS {
       if (!checked) {
         console[status](`${CLOUD_LOG_PREFIX} ${message}`, errMess);
         console.error('Failed to check session', 'Fix a warning before and try again');
-        process.exit(1);
+        exit(1);
       }
     } else if (checked) {
       console.info('Successfully logged in', '');
-      process.exit(0);
+      exit(0);
     }
 
     this.handler(
@@ -426,7 +428,7 @@ export default class WS {
           `"${PACKAGE_NAME} init" first`,
           'Or try add "-p [project-name]" option'
         );
-        process.exit(1);
+        exit(1);
       } else {
         return null;
       }
@@ -435,24 +437,26 @@ export default class WS {
     this.configText = data;
     let config = this.yaml.parse(data);
     if (!config) {
-      process.exit(1);
+      exit(1);
+      return null;
     }
 
     const changeRes = await this.changeConfigFileVolumes({ config, userId: this.userId });
     if (changeRes.error) {
       console.error(changeRes.error, '');
-      process.exit(1);
+      exit(1);
     }
     if (!this.deployData) {
       console.error('Deploy data is missing', 'Try again later');
-      process.exit(1);
+      exit(1);
+      return null;
     }
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
     if (!withoutCheck) {
       let checkErr = await checkConfig(
         { config, configText: data },
-        { deployData: this.deployData }
+        { deployData: this.deployData, projectDelete: false }
       );
       checkErr = checkErr.concat(this.checkVolumes({ config, configText: data }));
       let checkExit = false;
@@ -468,7 +472,7 @@ export default class WS {
       });
       if (checkExit) {
         await wait(1000);
-        process.exit(1);
+        exit(1);
       }
     }
 
@@ -619,7 +623,7 @@ export default class WS {
         if (token === null) {
           console.warn("Password is wrong, current session can't be use", '');
           if (!this.options.isLogin) {
-            process.exit();
+            exit();
           }
           this.handler({ failedLogin: true });
           return;
@@ -658,7 +662,7 @@ export default class WS {
         `You are not authenticated, run "${PACKAGE_NAME} login" first`,
         `Home dir: "${this.options.userHomeFolder || HOME_DIR}"`
       );
-      process.exit(1);
+      exit(1);
     } else {
       this.handler({ failedLogin: false, sessionExists: false });
     }
@@ -792,7 +796,7 @@ export default class WS {
     const interval = setInterval(() => {
       if (this.canClose) {
         clearInterval(interval);
-        process.exit(!data ? 1 : data?.code !== undefined ? data.code : 0);
+        exit(!data ? 1 : data?.code !== undefined ? data.code : 0);
       }
     }, 0);
   }

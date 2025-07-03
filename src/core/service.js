@@ -1,6 +1,6 @@
 import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { console, exit, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
@@ -75,6 +75,6 @@ export default class Service extends WS {
     }
 
     console.warn('No command', '');
-    process.exit();
+    exit(undefined);
   }
 }

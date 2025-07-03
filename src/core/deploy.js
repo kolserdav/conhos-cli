@@ -15,7 +15,14 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import { as, console, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import {
+  as,
+  console,
+  exit,
+  getPackagePath,
+  parseMessageCli,
+  stdoutWriteStart,
+} from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
   CONFIG_FILE_NAME,
@@ -207,7 +214,7 @@ export default class Deploy extends WS {
           console[status](message, serviceName, url);
           if (status === 'error') {
             console.warn(`Failed to upload volume for service "${key}"`, filePath);
-            process.exit(1);
+            exit(1);
           }
         }
         this.canClose = true;
@@ -325,7 +332,7 @@ export default class Deploy extends WS {
         });
     } else {
       console.info('Operation exited', 'Deletion canceled by user');
-      process.exit(1);
+      exit(1);
     }
   }
 
@@ -571,7 +578,7 @@ export default class Deploy extends WS {
     stdoutWriteStart('');
     console[status](`${message}: ${service}|${file}`, filePath);
     if (status === 'error') {
-      process.exit(1);
+      exit(1);
     }
 
     /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
@@ -671,7 +678,7 @@ export default class Deploy extends WS {
     if (!existsSync(targetDirPath)) {
       console.warn('Target dir is missing', targetDirPath);
       console.error('Exited with code 2', 'Fix warning before and try again');
-      process.exit(1);
+      exit(1);
     }
 
     const cacheChanged = new CacheChanged({
@@ -708,7 +715,7 @@ export default class Deploy extends WS {
           'Failed cache',
           `Remove folder ~/.${PACKAGE_NAME}/${this.project}/ and try again`
         );
-        process.exit(1);
+        exit(1);
       }
     }
     const _files = await this.createCache(cacheChanged, true);
@@ -973,13 +980,13 @@ export default class Deploy extends WS {
           `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
         );
         console.error('Request failed', error);
-        process.exit(1);
+        exit(1);
       });
 
       req.on('timeout', () => {
         stdoutWriteStart('');
         console.error('Request timeout exceeded', url);
-        process.exit(1);
+        exit(1);
       });
 
       req.on('close', () => {

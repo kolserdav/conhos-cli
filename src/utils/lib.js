@@ -14,6 +14,7 @@ import path from 'path';
 import { existsSync, readFileSync } from 'fs';
 import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
+import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @template T
@@ -277,4 +278,12 @@ export function parseMessageCli(msg) {
     console.error('error', 'Failed parse message', e);
   }
   return data;
+}
+
+/**
+ * @param {number | undefined} code
+ */
+export function exit(code = undefined) {
+  process.stdout.write(createLastStreamMessage());
+  process.exit(code);
 }

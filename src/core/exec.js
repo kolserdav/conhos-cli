@@ -13,7 +13,7 @@ import readline from 'readline';
 import WS from '../connectors/ws.js';
 import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { console, exit, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 import Console from 'console';
 import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
@@ -101,7 +101,7 @@ export default class Exec extends WS {
 
     socket.on('close', () => {
       console.warn('Connection aborting', 'Try again later');
-      process.exit(1);
+      exit(1);
     });
 
     socket.on('message', (d) => {
@@ -133,7 +133,7 @@ export default class Exec extends WS {
     rl.on('close', () => {
       stdoutWriteStart('');
       console.info('Terminal exited', this.serviceName);
-      process.exit(0);
+      exit(0);
     });
   }
 

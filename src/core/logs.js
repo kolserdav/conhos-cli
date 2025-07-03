@@ -12,8 +12,9 @@ import Console from 'console';
 import WS from '../connectors/ws.js';
 import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constants.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, parseMessageCli } from '../utils/lib.js';
+import { console, exit, parseMessageCli } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
+import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options
@@ -83,7 +84,7 @@ export default class Logs extends WS {
     const { url, serviceName } = data;
     const res = await this.readLogsRequest({ url, service: serviceName, connId }, data);
     console.info('End read logs', serviceName);
-    process.exit(res.code);
+    exit(res.code);
   }
 
   /**
