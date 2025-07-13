@@ -453,10 +453,11 @@ export default class WS {
     }
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
+
     if (!withoutCheck) {
       let checkErr = await checkConfig(
         { config, configText: data },
-        { deployData: this.deployData, projectDelete: false }
+        { deployData: this.deployData, projectDelete: this.options.delete || false }
       );
       checkErr = checkErr.concat(this.checkVolumes({ config, configText: data }));
       let checkExit = false;
