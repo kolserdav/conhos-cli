@@ -89,6 +89,7 @@ const crypto = new Crypto();
  *  name?: string;
  *  restart?: boolean;
  *  userHomeFolder?: string;
+ *  list?: boolean
  * }} Options
  */
 

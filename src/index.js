@@ -21,6 +21,7 @@ import IP from './core/ip.js';
 import Exec from './core/exec.js';
 import Project from './core/project.js';
 import Service from './core/service.js';
+import Registry from './core/registry.js';
 
 process.on('SIGABRT', (sig) => {
   console.warn('Received abort signal', sig);
@@ -194,6 +195,15 @@ program
   .option('-y, --yes', 'default for all')
   .action(async (options) => {
     new Init(options);
+  });
+
+program
+  .command('registry')
+  .usage('[options] <command> [options]')
+  .description('Container registry operations')
+  .option('-l, --list <boolean>', 'show all remote images')
+  .action(async (options) => {
+    new Registry(options);
   });
 
 program.parse();
