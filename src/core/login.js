@@ -10,12 +10,22 @@
  ******************************************************************************************/
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import WS from '../connectors/ws.js';
-import { console, exit, getPackagePath, openBrowser, parseMessageCli } from '../utils/lib.js';
+import {
+  console,
+  createDockerConfig,
+  exit,
+  getAppDomain,
+  getPackagePath,
+  openBrowser,
+  parseMessageCli,
+  readDockerConfig,
+} from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
   LOGIN_PAGE,
   QUERY_STRING_CONN_ID,
   PACKAGE_NAME,
+  DOCKER_CONFIG_PATH,
 } from '../utils/constants.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
@@ -134,8 +144,35 @@ export default class Login extends WS {
     }
     const authPath = getPackagePath(null, SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
+
+    this.createDockerConfig({ userId, token });
+
     console.info('Successfully logged in', '');
     exit(0);
+  }
+
+  /**
+   * @private
+   * @param {{
+   *  userId: string;
+   *  token: string
+   * }} param0
+   */
+  createDockerConfig({ userId, token }) {
+    const domain = `https://registry.${getAppDomain()}`;
+    if (!existsSync(DOCKER_CONFIG_PATH)) {
+      console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
+      createDockerConfig({ userId, token, domain }, { auths: {} });
+      return;
+    }
+    const dockerConfig = readDockerConfig();
+    if (dockerConfig) {
+      createDockerConfig({ userId, token, domain }, dockerConfig);
+    } else {
+      console.warn('Docker config is not changed', '');
+      return;
+    }
+    console.info('Docker config changed', DOCKER_CONFIG_PATH);
   }
 
   /**

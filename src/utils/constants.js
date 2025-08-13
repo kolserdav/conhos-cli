@@ -10,7 +10,7 @@
  ******************************************************************************************/
 import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
-import os from 'os';
+import os, { userInfo } from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -59,6 +59,7 @@ export const CRYPTO_IV = process.env.CRYPTO_IV || 'string';
 export const QUERY_STRING_CONN_ID = 'conn';
 
 export const HOME_DIR = os.homedir();
+export const DOCKER_CONFIG_PATH = path.resolve(HOME_DIR, '.docker/config.json');
 export const CWD = process.cwd();
 export const PACKAGE_VERSION = pack.version;
 export const PACKAGE_NAME = pack.name;

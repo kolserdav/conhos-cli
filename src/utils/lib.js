@@ -11,8 +11,16 @@
 import chalk from 'chalk';
 import Console from 'console';
 import path from 'path';
-import { existsSync, readFileSync } from 'fs';
-import { HOME_DIR, PACKAGE_NAME, DEBUG, CWD, CONFIG_FILE_NAME } from './constants.js';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
+import {
+  HOME_DIR,
+  PACKAGE_NAME,
+  DEBUG,
+  CWD,
+  CONFIG_FILE_NAME,
+  DOCKER_CONFIG_PATH,
+  LOGIN_PAGE,
+} from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
 import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
@@ -286,4 +294,53 @@ export function parseMessageCli(msg) {
 export function exit(code = undefined) {
   process.stdout.write(createLastStreamMessage());
   process.exit(code);
+}
+
+/**
+ * @typedef {{
+ *  auths: Record<string, {
+ *    auth: string
+ * }>
+ * }} DockerConfig
+ */
+
+export function readDockerConfig() {
+  if (!existsSync(DOCKER_CONFIG_PATH)) {
+    return null;
+  }
+  const data = readFileSync(DOCKER_CONFIG_PATH);
+  /**
+   * @type {DockerConfig | null}
+   */
+  let res = null;
+  try {
+    res = JSON.parse(data.toString());
+  } catch (e) {
+    console.error('Failed to parse docker config file', e);
+  }
+  return res;
+}
+
+/**
+ *
+ * @param {{
+ *   domain: string;
+ *   userId: string;
+ *   token: string;
+ * }} param0
+ * @param {DockerConfig} dockerConfig
+ */
+export function createDockerConfig({ domain, userId, token }, dockerConfig) {
+  const config = structuredClone(dockerConfig);
+  config.auths = {
+    ...dockerConfig.auths,
+    [domain]: {
+      auth: Buffer.from(`${userId}:${token}`, 'utf-8').toString('base64'),
+    },
+  };
+  writeFileSync(DOCKER_CONFIG_PATH, JSON.stringify(config, null, 4));
+}
+
+export function getAppDomain() {
+  return LOGIN_PAGE.replace(/https?:\/\//, '').replace(/\/.+/, '');
 }
