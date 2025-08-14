@@ -58,6 +58,8 @@ export const CRYPTO_IV = process.env.CRYPTO_IV || 'string';
  */
 export const QUERY_STRING_CONN_ID = 'conn';
 
+export const REGISTRY_SUBDOMAIN = 'registry';
+export const REGISTRY_AUTH_SUBDOMAIN = 'registry-auth';
 export const HOME_DIR = os.homedir();
 export const DOCKER_CONFIG_PATH = path.resolve(HOME_DIR, '.docker/config.json');
 export const CWD = process.cwd();

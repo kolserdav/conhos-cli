@@ -201,7 +201,7 @@ program
   .command('registry')
   .usage('[options] <command> [options]')
   .description('Container registry operations')
-  .option('-l, --list <boolean>', 'show all remote images')
+  .option('-l, --list', 'show all remote images')
   .action(async (options) => {
     new Registry(options);
   });

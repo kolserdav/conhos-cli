@@ -20,6 +20,8 @@ import {
   CONFIG_FILE_NAME,
   DOCKER_CONFIG_PATH,
   LOGIN_PAGE,
+  REGISTRY_SUBDOMAIN,
+  REGISTRY_AUTH_SUBDOMAIN,
 } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
 import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
@@ -343,4 +345,12 @@ export function createDockerConfig({ domain, userId, token }, dockerConfig) {
 
 export function getAppDomain() {
   return LOGIN_PAGE.replace(/https?:\/\//, '').replace(/\/.+/, '');
+}
+
+export function getRegistryOrigin() {
+  return `https://${REGISTRY_SUBDOMAIN}.${getAppDomain()}`;
+}
+
+export function getRegistryAuthOrigin() {
+  return `https://${REGISTRY_AUTH_SUBDOMAIN}.${getAppDomain()}`;
 }

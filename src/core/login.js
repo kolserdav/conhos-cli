@@ -14,8 +14,8 @@ import {
   console,
   createDockerConfig,
   exit,
-  getAppDomain,
   getPackagePath,
+  getRegistryOrigin,
   openBrowser,
   parseMessageCli,
   readDockerConfig,
@@ -159,7 +159,7 @@ export default class Login extends WS {
    * }} param0
    */
   createDockerConfig({ userId, token }) {
-    const domain = `https://registry.${getAppDomain()}`;
+    const domain = getRegistryOrigin();
     if (!existsSync(DOCKER_CONFIG_PATH)) {
       console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
       createDockerConfig({ userId, token, domain }, { auths: {} });
