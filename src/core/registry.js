@@ -1,18 +1,17 @@
-import WS, { WSInterface } from '../connectors/ws.js';
-import { console, exit, getRegistryAuthOrigin, getRegistryOrigin } from '../utils/lib.js';
+import WS from '../connectors/ws.js';
+import {
+  console,
+  exit,
+  getRegistryAuthOrigin,
+  getRegistryOrigin,
+  getRegistryProxyOrigin,
+  readDockerConfig,
+} from '../utils/lib.js';
 
 /**
  * @typedef {{
- *  errors: {
- *    code: string;
- *    message: string;
- *    detail: {
- *      Type: string;
- *      Class: string;
- *      Name: string;
- *      Action: string;
- *    }[]
- *  }[]
+ *  error: string;
+ *  repositories: string[];
  * }} RegistryResponse
  */
 
@@ -38,9 +37,7 @@ export default class Registry extends WS {
     super(options);
 
     if (this.options.list) {
-      this.list().then((res) => {
-        console.info(43, res);
-      });
+      this.list();
     }
   }
 
@@ -50,45 +47,71 @@ export default class Registry extends WS {
   listener() {}
 
   /**
-   * @returns {Promise<RegistryResponse>}
+   * @returns {Promise<void>}
    */
+
   async list() {
-    const res = await this.auth();
-    if (res.error) {
-      console.error('Failed to auth in registry', res.error);
+    const dockerConfig = readDockerConfig();
+    if (!dockerConfig) {
+      console.warn('Unauthorized', "Run 'conhos login' first");
+      exit(1);
+      return;
+    }
+
+    const registryOrigin = getRegistryOrigin();
+    if (!dockerConfig.auths[registryOrigin]) {
+      console.warn('Unauthorized', "Run 'conhos login' first");
+      exit(1);
+      return;
+    }
+
+    const authStr = Buffer.from(dockerConfig.auths[registryOrigin].auth, 'base64').toString(
+      'utf-8'
+    );
+    const autArr = authStr.split(':');
+    const username = autArr[0];
+    const password = autArr[1];
+
+    const auth = await this.auth({ username, password });
+    if (auth.error) {
+      console.error('Failed to auth in registry', auth.error);
       exit(1);
     }
-    console.info(res.token);
-    return new Promise((resolve) => {
-      const username = 'ccf92e82-c695-4c6e-8120-85261fc75eaa';
-      fetch(`${getRegistryOrigin()}/v2/_catalog?prefix=${username}`, {
+    const res = await new Promise((resolve) => {
+      fetch(`${getRegistryProxyOrigin()}/catalog?username=${username}`, {
         headers: {
-          Authorization: `Bearer ${res.token}`,
+          Authorization: `Bearer ${auth.token}`,
         },
+        method: 'GET',
       })
         .then((r) => {
-          console.info('headers', 'd', r);
           return r.json();
         })
         .then((data) => {
           resolve(data);
         });
     });
+    if (res.error) {
+      console.error('Failed to get repositories', res.error);
+      exit(1);
+    }
+    console.info('Repositories:\n', `${res.repositories.join('\n')}`, '');
+    exit(0);
   }
 
   /**
+   * @param {{
+   *  username: string;
+   *  password: string;
+   * }} param0
    * @returns {Promise<RegistryAuthResponse>}
    */
-  async auth() {
+  async auth({ username, password }) {
     const params = new URLSearchParams();
-    const username = 'ccf92e82-c695-4c6e-8120-85261fc75eaa';
     params.set('service', 'docker-registry');
     params.set('username', username);
-    params.set(
-      'password',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNjZjkyZTgyLWM2OTUtNGM2ZS04MTIwLTg1MjYxZmM3NWVhYSIsInBhc3N3b3JkIjoidGtXaFlLaXpYL2JJN0ZIR3pJbVdycllBUzF3QkFwUEJkR1pibEFVSC9KUXl1c05sbU1tNFRqeXNKOVFvbWRxNEZidTUyWXBBQnFBcXpzWDVyNkt2ckE9PSIsImlhdCI6MTc1NTA5MzMzN30.lyH5VbSN4aIb3IlNFOvcIwEWc6bs6hzsk-KN9k4UU_I'
-    );
-    params.set('scope', `registry:catalog:*`);
+    params.set('password', password);
+    params.set('scope', `registry:${username}/*:*`);
 
     return new Promise((resolve) => {
       fetch(`${getRegistryAuthOrigin()}/auth`, {

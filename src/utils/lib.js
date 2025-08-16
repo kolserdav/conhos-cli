@@ -20,8 +20,9 @@ import {
   CONFIG_FILE_NAME,
   DOCKER_CONFIG_PATH,
   LOGIN_PAGE,
-  REGISTRY_SUBDOMAIN,
   REGISTRY_AUTH_SUBDOMAIN,
+  REGISTRY_PROXY_SUBDOMAIN,
+  REGISTRY_SUBDOMAIN,
 } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
 import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
@@ -349,6 +350,10 @@ export function getAppDomain() {
 
 export function getRegistryOrigin() {
   return `https://${REGISTRY_SUBDOMAIN}.${getAppDomain()}`;
+}
+
+export function getRegistryProxyOrigin() {
+  return `https://${REGISTRY_PROXY_SUBDOMAIN}.${getAppDomain()}`;
 }
 
 export function getRegistryAuthOrigin() {
