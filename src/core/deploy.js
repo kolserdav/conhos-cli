@@ -631,7 +631,6 @@ export default class Deploy extends WS {
     }
 
     const env = this.getEnvVariables();
-
     this
       /** @type {typeof this.sendMessage<'deployServer'>} */ .sendMessage({
         token: this.token,
@@ -1134,7 +1133,7 @@ export default class Deploy extends WS {
           if (!this.config) {
             return;
           }
-          this.config.services[item] = mService;
+          this.config.services[item].image = mService.image;
         }
       } else {
         res[item] = service;
@@ -1167,6 +1166,7 @@ export default class Deploy extends WS {
         res.push(item);
       }
     });
+
     return res;
   }
 
