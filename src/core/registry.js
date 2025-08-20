@@ -1,3 +1,4 @@
+import Console from 'console';
 import WS from '../connectors/ws.js';
 import {
   console,
@@ -95,7 +96,8 @@ export default class Registry extends WS {
       console.error('Failed to get repositories', res.error);
       exit(1);
     }
-    console.info('Repositories:\n', `${res.repositories.join('\n')}`, '');
+    console.info('Repositories:', '', '');
+    Console.log(`${res.repositories.join('\n')}`);
     exit(0);
   }
 
