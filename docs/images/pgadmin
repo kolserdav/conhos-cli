@@ -1,0 +1,10 @@
+# Pseudo manifest for https://hub.docker.com/r/dpage/pgadmin4
+
+Maintainers:
+GitRepo:
+Builder:
+
+Tags: 9.7, latest
+Architectures: amd64
+GitCommit:
+Directory:
