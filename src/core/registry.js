@@ -178,6 +178,8 @@ export default class Registry extends WS {
         'build',
         '-f',
         'Dockerfile',
+        '--platform',
+        'linux/amd64',
         '--tag',
         `${registryUrl}/${this.userId}/${name}:latest`,
         '--cache-from',
