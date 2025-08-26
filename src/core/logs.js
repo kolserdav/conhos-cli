@@ -14,7 +14,6 @@ import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constan
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console, exit, parseMessageCli } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
-import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
 /**
  * @typedef {import("../connectors/ws.js").Options} Options

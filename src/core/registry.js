@@ -1,4 +1,5 @@
 import Console from 'console';
+import chalk from 'chalk';
 import WS from '../connectors/ws.js';
 import {
   console,
@@ -7,7 +8,21 @@ import {
   getRegistryOrigin,
   getRegistryProxyOrigin,
   readDockerConfig,
+  parseMessageCli,
+  getRegistryDomain,
 } from '../utils/lib.js';
+import { spawn } from 'child_process';
+
+/**
+ * @typedef {import("../connectors/ws.js").Options} Options
+ * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
+ * @typedef {import('conhos-vscode').Status} Status
+ */
+
+/**
+ * @template {keyof WSMessageDataCli} T
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
+ */
 
 /**
  * @typedef {{
@@ -26,26 +41,74 @@ import {
  * }} RegistryAuthResponse
  */
 
-/**
- * @typedef {import('../connectors/ws.js').Options} Options
- */
-
 export default class Registry extends WS {
   /**
    * @param {import('../connectors/ws.js').Options} options
    */
   constructor(options) {
     super(options);
+    this.checkOptions();
+  }
 
-    if (this.options.list) {
-      this.list();
+  /**
+   * @private
+   */
+  checkOptions() {
+    if (!this.options.list && !this.options.build) {
+      console.warn('One of options are required', '--build | --list');
+      exit(2);
+      return;
     }
+    if (this.options.build && this.options.list) {
+      console.warn('Two options are not allowed to use together', '--build & --list');
+      exit(2);
+      return;
+    }
+    if (this.options.build && !this.options.name) {
+      console.warn('Option "name" is required for build', '-n|--name [string]');
+      exit(2);
+      return;
+    }
+  }
+
+  listener() {
+    if (!this.conn) {
+      return;
+    }
+    const ws = this;
+    this.conn.on('message', async (d) => {
+      const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
+      if (rawMessage === null) {
+        return;
+      }
+      const { type } = rawMessage;
+      /**
+       * @type {keyof WSMessageDataCli}
+       */
+      const _type = type;
+      switch (_type) {
+        default:
+          await this.handleCommonMessages(rawMessage);
+      }
+    });
   }
 
   /**
    * @public
+   * @type {WS['handler']}
    */
-  listener() {}
+  handler({ sessionExists }) {
+    if (!sessionExists) {
+      console.info('Session is no exists', 'Run "conhos login" first');
+      exit(2);
+      return;
+    }
+    if (this.options.list) {
+      this.list();
+    } else if (this.options.build) {
+      this.build();
+    }
+  }
 
   /**
    * @returns {Promise<void>}
@@ -77,6 +140,7 @@ export default class Registry extends WS {
     if (auth.error) {
       console.error('Failed to auth in registry', auth.error);
       exit(1);
+      return;
     }
     const res = await new Promise((resolve) => {
       fetch(`${getRegistryProxyOrigin()}/catalog?username=${username}`, {
@@ -95,10 +159,76 @@ export default class Registry extends WS {
     if (res.error) {
       console.error('Failed to get repositories', res.error);
       exit(1);
+      return;
     }
     console.info('Repositories:', '', '');
     Console.log(`${res.repositories.join('\n')}`);
     exit(0);
+  }
+
+  /**
+   * @private
+   */
+  async build() {
+    const registryUrl = getRegistryDomain();
+    const { name } = this.options;
+    const code = await new Promise((resolve) => {
+      const cmd = spawn('docker', [
+        'buildx',
+        'build',
+        '-f',
+        'Dockerfile',
+        '--tag',
+        `${registryUrl}/${this.userId}/${name}:latest`,
+        '--cache-from',
+        `type=registry,ref=${registryUrl}/${this.userId}/${name}:cache`,
+        '--cache-to',
+        `type=registry,ref=${registryUrl}/${this.userId}/${name}:cache,mode=max`,
+        '--output',
+        '"type=registry"',
+        '.',
+      ]);
+      cmd.stdout.on('data', (d) => {
+        const mess = d.toString().trim();
+        if (mess) {
+          Console.log(mess);
+        }
+      });
+
+      cmd.stderr.on('data', (d) => {
+        let mess = d.toString().trim();
+        /**
+         * @type {string[][]}
+         */
+        const errors = Array.from(mess.matchAll(/ERROR: (.+)/g));
+        if (errors) {
+          errors.forEach((item) => {
+            item.forEach((_item) => {
+              mess = mess.replace(_item, chalk.red(_item));
+            });
+          });
+        }
+        if (mess) {
+          Console.warn(mess);
+        }
+      });
+
+      cmd.on('error', (e) => {
+        console.error('Failed to build image', e.message);
+        exit(1);
+      });
+
+      cmd.on('exit', (code) => {
+        resolve(code || 0);
+      });
+    });
+
+    if (code !== 0) {
+      console.warn('Build exit with non success code, see errors above', '');
+    } else {
+      console.info('Successfully build and upload image', name);
+    }
+    exit(code);
   }
 
   /**

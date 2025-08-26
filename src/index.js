@@ -202,6 +202,8 @@ program
   .usage('[options] <command> [options]')
   .description('Container registry operations')
   .option('-l, --list', 'show all remote images')
+  .option('-b, --build', 'build and push a new image')
+  .option('-n, --name <string>', 'repository name')
   .action(async (options) => {
     new Registry(options);
   });

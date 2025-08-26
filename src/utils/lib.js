@@ -349,7 +349,11 @@ export function getAppDomain() {
 }
 
 export function getRegistryOrigin() {
-  return `https://${REGISTRY_SUBDOMAIN}.${getAppDomain()}`;
+  return `https://${getRegistryDomain()}`;
+}
+
+export function getRegistryDomain() {
+  return `${REGISTRY_SUBDOMAIN}.${getAppDomain()}`;
 }
 
 export function getRegistryProxyOrigin() {
