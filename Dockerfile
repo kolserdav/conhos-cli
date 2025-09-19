@@ -1,3 +1,10 @@
+FROM node:lts-trixie-slim AS builder
+
+WORKDIR /conhos-vscode
+COPY --from=conhos-vscode . .
+
+RUN npm i && npm run prebuild
+
 FROM node:lts-bookworm-slim
 
 WORKDIR /home
@@ -13,5 +20,9 @@ COPY bin ${LIB}/bin
 RUN cd ${LIB} && npm i
 
 ENV PATH=$PATH:${LIB}/bin
+
+COPY --from=builder /conhos-vscode/dist /var/lib/conhos-vscode/dist
+COPY --from=builder /conhos-vscode/index.js /var/lib/conhos-vscode
+COPY --from=builder /conhos-vscode/package.json /var/lib/conhos-vscode
 
 CMD ["sleep", "infinity"]

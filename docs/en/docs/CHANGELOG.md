@@ -2,6 +2,7 @@
 
 **4.3.11-IN PROGRESS**
 
+- `[Core]` The system infrastructure has been migrated from Docker swarm to Kubernetes...
 - `[Server]` Fixed premature removal of git listener when `Unable to connect to Git` notification was received if github is temporarily unavailable
 - `[Website]` Added information to the project page indicating the time of creation and last modification of the project
 - `[Core,Server]` Added push notifications on the results of service assembly by event from Git
