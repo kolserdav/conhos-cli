@@ -23,6 +23,7 @@ import {
   REGISTRY_AUTH_SUBDOMAIN,
   REGISTRY_PROXY_SUBDOMAIN,
   REGISTRY_SUBDOMAIN,
+  REGISTRY_DOMAIN,
 } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
 import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
@@ -335,6 +336,7 @@ export function readDockerConfig() {
  */
 export function createDockerConfig({ domain, userId, token }, dockerConfig) {
   const config = structuredClone(dockerConfig);
+  console.info(1, domain, userId);
   config.auths = {
     ...dockerConfig.auths,
     [domain]: {
@@ -349,7 +351,7 @@ export function getAppDomain() {
 }
 
 export function getRegistryOrigin() {
-  return `https://${getRegistryDomain()}`;
+  return `https://${REGISTRY_DOMAIN || getRegistryDomain()}`;
 }
 
 export function getRegistryDomain() {

@@ -1059,10 +1059,6 @@ export default class Deploy extends WS {
       const metadataProject = metadata.projects[CWD];
       if (metadataProject) {
         this.checkRenameProject({ metadataProject });
-        const newServices = this.checkChangeImage({ metadataProject });
-        Object.keys(newServices).forEach((item) => {
-          metadata.projects[CWD].services[item] = newServices[item];
-        });
 
         const deletedServices = this.checkMetadataDeletedservices({ metadataProject });
         deletedServices.forEach((item) => {
@@ -1101,46 +1097,6 @@ export default class Deploy extends WS {
       this.config.name = oldName;
       this.project = oldName;
     }
-  }
-
-  /**
-   * @private
-   * @param {{
-   *  metadataProject: ConfigFile
-   * }} param0
-   * @returns
-   */
-  checkChangeImage({ metadataProject }) {
-    /**
-     * @type {ConfigFile['services']}
-     */
-    const res = {};
-    if (!this.config) {
-      return res;
-    }
-
-    const { services } = this.config;
-
-    Object.keys(services).forEach((item) => {
-      const service = services[item];
-      const mService = metadataProject.services[item];
-      if (mService) {
-        if (mService.image !== service.image) {
-          console.warn(
-            `Ignoring change image for service "${item}"`,
-            `${mService.image} != ${service.image}. Using cached service data.`
-          );
-          if (!this.config) {
-            return;
-          }
-          this.config.services[item].image = mService.image;
-        }
-      } else {
-        res[item] = service;
-      }
-    });
-
-    return res;
   }
 
   /**

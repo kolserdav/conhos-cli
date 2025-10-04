@@ -36,6 +36,8 @@ if (process.env.LOGIN_PAGE) {
   );
 }
 
+export const REGISTRY_DOMAIN = process.env.REGISTRY_DOMAIN;
+
 export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'https://server.conhos.ru';
 if (process.env.SERVER_ADDRESS) {
   console.warn(
