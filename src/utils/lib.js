@@ -27,6 +27,7 @@ import {
 } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
 import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
+import EventEmitter from 'events';
 
 /**
  * @template T
@@ -90,7 +91,16 @@ export const console = {
    * @returns {void}
    */
   info: (...args) => {
-    Console.info('info:', chalk.cyanBright(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+    if (process.env.IS_SERVER === 'true') {
+      console._eventEmitter.emit('message', args);
+    } else {
+      Console.info(
+        'info:',
+        chalk.cyanBright(args[0]),
+        getBrightUnderline(args[1]),
+        ...args.slice(2)
+      );
+    }
   },
   /**
    *
@@ -113,6 +123,7 @@ export const console = {
       ...args.slice(2)
     );
   },
+  _eventEmitter: new EventEmitter(),
 };
 
 /**
@@ -336,7 +347,6 @@ export function readDockerConfig() {
  */
 export function createDockerConfig({ domain, userId, token }, dockerConfig) {
   const config = structuredClone(dockerConfig);
-  console.info(1, domain, userId);
   config.auths = {
     ...dockerConfig.auths,
     [domain]: {

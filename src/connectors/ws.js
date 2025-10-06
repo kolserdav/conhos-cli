@@ -61,6 +61,7 @@ const crypto = new Crypto();
  */
 
 /**
+ * Dependency conhos-vscode
  * @typedef {{
  *  iv: string;
  *  content: string;
@@ -130,6 +131,11 @@ export class WSInterface {
  * @implements WSInterface
  */
 export default class WS {
+  /**
+   * @public
+   */
+  console = console;
+
   /**
    * @protected
    */
@@ -220,29 +226,31 @@ export default class WS {
 
   /**
    * @param {Options} options
+   * @param {boolean} withoutStart
    */
-  constructor(options) {
+  constructor(options, withoutStart = false) {
     this.options = options;
     this.userId = '';
     this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
     this.token = '';
-    this.start();
-    this.listener();
     this.configFile = getConfigFilePath();
+    if (!withoutStart) {
+      this.start();
+    }
   }
 
   /**
    * @type {WSInterface['listener']}
    */
   listener() {
-    console.warn('Default WS listener');
+    this.console.warn('Default WS listener');
   }
 
   /**
    * @type {WSInterface['handler']}
    */
   handler(options) {
-    console.warn('Default WS handler', options);
+    this.console.warn('Default WS handler', options);
   }
 
   /**
@@ -252,11 +260,11 @@ export default class WS {
    */
   sendMessage(data) {
     if (!this.conn) {
-      console.warn('Missing connection in send message');
+      this.console.warn('Missing connection in send message');
       return;
     }
     const _data = structuredClone(data);
-    console.log('Send message', _data);
+    this.console.log('Send message', _data);
     this.conn.send(JSON.stringify(data));
   }
 
@@ -277,23 +285,25 @@ export default class WS {
   }
 
   start() {
+    this.listener();
+
     this.package = JSON.parse(
       readFileSync(resolve(path.dirname(__filenameNew), '../../package.json')).toString()
     );
 
     if (!this.conn) {
-      console.warn('WebSocket is missing');
+      this.console.warn('WebSocket is missing');
       return;
     }
     this.conn.on('error', (error) => {
-      console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
+      this.console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
       exit(1);
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
     const { version } = this.package;
     this.conn.on('open', () => {
-      console.log('Open WS connection:', WEBSOCKET_ADDRESS);
+      this.console.log('Open WS connection:', WEBSOCKET_ADDRESS);
       /** @type {typeof ws.sendMessage<'setSocketServer'>} */ (ws.sendMessage)({
         status: 'info',
         type: 'setSocketServer',
@@ -308,7 +318,7 @@ export default class WS {
       });
     });
     this.conn.on('close', (d) => {
-      console.warn(`Connection closed with code ${d}`, 'Try again later');
+      this.console.warn(`Connection closed with code ${d}`, 'Try again later');
       exit();
     });
   }
@@ -337,7 +347,7 @@ export default class WS {
     }
 
     if ((!data && !this.options.isLogin) || !token) {
-      console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
+      this.console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
       exit(1);
       return;
     }
@@ -353,11 +363,11 @@ export default class WS {
     if (!this.options.isLogin) {
       if (!checked) {
         console[status](`${CLOUD_LOG_PREFIX} ${message}`, errMess);
-        console.error('Failed to check session', 'Fix a warning before and try again');
+        this.console.error('Failed to check session', 'Fix a warning before and try again');
         exit(1);
       }
     } else if (checked) {
-      console.info('Successfully logged in', '');
+      this.console.info('Successfully logged in', '');
       exit(0);
     }
 
@@ -425,7 +435,7 @@ export default class WS {
   ) {
     if (!existsSync(this.configFile)) {
       if (!this.options.project) {
-        console.warn(
+        this.console.warn(
           'Config file is not exists, run',
           `"${PACKAGE_NAME} init" first`,
           'Or try add "-p [project-name]" option'
@@ -445,11 +455,11 @@ export default class WS {
 
     const changeRes = await this.changeConfigFileVolumes({ config, userId: this.userId });
     if (changeRes.error) {
-      console.error(changeRes.error, '');
+      this.console.error(changeRes.error, '');
       exit(1);
     }
     if (!this.deployData) {
-      console.error('Deploy data is missing', 'Try again later');
+      this.console.error('Deploy data is missing', 'Try again later');
       exit(1);
       return null;
     }
@@ -457,17 +467,28 @@ export default class WS {
     const volumes = changeRes.volumes || {};
 
     if (!withoutCheck) {
-      let checkErr = await checkConfig(
+      let checkConfigGenerator = checkConfig(
         { config, configText: data },
-        { deployData: this.deployData, projectDelete: this.options.delete || false }
+        { deployData: this.deployData, projectDelete: this.options.delete || false, fast: true }
       );
+
+      /**
+       * @type {CheckConfigResult[]}
+       */
+      let checkErr = [];
+      for await (const message of checkConfigGenerator) {
+        checkErr.push(message);
+        if (message.exit) {
+          break;
+        }
+      }
       checkErr = checkErr.concat(this.checkVolumes({ config, configText: data }));
       let checkExit = false;
       checkErr.forEach((item) => {
         if (!withoutWarns) {
           console[item.exit ? 'error' : 'warn'](item.msg, item.data);
         } else if (item.exit) {
-          console.error(item.msg, item.data);
+          this.console.error(item.msg, item.data);
         }
         if (item.exit) {
           checkExit = true;
@@ -617,14 +638,14 @@ export default class WS {
       this.setUserId(authData.uid);
 
       if (authData.iv !== '') {
-        console.info('Session token was encrypted', '');
+        this.console.info('Session token was encrypted', '');
 
         const password = await inquirer.promptPassword('Enter password');
         const key = crypto.createHash(password);
         const token = crypto.decrypt(authData, key);
 
         if (token === null) {
-          console.warn("Password is wrong, current session can't be use", '');
+          this.console.warn("Password is wrong, current session can't be use", '');
           if (!this.options.isLogin) {
             exit();
           }
@@ -646,7 +667,7 @@ export default class WS {
         });
       } else {
         const authPath = getPackagePath(this.options.userHomeFolder || null, SESSION_FILE_NAME);
-        console.log("Now it's using the saved session token:", authPath);
+        this.console.log("Now it's using the saved session token:", authPath);
         /** @type {typeof this.sendMessage<'checkTokenServer'>} */ (this.sendMessage)({
           token: authData.content,
           type: 'checkTokenServer',
@@ -661,7 +682,7 @@ export default class WS {
         });
       }
     } else if (!this.options.isLogin) {
-      console.warn(
+      this.console.warn(
         `You are not authenticated, run "${PACKAGE_NAME} login" first`,
         `Home dir: "${this.options.userHomeFolder || HOME_DIR}"`
       );
@@ -771,7 +792,7 @@ export default class WS {
      * @type {keyof WSMessageDataCli}
      */
     const _type = type;
-    console.log('On message', { type, status, message, token });
+    this.console.log('On message', { type, status, message, token });
     switch (_type) {
       case 'setSocketCli':
         await this.listenSetSocket(msg, skipSetProject);
@@ -787,7 +808,7 @@ export default class WS {
         }
         break;
       default:
-        console.warn('Default message case of command:', type);
+        this.console.warn('Default message case of command:', type);
     }
   }
 

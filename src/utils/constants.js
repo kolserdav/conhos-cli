@@ -70,6 +70,7 @@ export const PACKAGE_VERSION = pack.version;
 export const PACKAGE_NAME = pack.name;
 export const CONFIG_FILE_NAME = `${PACKAGE_NAME}.yml`;
 export const CONFIG_FILE_NAME_A = `${PACKAGE_NAME}.yaml`;
+// Dependency conhos-vscode/src/constatns.ts
 export const SESSION_FILE_NAME = 'auth';
 export const METADATA_FILE_NAME = 'metadata';
 export const PACKAGES_DIR_NAME = 'packages';

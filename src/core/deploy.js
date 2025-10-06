@@ -15,16 +15,10 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import {
-  as,
-  console,
-  exit,
-  getPackagePath,
-  parseMessageCli,
-  stdoutWriteStart,
-} from '../utils/lib.js';
+import { as, exit, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
+  CLOUD_LOG_PREFIX,
   CONFIG_FILE_NAME,
   CONFIG_FILE_NAME_A,
   CWD,
@@ -114,7 +108,6 @@ export default class Deploy extends WS {
     if (!this.conn) {
       return;
     }
-
     const ws = this;
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
@@ -155,8 +148,12 @@ export default class Deploy extends WS {
    * @private
    * @param {WSMessageCli<'deployProgressCli'>} msg
    */
-  async progress({ data: { msg } }) {
-    stdoutWriteStart(msg.replaceAll(/\n/g, ''));
+  async progress({ data: { msg }, status }) {
+    if (status === 'warn') {
+      this.console.warn(`${CLOUD_LOG_PREFIX} ${msg}`, '');
+    } else {
+      stdoutWriteStart(msg.replaceAll(/\n/g, ''));
+    }
   }
 
   /**
@@ -174,7 +171,7 @@ export default class Deploy extends WS {
       if (key === serviceName) {
         const { volumes } = services[key];
         if (!volumes) {
-          console.error(
+          this.console.error(
             'Something went wrong',
             'Program got signal to upload volume, but volumes is undefined',
             'Try again later'
@@ -193,7 +190,7 @@ export default class Deploy extends WS {
 
           const fileM = volume.match(VOLUME_LOCAL_REGEX);
           if (!fileM) {
-            console.error(
+            this.console.error(
               `Service "${key}" has wrong volume "${volume}"`,
               `It doesn't match to regexp ${VOLUME_LOCAL_REGEX}`
             );
@@ -213,7 +210,7 @@ export default class Deploy extends WS {
           stdoutWriteStart('');
           console[status](message, serviceName, url);
           if (status === 'error') {
-            console.warn(`Failed to upload volume for service "${key}"`, filePath);
+            this.console.warn(`Failed to upload volume for service "${key}"`, filePath);
             exit(1);
           }
         }
@@ -228,7 +225,7 @@ export default class Deploy extends WS {
    */
   async deleteFiles({ data: { service, files, cwd, last, url }, status }) {
     if (this.waitGitUpload[service]) {
-      console.info('Waiting to git upload', service);
+      this.console.info('Waiting to git upload', service);
       await new Promise((resolve) => {
         setInterval(() => {
           if (this.waitGitUpload[service]) {
@@ -246,19 +243,19 @@ export default class Deploy extends WS {
 
     if (this.isNewUpload) {
       tarbalPath = resolve(tmpdir(), `${this.project}.tgz`);
-      console.info('Creating tarball ...', tarbalPath);
+      this.console.info('Creating tarball ...', tarbalPath);
       await new Promise((_resolve) => {
         create(
           {
             file: tarbalPath,
             cwd,
             onwarn: (d) => {
-              console.warn('Creating tarball onwarn', d.toString());
+              this.console.warn('Creating tarball onwarn', d.toString());
             },
           },
           this.fileList
         ).then((_) => {
-          console.info('Tarball created', tarbalPath);
+          this.console.info('Tarball created', tarbalPath);
           _resolve(0);
         });
       });
@@ -307,7 +304,7 @@ export default class Deploy extends WS {
    * @param {WSMessageCli<'acceptDeleteCli'>} param0
    */
   async acceptDelete({ data: { serviceName, serviceType } }) {
-    console.warn(
+    this.console.warn(
       `You want to delete service "${serviceName}" with type "${serviceType}"`,
       'If you have a needed data of it save it before'
     );
@@ -331,7 +328,7 @@ export default class Deploy extends WS {
           connId: this.connId,
         });
     } else {
-      console.info('Operation exited', 'Deletion canceled by user');
+      this.console.info('Operation exited', 'Deletion canceled by user');
       exit(1);
     }
   }
@@ -397,7 +394,7 @@ export default class Deploy extends WS {
    */
   async prepareUpload({ data }) {
     const { service, exclude, pwd, active, cache, git } = data;
-    console.log('Prepare upload', service);
+    this.console.log('Prepare upload', service);
     if (!this.config) {
       return;
     }
@@ -414,7 +411,7 @@ export default class Deploy extends WS {
 
     if (git) {
       if (active) {
-        console.info(
+        this.console.info(
           'Starting synchronize git',
           `Url: ${git.url}, branch: ${git.branch}, untracked: ${
             git.untracked || Object.keys(GIT_UNTRACKED_POLICY)[0]
@@ -444,7 +441,7 @@ export default class Deploy extends WS {
     this.setCacheFilePath({ project: this.project, service });
 
     if (!active) {
-      console.info('Skipping to upload deleted service files', pwd);
+      this.console.info('Skipping to upload deleted service files', pwd);
       /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
         token: this.token,
         message: '',
@@ -463,7 +460,7 @@ export default class Deploy extends WS {
         connId: this.connId,
       });
       if (existsSync(this.cacheFilePath[service])) {
-        console.info('Remove cache file', this.cacheFilePath[service]);
+        this.console.info('Remove cache file', this.cacheFilePath[service]);
         rmSync(this.cacheFilePath[service]);
       }
       return;
@@ -474,7 +471,7 @@ export default class Deploy extends WS {
       (await this.checkCache({ exclude, pwd, service, cached })) || [];
 
     if (!needUpload) {
-      console.info('Skipping to upload service files', pwd);
+      this.console.info('Skipping to upload service files', pwd);
       this.sendMessage({
         token: this.token,
         message: '',
@@ -625,9 +622,9 @@ export default class Deploy extends WS {
     const needToRemoveProject =
       typeof Object.keys(services).find((item) => services[item].active) === 'undefined';
     if (needToRemoveProject) {
-      console.info('Starting remove project ', name);
+      this.console.info('Starting remove project ', name);
     } else {
-      console.info('Starting deploy project', name);
+      this.console.info('Starting deploy project', name);
     }
 
     const env = this.getEnvVariables();
@@ -675,8 +672,8 @@ export default class Deploy extends WS {
     const targetDirPath = resolve(CWD, pwd);
 
     if (!existsSync(targetDirPath)) {
-      console.warn('Target dir is missing', targetDirPath);
-      console.error('Exited with code 2', 'Fix warning before and try again');
+      this.console.warn('Target dir is missing', targetDirPath);
+      this.console.error('Exited with code 2', 'Fix warning before and try again');
       exit(1);
     }
 
@@ -698,8 +695,8 @@ export default class Deploy extends WS {
       files = (await this.createCache(cacheChanged)) || [];
     } else {
       const cacheRes = await cacheChanged.compare().catch((err) => {
-        console.error('Failed to compare cache', err, new Error().stack);
-        console.warn('Cache skipping');
+        this.console.error('Failed to compare cache', err, new Error().stack);
+        this.console.warn('Cache skipping');
       });
 
       this.cacheWorked = typeof cacheRes !== 'undefined';
@@ -710,7 +707,7 @@ export default class Deploy extends WS {
         deleted = cacheRes.deleted;
       }
       if (!this.cacheWorked) {
-        console.error(
+        this.console.error(
           'Failed cache',
           `Remove folder ~/.${PACKAGE_NAME}/${this.project}/ and try again`
         );
@@ -782,8 +779,8 @@ export default class Deploy extends WS {
    */
   async createCache(cacheChanged, noWrite = false) {
     const cacheRes = await cacheChanged.create({ noWrite }).catch((err) => {
-      console.error('Failed to create cache', err, new Error().stack);
-      console.warn('Cache skipping');
+      this.console.error('Failed to create cache', err, new Error().stack);
+      this.console.warn('Cache skipping');
     });
     if (typeof cacheRes === 'undefined') {
       this.cacheWorked = false;
@@ -810,12 +807,12 @@ export default class Deploy extends WS {
    * }>}
    */
   async uploadFileRequest({ filePath, url, service, fileName, connId, tarball }) {
-    console.log(`Upload file "${service}"`, `Filename: ${fileName}, url: ${url}`);
+    this.console.log(`Upload file "${service}"`, `Filename: ${fileName}, url: ${url}`);
 
     const allSize = await new Promise((_resolve) => {
       stat(filePath, (err, data) => {
         if (err) {
-          console.error('Failed to get stat of file', err);
+          this.console.error('Failed to get stat of file', err);
           _resolve(0);
           return;
         }
@@ -924,11 +921,11 @@ export default class Deploy extends WS {
 
           res.on('error', (err) => {
             stdoutWriteStart('');
-            console.warn(
+            this.console.warn(
               'Can not upload file',
               `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
             );
-            console.error('Failed to upload file', err);
+            this.console.error('Failed to upload file', err);
             _resolve({
               status: 'error',
               code: res.statusCode,
@@ -963,28 +960,28 @@ export default class Deploy extends WS {
 
       file.on('end', () => {
         stdoutWriteStart('');
-        console.log('End read file', filePath);
+        this.console.log('End read file', filePath);
         file.close();
         req.end();
       });
 
       file.on('error', (e) => {
-        console.error('Failed to read file to upload', e);
+        this.console.error('Failed to read file to upload', e);
       });
 
       req.on('error', (error) => {
         stdoutWriteStart('');
-        console.warn(
+        this.console.warn(
           'Request error',
           `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
         );
-        console.error('Request failed', error);
+        this.console.error('Request failed', error);
         exit(1);
       });
 
       req.on('timeout', () => {
         stdoutWriteStart('');
-        console.error('Request timeout exceeded', url);
+        this.console.error('Request timeout exceeded', url);
         exit(1);
       });
 
@@ -1010,7 +1007,7 @@ export default class Deploy extends WS {
    */
   async readMetadataFile(metadataFilePath) {
     const res = await readFile(metadataFilePath).catch((error) => {
-      console.error('Failed to read metadata file', error);
+      this.console.error('Failed to read metadata file', error);
     });
     /**
      * @type {Metadata | null}
@@ -1022,7 +1019,7 @@ export default class Deploy extends WS {
     try {
       data = JSON.parse(res.toString());
     } catch (error) {
-      console.error('Failed to parse metadata file', { error, metadataFilePath });
+      this.console.error('Failed to parse metadata file', { error, metadataFilePath });
     }
     return data;
   }
@@ -1034,7 +1031,7 @@ export default class Deploy extends WS {
    */
   async writeMetadataFile(metadataFilePath, data) {
     await writeFile(metadataFilePath, JSON.stringify(data)).catch((error) => {
-      console.error('Failed to write metadata file', error);
+      this.console.error('Failed to write metadata file', error);
     });
   }
 
@@ -1093,7 +1090,7 @@ export default class Deploy extends WS {
     const oldName = metadataProject.name;
 
     if (metadataProject.name !== this.config.name) {
-      console.warn('Ingnoring to rename project', `${oldName} != ${this.config.name}`);
+      this.console.warn('Ingnoring to rename project', `${oldName} != ${this.config.name}`);
       this.config.name = oldName;
       this.project = oldName;
     }

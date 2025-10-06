@@ -22,6 +22,7 @@ import Exec from './core/exec.js';
 import Project from './core/project.js';
 import Service from './core/service.js';
 import Registry from './core/registry.js';
+import { argv } from 'process';
 
 process.on('SIGABRT', (sig) => {
   console.warn('Received abort signal', sig);
