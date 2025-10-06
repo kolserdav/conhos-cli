@@ -1,12 +1,17 @@
-import http from 'http';
+import http2 from 'http2';
 process.env.IS_SERVER = 'true';
 import Deploy from '../core/deploy.js';
+import { readFileSync } from 'fs';
 
 /**
+ * @typedef {import('../utils/lib.js').EmitterData} EmitterData
+ * @typedef {import('conhos-vscode').Status} Status
+ * @typedef {import('../connectors/ws.js').default} WS
  * @typedef {import('../connectors/ws.js').Options} Options
  * @typedef {{
  *    error?: string;
  *    message?: string;
+ *    code?: number;
  *  }} ResponseBody
  * @typedef {{
  *  command?: 'deploy' | 'logs' | 'exec'
@@ -22,16 +27,13 @@ class Server {
   /**
    *
    * @param {{
-   *  res: http.ServerResponse<http.IncomingMessage> & {
-   *   req: http.IncomingMessage;
-   *  };
-   *  statusCode: http.ServerResponse<http.IncomingMessage>['statusCode'];
+   *  res: http2.Http2ServerResponse<http2.Http2ServerRequest>;
+   *  statusCode: http2.Http2ServerResponse<http2.Http2ServerRequest>['statusCode'];
    *  body: ResponseBody
    * }} options
    */
   response({ res, body, statusCode }) {
     res.statusCode = statusCode;
-    res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(body));
   }
 
@@ -39,7 +41,20 @@ class Server {
    * @private
    */
   async start() {
-    const server = http.createServer(async (req, res) => {
+    /**
+     * @type {any}
+     */
+    const key = process.env.SSL_CERT_KEY;
+    /**
+     * @type {any}
+     */
+    const cert = process.env.SSL_CERT;
+    const serverOptions = {
+      key: readFileSync(key),
+      cert: readFileSync(cert),
+    };
+    const server = http2.createSecureServer(serverOptions, async (req, res) => {
+      res.setHeader('Content-Type', 'application/json');
       if (req.method !== 'POST') {
         return this.response({ res, body: { error: 'Method not allowed' }, statusCode: 405 });
       }
@@ -55,21 +70,6 @@ class Server {
           resolve(0);
         });
       });
-
-      /**
-       *
-       * @param {string | number | null | undefined} code
-       * @returns {never}
-       */
-      function exit(code) {
-        /**
-         * @type {never}
-         */
-        // @ts-ignore
-        const nev = 0;
-        return nev;
-      }
-      process.exit = exit;
 
       /**
        * @type {RequestBody | null}
@@ -93,23 +93,49 @@ class Server {
         });
       }
 
+      /**
+       * @type {WS | null}
+       */
+      let instance = null;
+
       switch (command) {
         case 'deploy':
-          const dep = new Deploy({ ssl: true, interractive: false }, true);
-          dep.console._eventEmitter.on('message', (d) => {
-            console.log(1, d);
-          });
-          dep.start();
+          instance = new Deploy({ ssl: true, interractive: false }, true);
           break;
         default:
           console.warn('Default case command', command);
       }
 
-      await new Promise(() => {
-        setInterval(() => {}, 1000);
-      });
+      /**
+       * @type {number | undefined}
+       */
+      let code = undefined;
+      if (instance) {
+        code = await new Promise((resolve) => {
+          /**
+           *
+           * @param {EmitterData} data
+           * @returns
+           */
+          const handler = (data) => {
+            const { code } = data;
+            if (code !== undefined) {
+              instance.console._eventEmitter.removeListener('message', handler);
+              resolve(code);
+              return;
+            }
+            res.write(JSON.stringify(data) + '\n');
+          };
+          instance.console._eventEmitter.on('message', handler);
+          instance.start();
+        });
+      }
 
-      return this.response({ res, body: { message: 'Hello World!' }, statusCode: 200 });
+      return this.response({
+        res,
+        body: { message: code ? 'Error' : 'Success', code },
+        statusCode: code ? 500 : 201,
+      });
     });
 
     const PORT = 3000;

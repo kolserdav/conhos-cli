@@ -211,7 +211,7 @@ export default class Deploy extends WS {
           console[status](message, serviceName, url);
           if (status === 'error') {
             this.console.warn(`Failed to upload volume for service "${key}"`, filePath);
-            exit(1);
+            return exit(1);
           }
         }
         this.canClose = true;
@@ -329,7 +329,7 @@ export default class Deploy extends WS {
         });
     } else {
       this.console.info('Operation exited', 'Deletion canceled by user');
-      exit(1);
+      return exit(1);
     }
   }
 
@@ -467,8 +467,11 @@ export default class Deploy extends WS {
     }
 
     const cached = this.changePWD({ cache, pwd });
-    const { files, needUpload, deleted } =
-      (await this.checkCache({ exclude, pwd, service, cached })) || [];
+    const cache1 = (await this.checkCache({ exclude, pwd, service, cached })) || null;
+    if (!cache1) {
+      return;
+    }
+    const { files, needUpload, deleted } = cache1;
 
     if (!needUpload) {
       this.console.info('Skipping to upload service files', pwd);
@@ -575,7 +578,7 @@ export default class Deploy extends WS {
     stdoutWriteStart('');
     console[status](`${message}: ${service}|${file}`, filePath);
     if (status === 'error') {
-      exit(1);
+      return exit(1);
     }
 
     /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
@@ -674,7 +677,7 @@ export default class Deploy extends WS {
     if (!existsSync(targetDirPath)) {
       this.console.warn('Target dir is missing', targetDirPath);
       this.console.error('Exited with code 2', 'Fix warning before and try again');
-      exit(1);
+      return exit(1);
     }
 
     const cacheChanged = new CacheChanged({
@@ -711,7 +714,7 @@ export default class Deploy extends WS {
           'Failed cache',
           `Remove folder ~/.${PACKAGE_NAME}/${this.project}/ and try again`
         );
-        exit(1);
+        return exit(1);
       }
     }
     const _files = await this.createCache(cacheChanged, true);
@@ -976,13 +979,13 @@ export default class Deploy extends WS {
           `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
         );
         this.console.error('Request failed', error);
-        exit(1);
+        return exit(1);
       });
 
       req.on('timeout', () => {
         stdoutWriteStart('');
         this.console.error('Request timeout exceeded', url);
-        exit(1);
+        return exit(1);
       });
 
       req.on('close', () => {

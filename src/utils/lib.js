@@ -74,6 +74,17 @@ const getBrightUnderline = (arg) => {
     : undefined;
 };
 
+/**
+ *
+ * @typedef {{
+ *  progress?: {
+ *    status: Status
+ *    args: string[];
+ *  }
+ *  code?: number;
+ *  }} EmitterData
+ */
+
 export const console = {
   /**
    *
@@ -82,7 +93,20 @@ export const console = {
    */
   log: (...args) => {
     if (DEBUG) {
-      Console.log('debug:', chalk.gray(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+      if (process.env.IS_SERVER === 'true') {
+        /**
+         * @type {EmitterData}
+         */
+        const data = {
+          progress: {
+            status: 'info',
+            args,
+          },
+        };
+        console._eventEmitter.emit('message', data);
+      } else {
+        Console.log('debug:', chalk.gray(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+      }
     }
   },
   /**
@@ -92,7 +116,16 @@ export const console = {
    */
   info: (...args) => {
     if (process.env.IS_SERVER === 'true') {
-      console._eventEmitter.emit('message', args);
+      /**
+       * @type {EmitterData}
+       */
+      const data = {
+        progress: {
+          status: 'info',
+          args,
+        },
+      };
+      console._eventEmitter.emit('message', data);
     } else {
       Console.info(
         'info:',
@@ -108,7 +141,25 @@ export const console = {
    * @returns {void}
    */
   warn: (...args) => {
-    Console.warn('warning:', chalk.yellow(args[0]), getBrightUnderline(args[1]), ...args.slice(2));
+    if (process.env.IS_SERVER === 'true') {
+      /**
+       * @type {EmitterData}
+       */
+      const data = {
+        progress: {
+          status: 'warn',
+          args,
+        },
+      };
+      console._eventEmitter.emit('message', data);
+    } else {
+      Console.warn(
+        'warning:',
+        chalk.yellow(args[0]),
+        getBrightUnderline(args[1]),
+        ...args.slice(2)
+      );
+    }
   },
   /**
    *
@@ -116,13 +167,27 @@ export const console = {
    * @returns {void}
    */
   error: (...args) => {
-    Console.error(
-      ERROR_LOG_PREFIX,
-      chalk.red(args[0]),
-      getBrightUnderline(args[1]),
-      ...args.slice(2)
-    );
+    if (process.env.IS_SERVER === 'true') {
+      /**
+       * @type {EmitterData}
+       */
+      const data = {
+        progress: {
+          status: 'error',
+          args,
+        },
+      };
+      console._eventEmitter.emit('message', data);
+    } else {
+      Console.error(
+        ERROR_LOG_PREFIX,
+        chalk.red(args[0]),
+        getBrightUnderline(args[1]),
+        ...args.slice(2)
+      );
+    }
   },
+
   _eventEmitter: new EventEmitter(),
 };
 
@@ -305,10 +370,16 @@ export function parseMessageCli(msg) {
 
 /**
  * @param {number | undefined} code
+ * @returns {null}
  */
 export function exit(code = undefined) {
-  process.stdout.write(createLastStreamMessage());
-  process.exit(code);
+  if (process.env.IS_SERVER === 'true') {
+    console._eventEmitter.emit('message', { code });
+  } else {
+    process.stdout.write(createLastStreamMessage());
+    process.exit(code);
+  }
+  return null;
 }
 
 /**
