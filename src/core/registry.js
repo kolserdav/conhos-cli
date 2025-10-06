@@ -14,7 +14,7 @@ import {
 import { spawn } from 'child_process';
 
 /**
- * @typedef {import("../connectors/ws.js").Options} Options
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').Status} Status
  */
@@ -43,7 +43,7 @@ import { spawn } from 'child_process';
 
 export default class Registry extends WS {
   /**
-   * @param {import('../connectors/ws.js').Options} options
+   * @param {Options} options
    */
   constructor(options) {
     super(options);

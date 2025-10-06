@@ -1,10 +1,10 @@
-NAME = conhos/cli
+DEPLOYMENT = cli-dev
+NAME = conhos/cli-dev
 
 deploy:
 	make build
 	make restart
 build:
-	docker buildx build --build-context conhos-vscode=../conhos-vscode -f Dockerfile --tag $(REGISTRY_URL)/$(NAME):latest --cache-from=type=registry,ref=$(REGISTRY_URL)/$(NAME):cache \
-	--cache-to=type=registry,ref=$(REGISTRY_URL)/$(NAME):cache,mode=max --output="type=registry" .
+	docker buildx build --build-context conhos-vscode=../conhos-vscode -f dockerfiles/Dockerfile.dev --tag $(REGISTRY_URL)/$(NAME):latest --output="type=registry" .
 restart:
-	kubectl rollout restart -n conhos-dev deploy cli
+	kubectl rollout restart -n conhos-dev deploy $(DEPLOYMENT)

@@ -39,6 +39,7 @@ export function as(data) {
 }
 
 /**
+ * @typedef {import('../types/interfaces.js').EmitterData} EmitterData
  * @typedef {number | null} StatusCode
  * @typedef {import('conhos-vscode').Status} Status
  * @typedef {import('conhos-vscode').UploadFileBody} UploadFileBody
@@ -73,17 +74,6 @@ const getBrightUnderline = (arg) => {
       : chalk.white(_arg)
     : undefined;
 };
-
-/**
- *
- * @typedef {{
- *  progress?: {
- *    status: Status
- *    args: string[];
- *  }
- *  code?: number;
- *  }} EmitterData
- */
 
 export const console = {
   /**
@@ -241,10 +231,10 @@ export function stdoutWriteStart(title) {
 
 /**
  * @returns {string}
+ * @param {string | undefined} cwd
  */
-export function getPackageName() {
-  const cwd = process.cwd();
-  const packageJsonPath = path.resolve(cwd, 'package.json');
+export function getPackageName(cwd = undefined) {
+  const packageJsonPath = path.resolve(cwd || CWD, 'package.json');
   if (!existsSync(packageJsonPath)) {
     return path.basename(path.resolve());
   }
@@ -265,9 +255,10 @@ export function getPackageName() {
 
 /**
  * @returns {string}
+ * @param {string | undefined} cwd
  */
-export function getConfigFilePath() {
-  let fileYml = path.resolve(CWD, CONFIG_FILE_NAME);
+export function getConfigFilePath(cwd = undefined) {
+  let fileYml = path.resolve(cwd || CWD, CONFIG_FILE_NAME);
   if (!existsSync(fileYml)) {
     fileYml = fileYml.replace(/yaml$/, 'yml');
   }

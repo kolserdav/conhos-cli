@@ -43,6 +43,7 @@ const __filenameNew = fileURLToPath(import.meta.url);
 const crypto = new Crypto();
 
 /**
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('conhos-vscode').DeployData} DeployData
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
@@ -67,32 +68,6 @@ const crypto = new Crypto();
  *  content: string;
  *  uid: string
  * }} Session
- */
-
-/**
- * @typedef {{
- *  crypt?: boolean;
- *  remove?: boolean;
- *  yes?: boolean;
- *  follow?: boolean;
- *  isLogin?: boolean;
- *  timestamps?: boolean;
- *  since?: string;
- *  until?: string;
- *  tail?: number
- *  clear?: boolean;
- *  clearCache?: boolean;
- *  interractive?: boolean;
- *  ssl?: boolean;
- *  project?: string;
- *  delete?: boolean;
- *  repl?: number;
- *  name?: string;
- *  restart?: boolean;
- *  userHomeFolder?: string;
- *  list?: boolean
- *  build?: boolean
- * }} Options
  */
 
 /**
@@ -131,6 +106,12 @@ export class WSInterface {
  * @implements WSInterface
  */
 export default class WS {
+  /**
+   * @protected
+   * @type {string | undefined}
+   */
+  cwd;
+
   /**
    * @public
    */
@@ -226,14 +207,19 @@ export default class WS {
 
   /**
    * @param {Options} options
-   * @param {boolean} withoutStart
+   * @param {{
+   *  withoutStart?: boolean;
+   *  cwd?: string;
+   * }} props
    */
-  constructor(options, withoutStart = false) {
+  constructor(options, props = {}) {
+    const { withoutStart, cwd } = props;
+    this.cwd = cwd;
     this.options = options;
     this.userId = '';
     this.conn = new WebSocket(WEBSOCKET_ADDRESS, PROTOCOL_CLI);
     this.token = '';
-    this.configFile = getConfigFilePath();
+    this.configFile = getConfigFilePath(this.cwd);
     if (!withoutStart) {
       this.start();
     }

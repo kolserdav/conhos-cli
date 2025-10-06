@@ -45,7 +45,7 @@ import { ENV_VARIABLE_REGEX, ENV_VARIABLES_CLEAN_REGEX } from '../types/interfac
 
 /**
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
- * @typedef {import('../connectors/ws.js').Options} Options
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('cache-changed').CacheItem} CacheItem
@@ -335,10 +335,13 @@ export default class Deploy extends WS {
 
   /**
    * @private
-   * @param {{service: string; project: string;}} param0
+   * @param {{service: string; project: string; homedir?: string}} param0
    */
   setCacheFilePath({ service, project }) {
-    const packagePath = getPackagePath(null, `${project}/${service}`);
+    const packagePath = getPackagePath(
+      this.options.userHomeFolder || null,
+      `${project}/${service}`
+    );
     if (!existsSync(packagePath)) {
       mkdirSync(packagePath, { recursive: true });
     }
@@ -617,7 +620,7 @@ export default class Deploy extends WS {
 
     const { name, services } = this.config;
 
-    const packageProjectPath = getPackagePath(null, name);
+    const packageProjectPath = getPackagePath(this.cwd || null, name);
     if (!existsSync(packageProjectPath)) {
       mkdirSync(packageProjectPath, { recursive: true });
     }
@@ -1000,7 +1003,7 @@ export default class Deploy extends WS {
    * @private
    */
   getMetadataFilePath() {
-    return getPackagePath(null, METADATA_FILE_NAME);
+    return getPackagePath(this.cwd || null, METADATA_FILE_NAME);
   }
 
   /**

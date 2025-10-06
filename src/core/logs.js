@@ -16,7 +16,7 @@ import { console, exit, parseMessageCli } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 
 /**
- * @typedef {import("../connectors/ws.js").Options} Options
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').Status} Status
  */

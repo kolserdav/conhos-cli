@@ -19,7 +19,7 @@ import Console from 'console';
 import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
 /**
- * @typedef {import("../connectors/ws.js").Options} Options
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').Status} Status
  */

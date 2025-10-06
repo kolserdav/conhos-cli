@@ -4,19 +4,12 @@ import Deploy from '../core/deploy.js';
 import { readFileSync } from 'fs';
 
 /**
- * @typedef {import('../utils/lib.js').EmitterData} EmitterData
+ * @typedef {import('../types/interfaces.js').CliServerResponse} CliServerResponse
+ * @typedef {import('../types/interfaces.js').CliServerRequestBody} CliServerRequestBody
+ * @typedef {import('../types/interfaces.js').EmitterData} EmitterData
  * @typedef {import('conhos-vscode').Status} Status
  * @typedef {import('../connectors/ws.js').default} WS
- * @typedef {import('../connectors/ws.js').Options} Options
- * @typedef {{
- *    error?: string;
- *    message?: string;
- *    code?: number;
- *  }} ResponseBody
- * @typedef {{
- *  command?: 'deploy' | 'logs' | 'exec'
- *  options: Options
- *  }} RequestBody
+ * @typedef {import('../types/interfaces.js').Options} Options
  */
 
 class Server {
@@ -29,7 +22,7 @@ class Server {
    * @param {{
    *  res: http2.Http2ServerResponse<http2.Http2ServerRequest>;
    *  statusCode: http2.Http2ServerResponse<http2.Http2ServerRequest>['statusCode'];
-   *  body: ResponseBody
+   *  body: CliServerResponse
    * }} options
    */
   response({ res, body, statusCode }) {
@@ -72,7 +65,7 @@ class Server {
       });
 
       /**
-       * @type {RequestBody | null}
+       * @type {CliServerRequestBody | null}
        */
       let body = null;
       try {
@@ -84,7 +77,7 @@ class Server {
         return this.response({ res, body: { error: 'Bad request' }, statusCode: 400 });
       }
 
-      const { command } = body;
+      const { command, cwd, options } = body;
       if (!command) {
         return this.response({
           res,
@@ -100,7 +93,7 @@ class Server {
 
       switch (command) {
         case 'deploy':
-          instance = new Deploy({ ssl: true, interractive: false }, true);
+          instance = new Deploy(options || {}, { withoutStart: true, cwd });
           break;
         default:
           console.warn('Default case command', command);

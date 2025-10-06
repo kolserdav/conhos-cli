@@ -33,7 +33,7 @@ import {
 import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants.js';
 
 /**
- * @typedef {import('../connectors/ws.js').Options} Options
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile

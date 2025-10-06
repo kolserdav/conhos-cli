@@ -31,7 +31,7 @@ import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
 
 /**
- * @typedef {import('../connectors/ws.js').Options} Options
+ *@typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../connectors/ws.js').Session} Session

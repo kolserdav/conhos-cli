@@ -12,7 +12,7 @@ import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { console, exit, parseMessageCli } from '../utils/lib.js';
 /**
- * @typedef {import("../connectors/ws.js").Options} Options
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
 

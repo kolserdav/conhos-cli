@@ -34,6 +34,52 @@ export function getEnvVariableRegex(name) {
  */
 
 /**
+ * @typedef {{
+ *  crypt?: boolean;
+ *  remove?: boolean;
+ *  yes?: boolean;
+ *  follow?: boolean;
+ *  isLogin?: boolean;
+ *  timestamps?: boolean;
+ *  since?: string;
+ *  until?: string;
+ *  tail?: number
+ *  clear?: boolean;
+ *  clearCache?: boolean;
+ *  interractive?: boolean;
+ *  ssl?: boolean;
+ *  project?: string;
+ *  delete?: boolean;
+ *  repl?: number;
+ *  name?: string;
+ *  restart?: boolean;
+ *  userHomeFolder?: string;
+ *  list?: boolean
+ *  build?: boolean
+ * }} Options
+ */
+
+/**
+ * @typedef {{
+ *  progress?: {
+ *    status: Status
+ *    args: string[];
+ *  }
+ *  code?: number;
+ *  }} EmitterData
+ * @typedef {{
+ *  command?: 'deploy' | 'logs' | 'exec'
+ *  cwd?: string;
+ *  options?: Options
+ * }} CliServerRequestBody
+ * @typedef {{
+ *    error?: string;
+ *    message?: string;
+ *    code?: number;
+ *  } & EmitterData} CliServerResponse
+ */
+
+/**
  * @template {keyof ExecMessageData} T
  * @typedef {{
  *  type: T;
