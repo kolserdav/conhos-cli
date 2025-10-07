@@ -62,7 +62,7 @@ export function getEnvVariableRegex(name) {
 /**
  * @typedef {{
  *  progress?: {
- *    status: Status
+ *    status: Status | 'log'
  *    args: string[];
  *  }
  *  code?: number;

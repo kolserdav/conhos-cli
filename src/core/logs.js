@@ -199,7 +199,7 @@ export default class Logs extends WS {
           const message = '';
 
           res.on('data', (msg) => {
-            this.console.log(msg.toString());
+            this.console.Log(msg.toString());
           });
 
           res.on('error', (err) => {
