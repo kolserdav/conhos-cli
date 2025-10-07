@@ -13,7 +13,6 @@ import WS from '../connectors/ws.js';
 import {
   console,
   createDockerConfig,
-  exit,
   getPackagePath,
   getRegistryOrigin,
   openBrowser,
@@ -61,7 +60,7 @@ export default class Login extends WS {
    */
   listener() {
     if (!this.conn) {
-      console.warn('Connection ID is missing', 'Need to update the program version');
+      this.console.warn('Connection ID is missing', 'Need to update the program version');
       return;
     }
 
@@ -69,11 +68,11 @@ export default class Login extends WS {
       const authPath = getPackagePath(null, SESSION_FILE_NAME);
       if (existsSync(authPath)) {
         rmSync(authPath);
-        console.info('Session token was deleted', authPath);
+        this.console.info('Session token was deleted', authPath);
       } else {
-        console.warn('Session token file not found', authPath);
+        this.console.warn('Session token file not found', authPath);
       }
-      exit(0);
+      return this.exit(0);
     }
 
     this.conn.on('message', async (d) => {
@@ -109,8 +108,9 @@ export default class Login extends WS {
       if (failedLogin || !sessionExists || !checked) {
         this.openNewSession();
       } else {
-        console.info('You have already signed in', '');
-        exit(0);
+        this.console.info('You have already signed in', '');
+        this.exit(0);
+        return;
       }
     }
   }
@@ -122,9 +122,9 @@ export default class Login extends WS {
    */
   async listenLogin({ token, message, userId }) {
     if (!token) {
-      console.warn("Session token wasn't get from the server", '');
-      console.warn(message, '');
-      exit(1);
+      this.console.warn("Session token wasn't get from the server", '');
+      this.console.warn(message, '');
+      return this.exit(1);
       return;
     }
     /**
@@ -136,7 +136,7 @@ export default class Login extends WS {
       uid: userId,
     };
     if (this.options.crypt) {
-      console.info('Session token will be encrypted with your password');
+      this.console.info('Session token will be encrypted with your password');
 
       const password = await inquirer.promptPassword('Enter a new password');
       const key = crypto.createHash(password);
@@ -147,8 +147,8 @@ export default class Login extends WS {
 
     this.createDockerConfig({ userId, token });
 
-    console.info('Successfully logged in', '');
-    exit(0);
+    this.console.info('Successfully logged in', '');
+    return this.exit(0);
   }
 
   /**
@@ -161,7 +161,7 @@ export default class Login extends WS {
   createDockerConfig({ userId, token }) {
     const domain = getRegistryOrigin();
     if (!existsSync(DOCKER_CONFIG_PATH)) {
-      console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
+      this.console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
       createDockerConfig({ userId, token, domain }, { auths: {} });
       return;
     }
@@ -169,17 +169,17 @@ export default class Login extends WS {
     if (dockerConfig) {
       createDockerConfig({ userId, token, domain }, dockerConfig);
     } else {
-      console.warn('Docker config is not changed', '');
+      this.console.warn('Docker config is not changed', '');
       return;
     }
-    console.info('Docker config changed', DOCKER_CONFIG_PATH);
+    this.console.info('Docker config changed', DOCKER_CONFIG_PATH);
   }
 
   /**
    * @private
    */
   openNewSession() {
-    console.info('Trying to create a new session', '...');
+    this.console.info('Trying to create a new session', '...');
     /** @type {typeof this.sendMessage<'loginServer'>} */ (this.sendMessage)({
       status: 'info',
       type: 'loginServer',
@@ -191,7 +191,7 @@ export default class Login extends WS {
       connId: this.connId,
     });
     const url = `${LOGIN_PAGE}?${QUERY_STRING_CONN_ID}=${this.connId}`;
-    console.info('Login via browser', url);
+    this.console.info('Login via browser', url);
     openBrowser(url);
   }
 }

@@ -2,6 +2,10 @@ import http2 from 'http2';
 process.env.IS_SERVER = 'true';
 import Deploy from '../core/deploy.js';
 import { readFileSync } from 'fs';
+import Exec from '../core/exec.js';
+import Logs from '../core/logs.js';
+import Project from '../core/project.js';
+import Service from '../core/service.js';
 
 /**
  * @typedef {import('../types/interfaces.js').CliServerResponse} CliServerResponse
@@ -77,7 +81,7 @@ class Server {
         return this.response({ res, body: { error: 'Bad request' }, statusCode: 400 });
       }
 
-      const { command, cwd, options } = body;
+      const { command, cwd, options, argument } = body;
       if (!command) {
         return this.response({
           res,
@@ -94,6 +98,32 @@ class Server {
       switch (command) {
         case 'deploy':
           instance = new Deploy(options || {}, { withoutStart: true, cwd });
+          break;
+        case 'exec':
+          if (!argument) {
+            return this.response({
+              res,
+              body: { error: 'Argument property required for exec' },
+              statusCode: 400,
+            });
+          }
+          instance = new Exec(options || {}, { withoutStart: true, cwd }, argument);
+          break;
+        case 'logs':
+          if (!argument) {
+            return this.response({
+              res,
+              body: { error: 'Argument property required for exec' },
+              statusCode: 400,
+            });
+          }
+          instance = new Logs(options || {}, { withoutStart: true, cwd }, argument);
+          break;
+        case 'project':
+          instance = new Project(options || {}, { withoutStart: true, cwd });
+          break;
+        case 'service':
+          instance = new Service(options || {}, { withoutStart: true, cwd });
           break;
         default:
           console.warn('Default case command', command);

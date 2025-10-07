@@ -12,10 +12,11 @@ import Console from 'console';
 import WS from '../connectors/ws.js';
 import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constants.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, exit, parseMessageCli } from '../utils/lib.js';
+import { console, parseMessageCli } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 
 /**
+ * @typedef {import('../connectors/ws.js').WSProps} WSProps
  * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').Status} Status
@@ -40,10 +41,11 @@ export default class Logs extends WS {
   /**
    * @public
    * @param {Options} options
+   * @param {WSProps} props
    * @param {string} serviceName
    */
-  constructor(options, serviceName) {
-    super(options);
+  constructor(options, props, serviceName) {
+    super(options, props);
     this.serviceName = serviceName;
   }
 
@@ -82,8 +84,8 @@ export default class Logs extends WS {
   async getLogs({ data, connId }) {
     const { url, serviceName } = data;
     const res = await this.readLogsRequest({ url, service: serviceName, connId }, data);
-    console.info('End read logs', serviceName);
-    exit(res.code);
+    this.console.info('End read logs', serviceName);
+    return this.exit(res.code);
   }
 
   /**
@@ -95,7 +97,7 @@ export default class Logs extends WS {
     this.num++;
     // Console[status](chalk.whiteBright(text));
     if (last) {
-      // process.exit(0);
+      // process. return this.exit(0);
     }
   }
 
@@ -125,13 +127,13 @@ export default class Logs extends WS {
     }
 
     if (this.options.clear) {
-      console.warn('While logs are cleaning the service will be restart!');
+      this.console.warn('While logs are cleaning the service will be restart!');
       const clearLogs = await inquirer.confirm(
         `Do you want to clear all logs for the service ${this.serviceName}?`,
         false
       );
       if (!clearLogs) {
-        console.warn('Clear logs is skipped');
+        this.console.warn('Clear logs is skipped');
         this.options.clear = false;
       }
     }
@@ -173,7 +175,7 @@ export default class Logs extends WS {
    * }>}
    */
   async readLogsRequest({ url, service, connId }, data) {
-    console.log(`Request of logs "${service}"`, { url });
+    this.console.log(`Request of logs "${service}"`, { url });
 
     const percent = 0;
     const percentUpload = 0;
@@ -197,11 +199,11 @@ export default class Logs extends WS {
           const message = '';
 
           res.on('data', (msg) => {
-            Console.log(msg.toString());
+            this.console.log(msg.toString());
           });
 
           res.on('error', (err) => {
-            console.error('Failed to read logs', err.message);
+            this.console.error('Failed to read logs', err.message);
             resolve({
               status: 'error',
               code: res.statusCode,
@@ -220,13 +222,13 @@ export default class Logs extends WS {
       );
 
       req.on('error', (error) => {
-        console.error('Request failed', { error, url, percent, percentUpload });
-        process.exit(1);
+        this.console.error('Request failed', { error, url, percent, percentUpload });
+        return this.exit(1);
       });
 
       req.on('timeout', () => {
-        console.error('Request timeout exceeded', { url });
-        process.exit(1);
+        this.console.error('Request timeout exceeded', { url });
+        return this.exit(1);
       });
 
       req.on('close', () => {

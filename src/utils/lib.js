@@ -360,20 +360,6 @@ export function parseMessageCli(msg) {
 }
 
 /**
- * @param {number | undefined} code
- * @returns {null}
- */
-export function exit(code = undefined) {
-  if (process.env.IS_SERVER === 'true') {
-    console._eventEmitter.emit('message', { code });
-  } else {
-    process.stdout.write(createLastStreamMessage());
-    process.exit(code);
-  }
-  return null;
-}
-
-/**
  * @typedef {{
  *  auths: Record<string, {
  *    auth: string

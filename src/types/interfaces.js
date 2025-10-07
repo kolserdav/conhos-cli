@@ -68,9 +68,10 @@ export function getEnvVariableRegex(name) {
  *  code?: number;
  *  }} EmitterData
  * @typedef {{
- *  command?: 'deploy' | 'logs' | 'exec'
+ *  command?: 'deploy' | 'logs' | 'exec' | 'project' | 'service'
  *  cwd?: string;
  *  options?: Options
+ *  argument?: string;
  * }} CliServerRequestBody
  * @typedef {{
  *    error?: string;

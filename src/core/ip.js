@@ -10,7 +10,7 @@
  ******************************************************************************************/
 import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, exit, parseMessageCli } from '../utils/lib.js';
+import { console, parseMessageCli } from '../utils/lib.js';
 /**
  * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
@@ -54,8 +54,11 @@ export default class IP extends WS {
    * @param {WSMessageCli<'ipCli'>} msg
    */
   async handleIP({ data }) {
-    console.info('Project node id received:', data.ip || 'IP is undefined please write to support');
-    exit(0);
+    this.console.info(
+      'Project node id received:',
+      data.ip || 'IP is undefined please write to support'
+    );
+    return this.exit(0);
   }
 
   /**

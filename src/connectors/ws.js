@@ -21,11 +21,15 @@ import {
   getFile,
   wait,
   stdoutWriteStart,
-  exit,
 } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import { checkConfig, findVolumeByName, getPosition } from 'conhos-vscode/dist/lib.js';
+import {
+  checkConfig,
+  createLastStreamMessage,
+  findVolumeByName,
+  getPosition,
+} from 'conhos-vscode/dist/lib.js';
 import Yaml from '../utils/yaml.js';
 import {
   PROTOCOL_CLI,
@@ -58,6 +62,10 @@ const crypto = new Crypto();
  */
 
 /**
+ * @typedef {{
+ *  withoutStart?: boolean;
+ *  cwd?: string;
+ * }} WSProps
  * @typedef {'login' | 'deploy'} Protocol
  */
 
@@ -207,10 +215,7 @@ export default class WS {
 
   /**
    * @param {Options} options
-   * @param {{
-   *  withoutStart?: boolean;
-   *  cwd?: string;
-   * }} props
+   * @param {} props
    */
   constructor(options, props = {}) {
     const { withoutStart, cwd } = props;
@@ -283,7 +288,7 @@ export default class WS {
     }
     this.conn.on('error', (error) => {
       this.console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
-      return exit(1);
+      return this.exit(1);
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const ws = this;
@@ -305,7 +310,7 @@ export default class WS {
     });
     this.conn.on('close', (d) => {
       this.console.warn(`Connection closed with code ${d}`, 'Try again later');
-      return exit();
+      return this.exit();
     });
   }
 
@@ -334,7 +339,7 @@ export default class WS {
 
     if ((!data && !this.options.isLogin) || !token) {
       this.console.warn(`Session is not allowed. First run "${PACKAGE_NAME}" login`);
-      return exit(1);
+      return this.exit(1);
     }
 
     this.setToken(token);
@@ -349,11 +354,11 @@ export default class WS {
       if (!checked) {
         console[status](`${CLOUD_LOG_PREFIX} ${message}`, errMess);
         this.console.error('Failed to check session', 'Fix a warning before and try again');
-        return exit(1);
+        return this.exit(1);
       }
     } else if (checked) {
       this.console.info('Successfully logged in', '');
-      return exit(0);
+      return this.exit(0);
     }
 
     this.handler(
@@ -425,7 +430,7 @@ export default class WS {
           `"${PACKAGE_NAME} init" first`,
           'Or try add "-p [project-name]" option'
         );
-        return exit(1);
+        return this.exit(1);
       } else {
         return null;
       }
@@ -434,17 +439,17 @@ export default class WS {
     this.configText = data;
     let config = this.yaml.parse(data);
     if (!config) {
-      return exit(1);
+      return this.exit(1);
     }
 
     const changeRes = await this.changeConfigFileVolumes({ config, userId: this.userId });
     if (changeRes.error) {
       this.console.error(changeRes.error, '');
-      return exit(1);
+      return this.exit(1);
     }
     if (!this.deployData) {
       this.console.error('Deploy data is missing', 'Try again later');
-      return exit(1);
+      return this.exit(1);
     }
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
@@ -479,7 +484,7 @@ export default class WS {
       });
       if (checkExit) {
         await wait(1000);
-        return exit(1);
+        return this.exit(1);
       }
     }
 
@@ -630,7 +635,7 @@ export default class WS {
         if (token === null) {
           this.console.warn("Password is wrong, current session can't be use", '');
           if (!this.options.isLogin) {
-            return exit();
+            return this.exit();
           }
           this.handler({ failedLogin: true });
           return;
@@ -669,7 +674,7 @@ export default class WS {
         `You are not authenticated, run "${PACKAGE_NAME} login" first`,
         `Home dir: "${this.options.userHomeFolder || HOME_DIR}"`
       );
-      return exit(1);
+      return this.exit(1);
     } else {
       this.handler({ failedLogin: false, sessionExists: false });
     }
@@ -796,6 +801,22 @@ export default class WS {
   }
 
   /**
+   * @protected
+   * @param {number | undefined} code
+   * @returns {null}
+   */
+  exit(code = undefined) {
+    this.conn?.close();
+    if (process.env.IS_SERVER === 'true') {
+      this.console._eventEmitter.emit('message', { code });
+    } else {
+      process.stdout.write(createLastStreamMessage());
+      process.exit(code);
+    }
+    return null;
+  }
+
+  /**
    * @private
    * @param {any} data
    */
@@ -803,7 +824,7 @@ export default class WS {
     const interval = setInterval(() => {
       if (this.canClose) {
         clearInterval(interval);
-        return exit(!data ? 1 : data?.code !== undefined ? data.code : 0);
+        return this.exit(!data ? 1 : data?.code !== undefined ? data.code : 0);
       }
     }, 100);
   }

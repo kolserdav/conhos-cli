@@ -28,7 +28,6 @@ import {
   getPHPCommandDefault,
   as,
   parseMessageCli,
-  exit,
 } from '../utils/lib.js';
 import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants.js';
 
@@ -149,7 +148,7 @@ export default class Init extends WS {
             this.project = await this.getProject();
             if (configExists) {
               if (!this.config) {
-                console.warn('Config is missing', '');
+                this.console.warn('Config is missing', '');
                 return;
               }
             }
@@ -198,8 +197,8 @@ export default class Init extends WS {
       }
     );
     if (!cost) {
-      console.error(`"${item.name}" is not allowed here`);
-      exit(1);
+      this.console.error(`"${item.name}" is not allowed here`);
+      this.exit(1);
       return '';
     }
     const { month, hour } = cost;
@@ -217,7 +216,7 @@ export default class Init extends WS {
   getService(service, services) {
     const res = services.find((item) => item.type === service);
     if (!res) {
-      console.error('Failed to find service from the list', {
+      this.console.error('Failed to find service from the list', {
         search: service,
         allowed: services.map((item) => item.type),
       });
@@ -234,7 +233,7 @@ export default class Init extends WS {
       data: { sizes, baseCost, baseValue, services, baseStorageCostHour },
     } = param0;
 
-    console.info("It's adding service to the config file...", this.configFile);
+    this.console.info("It's adding service to the config file...", this.configFile);
 
     /**
      * @type {string | undefined}
@@ -261,8 +260,8 @@ export default class Init extends WS {
         volumes: undefined,
       });
 
-      console.info('Project successfully initialized', this.configFile);
-      exit(0);
+      this.console.info('Project successfully initialized', this.configFile);
+      return this.exit(0);
       return;
     }
 
@@ -286,8 +285,8 @@ export default class Init extends WS {
 
     const serv = this.getService(service, services);
     if (!serv) {
-      console.error('Unexpected error. Service is temporarily unavailable.', '');
-      exit(1);
+      this.console.error('Unexpected error. Service is temporarily unavailable.', '');
+      return this.exit(1);
       return;
     }
     const size = await inquirer.list(
@@ -354,7 +353,7 @@ export default class Init extends WS {
         command = await inquirer.input(GET_SERVICE_MESSAGE, COMMAND_DEFAULT.custom);
         break;
       default:
-        console.log('Default case in create service command', service);
+        this.console.log('Default case in create service command', service);
     }
 
     const environment = (ports || []).map(
@@ -384,8 +383,8 @@ export default class Init extends WS {
     if (addAnother) {
       await this.handleDeployData(param0);
     } else {
-      console.info('Project successfully initialized', this.configFile);
-      exit(0);
+      this.console.info('Project successfully initialized', this.configFile);
+      return this.exit(0);
     }
   }
 
@@ -466,9 +465,9 @@ export default class Init extends WS {
    * @type {WS['handler']}
    */
   async handler() {
-    console.info('Starting init service script...', '');
+    this.console.info('Starting init service script...', '');
     if (!existsSync(this.configFile)) {
-      console.info('Config file is not found, creating...', this.configFile);
+      this.console.info('Config file is not found, creating...', this.configFile);
       /** @type {typeof this.sendMessage<'getDeployData'>} */ this.sendMessage({
         token: this.token,
         type: 'getDeployData',
@@ -483,7 +482,7 @@ export default class Init extends WS {
       });
       return;
     }
-    console.info('Config file is exists', this.configFile);
+    this.console.info('Config file is exists', this.configFile);
     const OVERWRITE = 'Overwrite';
     const ADD_NEW_SERVICE = 'Add new service';
     const rewrite = await inquirer.expand('What do you want to make with old config file', 'H', [
@@ -496,7 +495,7 @@ export default class Init extends WS {
       this.addNewService = true;
     }
     if (this.overwrite) {
-      console.warn(
+      this.console.warn(
         'If you overwrite the config file that all old services will delete',
         'Old services will delete from cloud with all their data, when you run "deploy"'
       );
@@ -505,10 +504,11 @@ export default class Init extends WS {
         false
       );
       if (overwriteConf) {
-        console.info('Config file will be overwrite', this.configFile);
+        this.console.info('Config file will be overwrite', this.configFile);
       } else {
-        console.info('This project has been initialized before');
-        exit(0);
+        this.console.info('This project has been initialized before');
+        this.exit(0);
+        return;
       }
     }
 

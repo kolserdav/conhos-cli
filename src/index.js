@@ -153,7 +153,7 @@ program
   .argument('<service_name>', 'The name of target service')
   .option('--user-home-folder <string>', 'Custom user home folder')
   .action(async (arg, options) => {
-    new Exec(options, arg);
+    new Exec(options, {}, arg);
   });
 
 program
@@ -186,7 +186,7 @@ program
   )
   .argument('<service_name>', 'The name of target service')
   .action(async (arg, options) => {
-    new Logs(options, arg);
+    new Logs(options, {}, arg);
   });
 
 program

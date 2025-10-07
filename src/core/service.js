@@ -1,6 +1,6 @@
 import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, exit, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 
 /**
  * @typedef {import('../types/interfaces.js').Options} Options
@@ -57,7 +57,7 @@ export default class Service extends WS {
     }
 
     if (this.options.name && this.options.restart) {
-      console.info(`Try to restart service '${this.options.name}' in project:'`, project);
+      this.console.info(`Try to restart service '${this.options.name}' in project:'`, project);
       this.sendMessage({
         token: this.token,
         type: 'serviceRestartServer',
@@ -74,7 +74,7 @@ export default class Service extends WS {
       return;
     }
 
-    console.warn('No command', '');
-    exit(undefined);
+    this.console.warn('No command', '');
+    this.exit(undefined);
   }
 }

@@ -15,7 +15,7 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import { as, exit, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { as, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
   CLOUD_LOG_PREFIX,
@@ -39,7 +39,11 @@ import {
   VOLUME_LOCAL_REGEX,
 } from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
-import { findVolumeByName, isCustomService } from 'conhos-vscode/dist/lib.js';
+import {
+  createLastStreamMessage,
+  findVolumeByName,
+  isCustomService,
+} from 'conhos-vscode/dist/lib.js';
 import { readFile, writeFile } from 'fs/promises';
 import { ENV_VARIABLE_REGEX, ENV_VARIABLES_CLEAN_REGEX } from '../types/interfaces.js';
 
@@ -211,7 +215,7 @@ export default class Deploy extends WS {
           console[status](message, serviceName, url);
           if (status === 'error') {
             this.console.warn(`Failed to upload volume for service "${key}"`, filePath);
-            return exit(1);
+            return this.exit(1);
           }
         }
         this.canClose = true;
@@ -329,7 +333,7 @@ export default class Deploy extends WS {
         });
     } else {
       this.console.info('Operation exited', 'Deletion canceled by user');
-      return exit(1);
+      return this.exit(1);
     }
   }
 
@@ -581,7 +585,7 @@ export default class Deploy extends WS {
     stdoutWriteStart('');
     console[status](`${message}: ${service}|${file}`, filePath);
     if (status === 'error') {
-      return exit(1);
+      return this.exit(1);
     }
 
     /** @type {typeof this.sendMessage<'deployEndServer'>} */ (this.sendMessage)({
@@ -680,7 +684,7 @@ export default class Deploy extends WS {
     if (!existsSync(targetDirPath)) {
       this.console.warn('Target dir is missing', targetDirPath);
       this.console.error('Exited with code 2', 'Fix warning before and try again');
-      return exit(1);
+      return this.exit(1);
     }
 
     const cacheChanged = new CacheChanged({
@@ -717,7 +721,7 @@ export default class Deploy extends WS {
           'Failed cache',
           `Remove folder ~/.${PACKAGE_NAME}/${this.project}/ and try again`
         );
-        return exit(1);
+        return this.exit(1);
       }
     }
     const _files = await this.createCache(cacheChanged, true);
@@ -982,13 +986,13 @@ export default class Deploy extends WS {
           `url: ${url}, percent: ${percent}, percentUpload: ${percentUpload}`
         );
         this.console.error('Request failed', error);
-        return exit(1);
+        return this.exit(1);
       });
 
       req.on('timeout', () => {
         stdoutWriteStart('');
         this.console.error('Request timeout exceeded', url);
-        return exit(1);
+        return this.exit(1);
       });
 
       req.on('close', () => {

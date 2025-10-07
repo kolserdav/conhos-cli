@@ -3,7 +3,6 @@ import chalk from 'chalk';
 import WS from '../connectors/ws.js';
 import {
   console,
-  exit,
   getRegistryAuthOrigin,
   getRegistryOrigin,
   getRegistryProxyOrigin,
@@ -55,18 +54,18 @@ export default class Registry extends WS {
    */
   checkOptions() {
     if (!this.options.list && !this.options.build) {
-      console.warn('One of options are required', '--build | --list');
-      exit(2);
+      this.console.warn('One of options are required', '--build | --list');
+      return this.exit(2);
       return;
     }
     if (this.options.build && this.options.list) {
-      console.warn('Two options are not allowed to use together', '--build & --list');
-      exit(2);
+      this.console.warn('Two options are not allowed to use together', '--build & --list');
+      return this.exit(2);
       return;
     }
     if (this.options.build && !this.options.name) {
-      console.warn('Option "name" is required for build', '-n|--name [string]');
-      exit(2);
+      this.console.warn('Option "name" is required for build', '-n|--name [string]');
+      return this.exit(2);
       return;
     }
   }
@@ -99,8 +98,8 @@ export default class Registry extends WS {
    */
   handler({ sessionExists }) {
     if (!sessionExists) {
-      console.info('Session is no exists', 'Run "conhos login" first');
-      exit(2);
+      this.console.info('Session is no exists', 'Run "conhos login" first');
+      this.exit(2);
       return;
     }
     if (this.options.list) {
@@ -117,15 +116,15 @@ export default class Registry extends WS {
   async list() {
     const dockerConfig = readDockerConfig();
     if (!dockerConfig) {
-      console.warn('Unauthorized', "Run 'conhos login' first");
-      exit(1);
+      this.console.warn('Unauthorized', "Run 'conhos login' first");
+      this.exit(1);
       return;
     }
 
     const registryOrigin = getRegistryOrigin();
     if (!dockerConfig.auths[registryOrigin]) {
-      console.warn('Unauthorized', "Run 'conhos login' first");
-      exit(1);
+      this.console.warn('Unauthorized', "Run 'conhos login' first");
+      this.exit(1);
       return;
     }
 
@@ -138,8 +137,8 @@ export default class Registry extends WS {
 
     const auth = await this.auth({ username, password });
     if (auth.error) {
-      console.error('Failed to auth in registry', auth.error);
-      exit(1);
+      this.console.error('Failed to auth in registry', auth.error);
+      this.exit(1);
       return;
     }
     const res = await new Promise((resolve) => {
@@ -157,13 +156,13 @@ export default class Registry extends WS {
         });
     });
     if (res.error) {
-      console.error('Failed to get repositories', res.error);
-      exit(1);
+      this.console.error('Failed to get repositories', res.error);
+      this.exit(1);
       return;
     }
-    console.info('Repositories:', '', '');
-    Console.log(`${res.repositories.join('\n')}`);
-    exit(0);
+    this.console.info('Repositories:', '', '');
+    this.console.log(`${res.repositories.join('\n')}`);
+    this.exit(0);
   }
 
   /**
@@ -193,7 +192,7 @@ export default class Registry extends WS {
       cmd.stdout.on('data', (d) => {
         const mess = d.toString().trim();
         if (mess) {
-          Console.log(mess);
+          this.console.log(mess);
         }
       });
 
@@ -211,13 +210,13 @@ export default class Registry extends WS {
           });
         }
         if (mess) {
-          Console.warn(mess);
+          this.console.warn(mess);
         }
       });
 
       cmd.on('error', (e) => {
-        console.error('Failed to build image', e.message);
-        exit(1);
+        this.console.error('Failed to build image', e.message);
+        return this.exit(1);
       });
 
       cmd.on('exit', (code) => {
@@ -226,11 +225,11 @@ export default class Registry extends WS {
     });
 
     if (code !== 0) {
-      console.warn('Build exit with non success code, see errors above', '');
+      this.console.warn('Build exit with non success code, see errors above', '');
     } else {
-      console.info('Successfully build and upload image', name);
+      this.console.info('Successfully build and upload image', name);
     }
-    exit(code);
+    return this.exit(code);
   }
 
   /**
