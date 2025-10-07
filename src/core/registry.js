@@ -1,8 +1,6 @@
-import Console from 'console';
 import chalk from 'chalk';
 import WS from '../connectors/ws.js';
 import {
-  console,
   getRegistryAuthOrigin,
   getRegistryOrigin,
   getRegistryProxyOrigin,
@@ -161,7 +159,7 @@ export default class Registry extends WS {
       return;
     }
     this.console.info('Repositories:', '', '');
-    this.console.log(`${res.repositories.join('\n')}`);
+    this.console.Log(`${res.repositories.join('\n')}`);
     this.exit(0);
   }
 
@@ -192,7 +190,7 @@ export default class Registry extends WS {
       cmd.stdout.on('data', (d) => {
         const mess = d.toString().trim();
         if (mess) {
-          this.console.log(mess);
+          this.console.Log(mess);
         }
       });
 
@@ -210,7 +208,7 @@ export default class Registry extends WS {
           });
         }
         if (mess) {
-          this.console.warn(mess);
+          this.console.Warn(mess);
         }
       });
 

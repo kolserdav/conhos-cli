@@ -1,6 +1,6 @@
 import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 
 /**
  * @typedef {import('../types/interfaces.js').Options} Options

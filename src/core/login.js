@@ -11,7 +11,6 @@
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import WS from '../connectors/ws.js';
 import {
-  console,
   createDockerConfig,
   getPackagePath,
   getRegistryOrigin,

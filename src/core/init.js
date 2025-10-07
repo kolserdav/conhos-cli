@@ -21,7 +21,6 @@ import {
 import { computeCostService, isCustomService, isCommonService } from 'conhos-vscode/dist/lib.js';
 import {
   getConfigFilePath,
-  console,
   getPackageName,
   getRustCommandDefault,
   filterUnique,

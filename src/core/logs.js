@@ -8,11 +8,10 @@
  * Copyright: kolserdav, All rights reserved (c)
  * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
-import Console from 'console';
 import WS from '../connectors/ws.js';
 import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constants.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, parseMessageCli } from '../utils/lib.js';
+import { parseMessageCli } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 
 /**

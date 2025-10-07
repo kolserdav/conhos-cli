@@ -13,9 +13,8 @@ import readline from 'readline';
 import WS from '../connectors/ws.js';
 import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { console, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
-import Console from 'console';
 import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 
 /**
@@ -114,7 +113,7 @@ export default class Exec extends WS {
           this.showStartLine();
         } else {
           stdoutWriteStart('');
-          this.console.log(str.replace(/\n$/, ''));
+          this.console.Log(str.replace(/\n$/, ''));
         }
       }
     });

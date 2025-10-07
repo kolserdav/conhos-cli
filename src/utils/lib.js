@@ -198,7 +198,27 @@ export const console = {
       Console.log(args.join(' '));
     }
   },
-
+  /**
+   *
+   * @param  {...any} args
+   * @returns {void}
+   */
+  Warn: (...args) => {
+    if (process.env.IS_SERVER === 'true') {
+      /**
+       * @type {EmitterData}
+       */
+      const data = {
+        progress: {
+          status: 'log',
+          args,
+        },
+      };
+      console._eventEmitter.emit('message', data);
+    } else {
+      Console.warn(args.join(' '));
+    }
+  },
   _eventEmitter: new EventEmitter(),
 };
 
