@@ -72,6 +72,9 @@ export function getEnvVariableRegex(name) {
  *  cwd?: string;
  *  options?: Options
  *  argument?: string;
+ *  event?: {
+ *    command: string;
+ *  }
  * }} CliServerRequestBody
  * @typedef {{
  *    error?: string;

@@ -56,103 +56,98 @@ class Server {
         return this.response({ res, body: { error: 'Method not allowed' }, statusCode: 405 });
       }
 
-      let bodyChunks = '';
-
-      req.on('data', (chunk) => {
-        bodyChunks += chunk.toString();
-      });
-
-      await new Promise((resolve) => {
-        req.on('end', () => {
-          resolve(0);
-        });
-      });
-
-      /**
-       * @type {CliServerRequestBody | null}
-       */
-      let body = null;
-      try {
-        body = JSON.parse(bodyChunks);
-      } catch (err) {
-        console.error('Failed to parse body', err);
-      }
-      if (body === null) {
-        return this.response({ res, body: { error: 'Bad request' }, statusCode: 400 });
-      }
-
-      const { command, cwd, options, argument } = body;
-      if (!command) {
-        return this.response({
-          res,
-          body: { error: 'Command property required in body' },
-          statusCode: 400,
-        });
-      }
-
       /**
        * @type {WS | null}
        */
       let instance = null;
-
-      switch (command) {
-        case 'deploy':
-          instance = new Deploy(options || {}, { withoutStart: true, cwd });
-          break;
-        case 'exec':
-          if (!argument) {
-            return this.response({
-              res,
-              body: { error: 'Argument property required for exec' },
-              statusCode: 400,
-            });
-          }
-          instance = new Exec(options || {}, { withoutStart: true, cwd }, argument);
-          break;
-        case 'logs':
-          if (!argument) {
-            return this.response({
-              res,
-              body: { error: 'Argument property required for exec' },
-              statusCode: 400,
-            });
-          }
-          instance = new Logs(options || {}, { withoutStart: true, cwd }, argument);
-          break;
-        case 'project':
-          instance = new Project(options || {}, { withoutStart: true, cwd });
-          break;
-        case 'service':
-          instance = new Service(options || {}, { withoutStart: true, cwd });
-          break;
-        default:
-          console.warn('Default case command', command);
-      }
-
-      /**
-       * @type {number | undefined}
-       */
-      let code = undefined;
-      if (instance) {
-        code = await new Promise((resolve) => {
+      const code = await new Promise((resolve) => {
+        req.on('data', (chunk) => {
           /**
-           *
-           * @param {EmitterData} data
-           * @returns
+           * @type {CliServerRequestBody | null}
            */
-          const handler = (data) => {
-            const { code } = data;
-            if (code !== undefined) {
-              instance.console._eventEmitter.removeListener('message', handler);
-              resolve(code);
-              return;
-            }
-            res.write(JSON.stringify(data) + '\n');
-          };
-          instance.console._eventEmitter.on('message', handler);
-          instance.start();
+          let body = null;
+          try {
+            body = JSON.parse(chunk.toString());
+          } catch (err) {
+            console.error('Failed to parse body', err);
+          }
+
+          if (body === null) {
+            return this.response({ res, body: { error: 'Bad request' }, statusCode: 400 });
+          }
+
+          const { command, cwd, options, argument, event } = body;
+          if (!command) {
+            return this.response({
+              res,
+              body: { error: 'Command property required in body' },
+              statusCode: 400,
+            });
+          }
+
+          switch (command) {
+            case 'deploy':
+              instance = new Deploy(options || {}, { withoutStart: true, cwd });
+              break;
+            case 'exec':
+              if (!event) {
+                if (!argument) {
+                  return this.response({
+                    res,
+                    body: { error: 'Argument property required for exec' },
+                    statusCode: 400,
+                  });
+                }
+                instance = new Exec(options || {}, { withoutStart: true, cwd }, argument);
+              } else if (instance?.rl) {
+                console.info(1, event.command, instance.rl);
+                instance.rl.emit('line', event.command);
+              }
+              break;
+            case 'logs':
+              if (!argument) {
+                return this.response({
+                  res,
+                  body: { error: 'Argument property required for exec' },
+                  statusCode: 400,
+                });
+              }
+              instance = new Logs(options || {}, { withoutStart: true, cwd }, argument);
+              break;
+            case 'project':
+              instance = new Project(options || {}, { withoutStart: true, cwd });
+              break;
+            case 'service':
+              instance = new Service(options || {}, { withoutStart: true, cwd });
+              break;
+            default:
+              console.warn('Default case command', command);
+          }
+
+          if (instance && !event) {
+            /**
+             *
+             * @param {EmitterData} data
+             * @returns
+             */
+            const handler = (data) => {
+              const { code } = data;
+              if (code !== undefined) {
+                if (instance) {
+                  instance.console._eventEmitter.removeListener('message', handler);
+                } else {
+                  console.error('Instance not found in handler', '');
+                }
+                resolve(code);
+                return;
+              }
+              res.write(JSON.stringify(data) + '\n');
+            };
+            instance.console._eventEmitter.on('message', handler);
+            instance.start();
+          }
         });
-      }
+      });
 
       return this.response({
         res,

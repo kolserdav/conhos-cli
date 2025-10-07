@@ -122,6 +122,12 @@ export default class WS {
 
   /**
    * @public
+   * @type {import('readline').Interface | undefined}
+   */
+  rl = undefined;
+
+  /**
+   * @public
    */
   console = console;
 
@@ -215,7 +221,7 @@ export default class WS {
 
   /**
    * @param {Options} options
-   * @param {} props
+   * @param {WSProps} props
    */
   constructor(options, props = {}) {
     const { withoutStart, cwd } = props;

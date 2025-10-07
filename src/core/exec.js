@@ -119,19 +119,19 @@ export default class Exec extends WS {
     });
 
     this.showStartLine();
-    const rl = readline.createInterface({
+    this.rl = readline.createInterface({
       // @ts-ignore
       input: process.stdin,
       output: this.options.interractive ? process.stdout : undefined,
       terminal: true,
     });
 
-    rl.on('line', (input) => {
+    this.rl.on('line', (input) => {
       this.history.push();
       socket.send(input);
     });
 
-    rl.on('close', () => {
+    this.rl.on('close', () => {
       stdoutWriteStart('');
       this.console.info('Terminal exited', this.serviceName);
       return this.exit(0);
