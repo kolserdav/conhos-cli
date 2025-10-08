@@ -16,8 +16,18 @@ import Service from '../core/service.js';
  * @typedef {import('../types/interfaces.js').Options} Options
  */
 
-class Server {
-  constructor() {
+export default class Server {
+  /**
+   * @private
+   * @type {Options}
+   */
+  options;
+
+  /**
+   * @param {Options} options
+   */
+  constructor(options) {
+    this.options = options;
     this.start();
   }
 
@@ -163,5 +173,3 @@ class Server {
     });
   }
 }
-
-new Server();

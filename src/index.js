@@ -23,6 +23,7 @@ import Project from './core/project.js';
 import Service from './core/service.js';
 import Registry from './core/registry.js';
 import { argv } from 'process';
+import Server from './server/server.js';
 
 process.on('SIGABRT', (sig) => {
   console.warn('Received abort signal', sig);
@@ -207,6 +208,13 @@ program
   .option('-n, --name <string>', 'repository name')
   .action(async (options) => {
     new Registry(options);
+  });
+
+program
+  .command('server')
+  .usage('[options] <command> [options]')
+  .action(async (options) => {
+    new Server(options);
   });
 
 program.parse();
