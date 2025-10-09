@@ -22,7 +22,6 @@ import {
   CONFIG_FILE_NAME,
   CONFIG_FILE_NAME_A,
   CWD,
-  METADATA_FILE_NAME,
   PACKAGE_NAME,
   UPLOAD_CHUNK_SIZE,
   UPLOAD_PERCENT_DIFF,
@@ -616,12 +615,6 @@ export default class Deploy extends WS {
       return;
     }
 
-    if (this.options.clearCache) {
-      await this.removeMetadata();
-    }
-
-    await this.checkMetadata();
-
     const { name, services } = this.config;
 
     const packageProjectPath = getPackagePath(this.cwd || null, name);
@@ -748,19 +741,6 @@ export default class Deploy extends WS {
     }
 
     return { files: this.filterUnique(files), needUpload, deleted: this.filterUnique(deleted) };
-  }
-
-  async removeMetadata() {
-    const metadataPath = this.getMetadataFilePath();
-    const metadata = await this.readMetadataFile(metadataPath);
-    if (!metadata) {
-      return;
-    }
-    const _metadata = structuredClone(metadata);
-
-    delete _metadata.projects[CWD];
-
-    await this.writeMetadataFile(metadataPath, _metadata);
   }
 
   /**
@@ -1001,136 +981,6 @@ export default class Deploy extends WS {
         clearInterval(interval2);
       });
     });
-  }
-
-  /**
-   * @private
-   */
-  getMetadataFilePath() {
-    return getPackagePath(this.cwd || null, METADATA_FILE_NAME);
-  }
-
-  /**
-   * @private
-   * @param {string} metadataFilePath
-   * @returns {Promise<Metadata | null>}
-   */
-  async readMetadataFile(metadataFilePath) {
-    const res = await readFile(metadataFilePath).catch((error) => {
-      this.console.error('Failed to read metadata file', error);
-    });
-    /**
-     * @type {Metadata | null}
-     */
-    if (!res) {
-      return null;
-    }
-    let data = null;
-    try {
-      data = JSON.parse(res.toString());
-    } catch (error) {
-      this.console.error('Failed to parse metadata file', { error, metadataFilePath });
-    }
-    return data;
-  }
-
-  /**
-   * @private
-   * @param {string} metadataFilePath
-   * @param {Metadata} data
-   */
-  async writeMetadataFile(metadataFilePath, data) {
-    await writeFile(metadataFilePath, JSON.stringify(data)).catch((error) => {
-      this.console.error('Failed to write metadata file', error);
-    });
-  }
-
-  /**
-   * @private
-   * @returns
-   */
-  async checkMetadata() {
-    if (!this.config) {
-      return;
-    }
-    const metadataFilePath = this.getMetadataFilePath();
-    /**
-     * @type {Metadata | null}
-     */
-    let metadata = null;
-    if (existsSync(metadataFilePath)) {
-      metadata = await this.readMetadataFile(metadataFilePath);
-    }
-
-    if (metadata) {
-      const metadataProject = metadata.projects[CWD];
-      if (metadataProject) {
-        this.checkRenameProject({ metadataProject });
-
-        const deletedServices = this.checkMetadataDeletedservices({ metadataProject });
-        deletedServices.forEach((item) => {
-          delete metadata.projects[CWD].services[item];
-        });
-
-        await this.writeMetadataFile(metadataFilePath, metadata);
-      } else {
-        metadata.projects[CWD] = this.config;
-        await this.writeMetadataFile(metadataFilePath, metadata);
-      }
-    } else {
-      await this.writeMetadataFile(metadataFilePath, {
-        projects: {
-          [CWD]: this.config,
-        },
-      });
-    }
-  }
-
-  /**
-   * @private
-   * @param {{
-   *  metadataProject: ConfigFile
-   * }} param0
-   * @returns
-   */
-  checkRenameProject({ metadataProject }) {
-    if (!this.config) {
-      return;
-    }
-    const oldName = metadataProject.name;
-
-    if (metadataProject.name !== this.config.name) {
-      this.console.warn('Ingnoring to rename project', `${oldName} != ${this.config.name}`);
-      this.config.name = oldName;
-      this.project = oldName;
-    }
-  }
-
-  /**
-   * @private
-   * @param {{
-   *  metadataProject: ConfigFile
-   * }} param0
-   * @returns
-   */
-  checkMetadataDeletedservices({ metadataProject }) {
-    /**
-     * @type {string[]}
-     */
-    const res = [];
-    if (!this.config) {
-      return res;
-    }
-    Object.keys(metadataProject.services).forEach((item) => {
-      if (!this.config) {
-        return;
-      }
-      if (!this.config.services[item]) {
-        res.push(item);
-      }
-    });
-
-    return res;
   }
 
   /**

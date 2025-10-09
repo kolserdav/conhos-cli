@@ -85,10 +85,6 @@ program
     'If you are asked to confirm the deletion of the service, the script will automatically answer "yes"'
   )
   .option('--user-home-folder <string>', 'Custom user home folder')
-  .option(
-    '-c, --clear-cache',
-    'Clear cache and metadata before upload to upload all files, or to create a new project in old dir'
-  )
   .option('--no-ssl', 'Do not create SSL certificate')
   .action(async (options) => {
     new Deploy(options);
