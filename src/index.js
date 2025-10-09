@@ -199,21 +199,38 @@ program
     new Init(options);
   });
 
-program
+const registryCommand = program
   .command('registry')
   .usage('[options] <command> [options]')
   .description('Container registry operations')
-  .option('-l, --list', 'show all remote images')
-  .option('-b, --build', 'build and push a new image')
-  .option('-n, --name <string>', 'repository name')
   .action(async (options) => {
-    new Registry(options);
+    new Registry(null, options);
+  });
+
+registryCommand
+  .command('build')
+  .description('Build and push a new image')
+  .option('-n, --name <string>', 'repository name')
+  .option('-f, --file <string>', 'Dockerfile [Default ./Dockerfile]')
+  .option('--cache-dir <string>', 'Local cached directory [Default /tmp]')
+  .option('-c, --context <string>', 'Build context dir [Default .]')
+  .option('--no-cache', 'Do not use cache')
+  .action(async (options) => {
+    new Registry('build', options);
+  });
+
+registryCommand
+  .command('list')
+  .description('Show all remote images')
+  .action(async (options) => {
+    new Registry('list', options);
   });
 
 program
   .command('server')
   .usage('[options] <command> [options]')
   .action(async (options) => {
+    process.env.IS_SERVER = 'true';
     new Server(options);
   });
 

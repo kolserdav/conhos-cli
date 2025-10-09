@@ -116,6 +116,11 @@ export class WSInterface {
 export default class WS {
   /**
    * @protected
+   */
+  withoutCheck = false;
+
+  /**
+   * @protected
    * @type {string | undefined}
    */
   cwd;
@@ -460,7 +465,7 @@ export default class WS {
     config = changeRes.config;
     const volumes = changeRes.volumes || {};
 
-    if (!withoutCheck) {
+    if (!this.withoutCheck && !withoutCheck) {
       let checkConfigGenerator = checkConfig(
         { config, configText: data },
         { deployData: this.deployData, projectDelete: this.options.delete || false, fast: true }

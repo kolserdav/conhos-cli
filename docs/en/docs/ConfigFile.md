@@ -101,25 +101,13 @@ image: node
 
 Supported service types: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin' | 'custom'_
 
-#### Custom container [![anchor](https://conhos.ru/images/icons/link.svg)](#custom-container)
+#### Build image from Dockerfile [![anchor](https://conhos.ru/images/icons/link.svg)](#service-custom-image)
 
-To run a service based on any of the images on Docker Hub, you need to specify `custom` and in `version` specify _'author/name:version'_ of the image.
-
-```yml
-image: custom
-version: dart # Will be installed from the official Dart repository latest (default) version
-```
-
-#### Build container from Dockerfile [![anchor](https://conhos.ru/images/icons/link.svg)](#custom-container-build)
-
-Build a custom image for the service from `Dockerfile`. Only works with the `conhos deploy` command.
-
-> After changing the Dockerfile in the repository, if you want the container to rebuild, you need to run the `deploy` command manually.
+> To use this option, you must first build a custom image using the command `conhos registry build -n my-image`
 
 ```yml
-image: custom # This value is required to use build
-build:
-  dockerfile: Dockerfile # Relative path to Dockerfile in the context of "project-path/pwd"
+image: custom # This value is required to use customImage
+customImage: my-image:latest # Name and tag of the custom image
 ```
 
 ### Service size [![anchor](https://conhos.ru/images/icons/link.svg)](#service-size)

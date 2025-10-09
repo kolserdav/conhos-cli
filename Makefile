@@ -3,6 +3,8 @@ DEPLOYMENT_PROD = cli
 PREFIX = conhos
 NAME = cli-dev
 NAME_PROD = cli
+DOCKERFILE = Dockerfile.dev
+DOCKERFILE_PROD = Dockerfile
 
 deploy:
 	make build
@@ -11,9 +13,9 @@ deploy-prod:
 	make build-prod
 	make restart-prod
 build:
-	docker buildx build --build-context conhos-vscode=../conhos-vscode -f dockerfiles/Dockerfile.dev --tag $(REGISTRY_URL)/$(PREFIX)/$(NAME):latest --output="type=registry" .
+	docker buildx build --build-context conhos-vscode=../conhos-vscode -f dockerfiles/$(DOCKERFILE) --tag $(REGISTRY_URL)/$(PREFIX)/$(NAME):latest --output="type=registry" .
 build-prod:
-	make build NAME=$(NAME_PROD)
+	make build NAME=$(NAME_PROD) DOCKERFILE=$(DOCKERFILE_PROD)
 restart:
 	kubectl rollout restart -n conhos-dev deploy $(DEPLOYMENT)
 restart-prod:

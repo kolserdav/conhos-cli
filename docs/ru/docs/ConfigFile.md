@@ -102,25 +102,13 @@ image: node
 
 Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin' | 'custom'_
 
-#### Кастомный контейнер [![якорь](https://conhos.ru/images/icons/link.svg)](#custom-container)
+#### Собрать контейнер из Dockerfile [![якорь](https://conhos.ru/images/icons/link.svg)](#service-custom-image)
 
-Чтобы запустить сервис на основе любого из образов на Docker Hub нужно указать `custom` а в `version` прописать _'автор/название:версия'_ образа.
-
-```yml
-image: custom
-version: dart # Будет устаовлено из официального репозитория Dart версия latest (по умолчанию)
-```
-
-#### Собрать контейнер из Dockerfile [![якорь](https://conhos.ru/images/icons/link.svg)](#custom-container-build)
-
-Собрать специальный образ для сервиса из `Dockerfile`. Срабатывает только при команде `conhos deploy`.
-
-> После изменения Dockerfile в репозитории если нужно чтобы контейнер пересобрался, нужно запустить команду `deploy` вручную.
+> Для использования данной опции необходимо предварительно собрать кастомный контейнер с помощью команды `conhos registry build -n my-image`
 
 ```yml
-image: custom # Обязательно такое значение для использования build
-build:
-  dockerfile: Dockerfile # Относительный путь до Dockerfile в контексте "project-path/pwd"
+image: custom # Обязательно такое значение для использования customImage
+customImage: my-image:latest # Название и тег кастомного образа
 ```
 
 ### Размер сервиса [![якорь](https://conhos.ru/images/icons/link.svg)](#service-size)

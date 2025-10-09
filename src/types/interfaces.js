@@ -56,6 +56,10 @@ export function getEnvVariableRegex(name) {
  *  userHomeFolder?: string;
  *  list?: boolean
  *  build?: boolean
+ *  file?: string;
+ *  context?: string;
+ *  cacheDir?: string;
+ *  cache?: boolean;
  * }} Options
  */
 

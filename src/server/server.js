@@ -1,5 +1,4 @@
 import http2 from 'http2';
-process.env.IS_SERVER = 'true';
 import Deploy from '../core/deploy.js';
 import { readFileSync } from 'fs';
 import Exec from '../core/exec.js';

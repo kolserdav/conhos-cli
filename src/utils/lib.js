@@ -454,13 +454,13 @@ export function getRegistryOrigin() {
 }
 
 export function getRegistryDomain() {
-  return `${REGISTRY_SUBDOMAIN}.${getAppDomain()}`;
+  return `${REGISTRY_SUBDOMAIN}.conhos.ru`;
 }
 
 export function getRegistryProxyOrigin() {
-  return `https://${REGISTRY_PROXY_SUBDOMAIN}.${getAppDomain()}`;
+  return `https://${REGISTRY_PROXY_SUBDOMAIN}.conhos.ru`;
 }
 
 export function getRegistryAuthOrigin() {
-  return `https://${REGISTRY_AUTH_SUBDOMAIN}.${getAppDomain()}`;
+  return `https://${REGISTRY_AUTH_SUBDOMAIN}.conhos.ru`;
 }

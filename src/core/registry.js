@@ -9,6 +9,9 @@ import {
   getRegistryDomain,
 } from '../utils/lib.js';
 import { spawn } from 'child_process';
+import { tmpdir } from 'os';
+import { resolve } from 'path';
+import { mkdir } from 'fs/promises';
 
 /**
  * @typedef {import('../types/interfaces.js').Options} Options
@@ -36,14 +39,22 @@ import { spawn } from 'child_process';
  *   expires_in: number;
  *   issued_at: string;
  * }} RegistryAuthResponse
+ * @typedef { 'build' | 'list' } RegistrySubcommand
  */
 
 export default class Registry extends WS {
   /**
+   * @type {RegistrySubcommand | null}
+   */
+  subCommand = null;
+
+  /**
+   * @param {RegistrySubcommand | null} subCommand
    * @param {Options} options
    */
-  constructor(options) {
+  constructor(subCommand, options) {
     super(options);
+    this.subCommand = subCommand;
     this.checkOptions();
   }
 
@@ -51,17 +62,7 @@ export default class Registry extends WS {
    * @private
    */
   checkOptions() {
-    if (!this.options.list && !this.options.build) {
-      this.console.warn('One of options are required', '--build | --list');
-      return this.exit(2);
-      return;
-    }
-    if (this.options.build && this.options.list) {
-      this.console.warn('Two options are not allowed to use together', '--build & --list');
-      return this.exit(2);
-      return;
-    }
-    if (this.options.build && !this.options.name) {
+    if (this.subCommand === 'build' && !this.options.name) {
       this.console.warn('Option "name" is required for build', '-n|--name [string]');
       return this.exit(2);
       return;
@@ -69,6 +70,7 @@ export default class Registry extends WS {
   }
 
   listener() {
+    this.withoutCheck = true;
     if (!this.conn) {
       return;
     }
@@ -100,10 +102,15 @@ export default class Registry extends WS {
       this.exit(2);
       return;
     }
-    if (this.options.list) {
-      this.list();
-    } else if (this.options.build) {
-      this.build();
+    switch (this.subCommand) {
+      case 'build':
+        this.build();
+        break;
+      case 'list':
+        this.list();
+        break;
+      default:
+        this.console.warn('Default command not implement', this.subCommand);
     }
   }
 
@@ -169,47 +176,40 @@ export default class Registry extends WS {
   async build() {
     const registryUrl = getRegistryDomain();
     const { name } = this.options;
-    const code = await new Promise((resolve) => {
-      const cmd = spawn('docker', [
-        'buildx',
-        'build',
-        '-f',
-        'Dockerfile',
-        '--platform',
-        'linux/amd64',
-        '--tag',
-        `${registryUrl}/${this.userId}/${name}:latest`,
+    if (!name) {
+      return;
+    }
+    const tmpDir = tmpdir();
+    const cacheDir = resolve(tmpDir, name);
+    await mkdir(cacheDir, { recursive: true }).catch((err) => {
+      this.console.error('Failed to create tmp dir for cache', err);
+    });
+    let command = [
+      'buildx',
+      'build',
+      '-f',
+      this.options.file || 'Dockerfile',
+      '--platform',
+      'linux/amd64',
+      '--tag',
+      `${registryUrl}/${this.userId}/${name}:latest`,
+    ];
+    if (this.options.cache) {
+      command = command.concat([
         '--cache-from',
-        `type=registry,ref=${registryUrl}/${this.userId}/${name}:cache`,
+        `type=local,src=${this.options.cacheDir || cacheDir}`,
         '--cache-to',
-        `type=registry,ref=${registryUrl}/${this.userId}/${name}:cache,mode=max`,
-        '--output',
-        '"type=registry"',
-        '.',
+        `type=local,dest=${this.options.cacheDir || cacheDir},mode=max`,
       ]);
-      cmd.stdout.on('data', (d) => {
-        const mess = d.toString().trim();
-        if (mess) {
-          this.console.Log(mess);
-        }
-      });
-
-      cmd.stderr.on('data', (d) => {
-        let mess = d.toString().trim();
-        /**
-         * @type {string[][]}
-         */
-        const errors = Array.from(mess.matchAll(/ERROR: (.+)/g));
-        if (errors) {
-          errors.forEach((item) => {
-            item.forEach((_item) => {
-              mess = mess.replace(_item, chalk.red(_item));
-            });
-          });
-        }
-        if (mess) {
-          this.console.Warn(mess);
-        }
+    }
+    command = command.concat(['--output', '"type=registry"', this.options.context || '.']);
+    const code = await new Promise((resolve) => {
+      const cmd = spawn('docker', command, {
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          FORCE_COLOR: '1',
+        },
       });
 
       cmd.on('error', (e) => {
@@ -217,8 +217,8 @@ export default class Registry extends WS {
         return this.exit(1);
       });
 
-      cmd.on('exit', (code) => {
-        resolve(code || 0);
+      cmd.on('close', (code) => {
+        resolve(code);
       });
     });
 
