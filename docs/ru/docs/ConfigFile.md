@@ -102,9 +102,9 @@ image: node
 
 Поддерживаемые типы сервисов: _'node' | 'rust' | 'golang' | 'php' | 'ruby' | 'python' | 'redis' | 'postgres' | 'mysql' | 'mariadb' | 'mongo' | 'rabbitmq' | 'mongo_express' | 'adminer' | 'phpmyadmin' | 'custom'_
 
-#### Собрать контейнер из Dockerfile [![якорь](https://conhos.ru/images/icons/link.svg)](#service-custom-image)
+#### Собрать образ из Dockerfile [![якорь](https://conhos.ru/images/icons/link.svg)](#service-custom-image)
 
-> Для использования данной опции необходимо предварительно собрать кастомный контейнер с помощью команды `conhos registry build -n my-image`
+> Для использования данной опции необходимо предварительно собрать кастомный образ с помощью команды `conhos registry build -n my-image`
 
 ```yml
 image: custom # Обязательно такое значение для использования customImage
