@@ -84,6 +84,7 @@ export function getEnvVariableRegex(name) {
  *    error?: string;
  *    message?: string;
  *    code?: number;
+ *    end: 'end';
  *  } & EmitterData} CliServerResponse
  */
 

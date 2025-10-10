@@ -35,12 +35,12 @@ export default class Server {
    * @param {{
    *  res: http2.Http2ServerResponse<http2.Http2ServerRequest>;
    *  statusCode: http2.Http2ServerResponse<http2.Http2ServerRequest>['statusCode'];
-   *  body: CliServerResponse
+   *  body: Omit<CliServerResponse, 'end'>
    * }} options
    */
   response({ res, body, statusCode }) {
     res.statusCode = statusCode;
-    res.end(JSON.stringify(body));
+    res.end(JSON.stringify({ ...body, end: 'end' }));
   }
 
   /**
@@ -109,7 +109,6 @@ export default class Server {
                 }
                 instance = new Exec(options || {}, { withoutStart: true, cwd }, argument);
               } else if (instance?.rl) {
-                console.info(1, event.command, instance.rl);
                 instance.rl.emit('line', event.command);
               }
               break;
@@ -150,7 +149,7 @@ export default class Server {
                 resolve(code);
                 return;
               }
-              res.write(JSON.stringify(data) + '\n');
+              this.write(res, { ...data, end: 'end' });
             };
             instance.console._eventEmitter.on('message', handler);
             instance.start();
@@ -167,8 +166,25 @@ export default class Server {
 
     const PORT = 3000;
 
+    server.on('error', (err) => {
+      console.error('Server error:', err);
+    });
+
+    server.on('sessionError', (err) => {
+      console.error('HTTP/2 session error:', err);
+    });
+
     server.listen(PORT, () => {
       console.log(`Cli server running on http://localhost:${PORT}`);
     });
+  }
+
+  /**
+   * @private
+   * @param {http2.Http2ServerResponse<http2.Http2ServerRequest>} res
+   * @param {CliServerResponse} data
+   */
+  write(res, data) {
+    res.write(JSON.stringify(data) + '\n');
   }
 }
