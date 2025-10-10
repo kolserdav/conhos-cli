@@ -22,7 +22,6 @@ import Exec from './core/exec.js';
 import Project from './core/project.js';
 import Service from './core/service.js';
 import Registry from './core/registry.js';
-import { argv } from 'process';
 import Server from './server/server.js';
 
 process.on('SIGABRT', (sig) => {

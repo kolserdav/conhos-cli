@@ -70,13 +70,39 @@ export default class Server {
        */
       let instance = null;
       const code = await new Promise((resolve) => {
+        /**
+         *
+         * @param {EmitterData} data
+         * @returns
+         */
+        const handler = (data) => {
+          const { code } = data;
+          if (code !== undefined) {
+            if (instance) {
+              closeConnection();
+            } else {
+              console.error('Instance not found in handler', '');
+            }
+            resolve(code);
+            return;
+          }
+          this.write(res, { ...data, end: 'end' });
+        };
+
+        const closeConnection = () => {
+          if (instance) {
+            instance.console._eventEmitter.removeListener('message', handler);
+          }
+        };
+
         req.on('data', (chunk) => {
+          const chunkStr = chunk.toString();
           /**
            * @type {CliServerRequestBody | null}
            */
           let body = null;
           try {
-            body = JSON.parse(chunk.toString());
+            body = JSON.parse(chunkStr);
           } catch (err) {
             console.error('Failed to parse body', err);
           }
@@ -116,7 +142,7 @@ export default class Server {
               if (!argument) {
                 return this.response({
                   res,
-                  body: { error: 'Argument property required for exec' },
+                  body: { error: 'Argument property required for logs' },
                   statusCode: 400,
                 });
               }
@@ -133,27 +159,13 @@ export default class Server {
           }
 
           if (instance && !event) {
-            /**
-             *
-             * @param {EmitterData} data
-             * @returns
-             */
-            const handler = (data) => {
-              const { code } = data;
-              if (code !== undefined) {
-                if (instance) {
-                  instance.console._eventEmitter.removeListener('message', handler);
-                } else {
-                  console.error('Instance not found in handler', '');
-                }
-                resolve(code);
-                return;
-              }
-              this.write(res, { ...data, end: 'end' });
-            };
             instance.console._eventEmitter.on('message', handler);
             instance.start();
           }
+        });
+
+        req.on('end', () => {
+          closeConnection();
         });
       });
 

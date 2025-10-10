@@ -13,9 +13,10 @@ import readline from 'readline';
 import WS from '../connectors/ws.js';
 import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
-import { parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import { as, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
+import { Readable, Writable } from 'stream';
 
 /**
  * @typedef {import('../connectors/ws.js').WSProps} WSProps
@@ -119,11 +120,29 @@ export default class Exec extends WS {
     });
 
     this.showStartLine();
+
+    let input = process.stdin;
+    let output = process.stdout;
+    let terminal = true;
+    if (process.env.IS_SERVER === 'true') {
+      terminal = false;
+      input = /** @type {any} */ (as)(new Readable({ read() {} }));
+      const Console = this.console;
+      output = /** @type {any} */ (as)(
+        new Writable({
+          write(chunk, encoding, callback) {
+            Console.log(chunk.toString());
+            callback();
+          },
+        })
+      );
+    }
+
     this.rl = readline.createInterface({
       // @ts-ignore
-      input: process.stdin,
-      output: this.options.interractive ? process.stdout : undefined,
-      terminal: true,
+      input,
+      output: this.options.interractive ? output : undefined,
+      terminal,
     });
 
     this.rl.on('line', (input) => {

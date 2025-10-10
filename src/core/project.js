@@ -11,7 +11,7 @@
 import WS from '../connectors/ws.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import Inquirer from '../utils/inquirer.js';
-import { console, parseMessageCli } from '../utils/lib.js';
+import { parseMessageCli } from '../utils/lib.js';
 
 const inquirer = new Inquirer();
 
@@ -61,7 +61,7 @@ export default class Project extends WS {
    * @param {WSMessageCli<'projectDeleteProgressCli'>} msg
    */
   async progress({ status, message, data }) {
-    console[status](message.replace(/^\w+: /, '').replace(/\n$/, ''), data.msg);
+    this.console[status](message.replace(/^\w+: /, '').replace(/\n$/, ''), data.msg);
   }
 
   /**
