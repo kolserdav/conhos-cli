@@ -646,6 +646,7 @@ export default class Deploy extends WS {
           configText: this.configText,
           ssl: this.options.ssl || false,
           env,
+          runInNode: process.env.RUN_IN_NODE,
         },
         status: 'info',
         connId: this.connId,

@@ -130,6 +130,7 @@ export function getEnvVariableRegex(name) {
  *   interractive: boolean;
  *   ssl: boolean;
  *   env: Record<string, string>
+ *   runInNode?: string;
  * }} prepareDeployServer
  * @property {{
  *   url: string;
