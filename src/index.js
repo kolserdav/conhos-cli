@@ -73,7 +73,7 @@ program
   .option('-c, --crypt', 'encrypt session token with password')
   .option('-r, --remove', 'remove session token from this device')
   .action(async (options) => {
-    new Login({ ...options, isLogin: true });
+    new Login({ ...options, isLogin: true }, {});
   });
 
 program
@@ -86,14 +86,14 @@ program
   .option('--user-home-folder <string>', 'Custom user home folder')
   .option('--no-ssl', 'Do not create SSL certificate')
   .action(async (options) => {
-    new Deploy(options);
+    new Deploy(options, {});
   });
 
 program
   .command('ip')
   .description('Get project node IP')
   .action(async (options) => {
-    new IP(options);
+    new IP(options, {});
   });
 
 program
@@ -110,7 +110,7 @@ program
     'If you are asked to confirm the deletion of the project, the script will automatically answer "yes"'
   )
   .action(async (options) => {
-    new Project(options);
+    new Project(options, {});
   });
 
 program
@@ -124,7 +124,7 @@ program
   .option('-r --restart', 'Restart service')
   .option('--user-home-folder <string>', 'Custom user home folder')
   .action(async (options) => {
-    new Service(options);
+    new Service(options, {});
   });
 
 program
@@ -191,7 +191,7 @@ program
   .description('Set up project configuration')
   .option('-y, --yes', 'default for all')
   .action(async (options) => {
-    new Init(options);
+    new Init(options, {});
   });
 
 const registryCommand = program
@@ -199,7 +199,7 @@ const registryCommand = program
   .usage('[options] <command> [options]')
   .description('Container registry operations')
   .action(async (options) => {
-    new Registry(null, options);
+    new Registry(null, options, {});
   });
 
 registryCommand
@@ -211,14 +211,14 @@ registryCommand
   .option('-c, --context <string>', 'Build context dir [Default .]')
   .option('--no-cache', 'Do not use cache')
   .action(async (options) => {
-    new Registry('build', options);
+    new Registry('build', options, {});
   });
 
 registryCommand
   .command('list')
   .description('Show all remote images')
   .action(async (options) => {
-    new Registry('list', options);
+    new Registry('list', options, {});
   });
 
 program

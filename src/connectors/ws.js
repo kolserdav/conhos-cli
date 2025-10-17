@@ -41,6 +41,7 @@ import {
   WEBSOCKET_ADDRESS,
 } from 'conhos-vscode/dist/constants.js';
 import { tmpdir } from 'os';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 
 const __filenameNew = fileURLToPath(import.meta.url);
 
@@ -226,9 +227,10 @@ export default class WS {
 
   /**
    * @param {Options} options
+   * @param {keyof typeof CLI_COMMANDS } command
    * @param {WSProps} props
    */
-  constructor(options, props = {}) {
+  constructor(options, command, props = {}) {
     const { withoutStart, cwd } = props;
     this.cwd = cwd;
     this.options = options;
@@ -237,7 +239,7 @@ export default class WS {
     this.token = '';
     this.configFile = getConfigFilePath(this.cwd);
     if (!withoutStart) {
-      this.start();
+      this.start(command);
     }
   }
 
@@ -286,7 +288,12 @@ export default class WS {
     this.project = project;
   }
 
-  start() {
+  /**
+   *
+   * @param {keyof typeof CLI_COMMANDS} command
+   * @returns
+   */
+  start(command) {
     this.listener();
 
     this.package = JSON.parse(
@@ -313,6 +320,7 @@ export default class WS {
         message: '',
         data: {
           version,
+          command,
         },
         connId: ws.connId,
         token: this.token,

@@ -27,9 +27,11 @@ import {
 } from '../utils/constants.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 
 /**
- *@typedef {import('../types/interfaces.js').Options} Options
+ * @typedef {import('../connectors/ws.js').WSProps} WSProps
+ * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('../connectors/ws.js').Session} Session
@@ -45,12 +47,12 @@ const crypto = new Crypto();
 
 export default class Login extends WS {
   /**
+   * @public
    * @param {Options} options
+   * @param {WSProps} props
    */
-  constructor(options) {
-    const _options = structuredClone(options);
-    _options.isLogin = true;
-    super(_options);
+  constructor(options, props) {
+    super(options, CLI_COMMANDS.login, props);
   }
 
   /**

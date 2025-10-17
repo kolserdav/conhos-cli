@@ -38,15 +38,15 @@ import {
   VOLUME_LOCAL_REGEX,
 } from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
+import { findVolumeByName, isCustomService } from 'conhos-vscode/dist/lib.js';
 import {
-  createLastStreamMessage,
-  findVolumeByName,
-  isCustomService,
-} from 'conhos-vscode/dist/lib.js';
-import { readFile, writeFile } from 'fs/promises';
-import { ENV_VARIABLE_REGEX, ENV_VARIABLES_CLEAN_REGEX } from '../types/interfaces.js';
+  CLI_COMMANDS,
+  ENV_VARIABLE_REGEX,
+  ENV_VARIABLES_CLEAN_REGEX,
+} from '../types/interfaces.js';
 
 /**
+ * @typedef {import('../connectors/ws.js').WSProps} WSProps
  * @typedef {import('conhos-vscode').ConfigFile} ConfigFile
  * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
@@ -102,6 +102,15 @@ export default class Deploy extends WS {
    * @type {Record<string, true>}
    */
   waitGitUpload = {};
+
+  /**
+   * @public
+   * @param {Options} options
+   * @param {WSProps} props
+   */
+  constructor(options, props) {
+    super(options, CLI_COMMANDS.deploy, props);
+  }
 
   /**
    * @public

@@ -9,9 +9,12 @@
  * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WS from '../connectors/ws.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { parseMessageCli } from '../utils/lib.js';
+
 /**
+ * @typedef {import('../connectors/ws.js').WSProps} WSProps
  * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  */
@@ -23,6 +26,15 @@ import { parseMessageCli } from '../utils/lib.js';
 
 export default class IP extends WS {
   num = 0;
+
+  /**
+   * @public
+   * @param {Options} options
+   * @param {WSProps} props
+   */
+  constructor(options, props) {
+    super(options, CLI_COMMANDS.ip, props);
+  }
 
   listener() {
     if (!this.conn) {

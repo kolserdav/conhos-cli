@@ -12,8 +12,10 @@ import { spawn } from 'child_process';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { mkdir } from 'fs/promises';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 
 /**
+ * @typedef {import('../connectors/ws.js').WSProps} WSProps
  * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
  * @typedef {import('conhos-vscode').Status} Status
@@ -51,9 +53,10 @@ export default class Registry extends WS {
   /**
    * @param {RegistrySubcommand | null} subCommand
    * @param {Options} options
+   * @param {WSProps} props
    */
-  constructor(subCommand, options) {
-    super(options);
+  constructor(subCommand, options, props) {
+    super(options, CLI_COMMANDS.registry, props);
     this.subCommand = subCommand;
     this.checkOptions();
   }

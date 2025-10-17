@@ -29,8 +29,10 @@ import {
   parseMessageCli,
 } from '../utils/lib.js';
 import { PORT_DEFAULT, PORT_MAX, PORT_TYPES } from 'conhos-vscode/dist/constants.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 
 /**
+ * @typedef {import('../connectors/ws.js').WSProps} WSProps
  * @typedef {import('../types/interfaces.js').Options} Options
  * @typedef {import('../connectors/ws.js').CommandOptions} CommandOptions
  * @typedef {import('../types/interfaces.js').WSMessageDataCli} WSMessageDataCli
@@ -50,6 +52,7 @@ const inquirer = new Inquirer();
 
 export default class Init extends WS {
   /**
+   * @deprecated use extends
    * @public
    * @type {string}
    */
@@ -78,6 +81,7 @@ export default class Init extends WS {
   addNewService = false;
 
   /**
+   * @deprecated use extends
    * @public
    * @type {Options}
    */
@@ -102,9 +106,10 @@ export default class Init extends WS {
 
   /**
    * @param {Options} options
+   * @param {WSProps} props
    */
-  constructor(options) {
-    super(options);
+  constructor(options, props) {
+    super(options, CLI_COMMANDS.init, props);
 
     this.services = {};
 

@@ -11,7 +11,7 @@
 import WebSocket from 'ws';
 import readline from 'readline';
 import WS from '../connectors/ws.js';
-import { EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
+import { CLI_COMMANDS, EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { as, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
@@ -57,7 +57,7 @@ export default class Exec extends WS {
    * @param {string} serviceName
    */
   constructor(options, props, serviceName) {
-    super(options, props);
+    super(options, CLI_COMMANDS.exec, props);
     this.serviceName = serviceName;
   }
 

@@ -5,6 +5,7 @@ import Exec from '../core/exec.js';
 import Logs from '../core/logs.js';
 import Project from '../core/project.js';
 import Service from '../core/service.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 
 /**
  * @typedef {import('../types/interfaces.js').CliServerResponse} CliServerResponse
@@ -120,9 +121,14 @@ export default class Server {
             });
           }
 
+          /**
+           * @type {keyof typeof CLI_COMMANDS}
+           */
+          let com = CLI_COMMANDS.deploy;
           switch (command) {
             case 'deploy':
               instance = new Deploy(options || {}, { withoutStart: true, cwd });
+              com = CLI_COMMANDS.deploy;
               break;
             case 'exec':
               if (!event) {
@@ -137,6 +143,7 @@ export default class Server {
               } else if (instance?.rl) {
                 instance.rl.emit('line', event.command);
               }
+              com = CLI_COMMANDS.exec;
               break;
             case 'logs':
               if (!argument) {
@@ -147,12 +154,15 @@ export default class Server {
                 });
               }
               instance = new Logs(options || {}, { withoutStart: true, cwd }, argument);
+              com = CLI_COMMANDS.logs;
               break;
             case 'project':
               instance = new Project(options || {}, { withoutStart: true, cwd });
+              com = CLI_COMMANDS.project;
               break;
             case 'service':
               instance = new Service(options || {}, { withoutStart: true, cwd });
+              com = CLI_COMMANDS.service;
               break;
             default:
               console.warn('Default case command', command);
@@ -160,7 +170,7 @@ export default class Server {
 
           if (instance && !event) {
             instance.console._eventEmitter.on('message', handler);
-            instance.start();
+            instance.start(com);
           }
         });
 

@@ -6,6 +6,18 @@ export const ENV_VARIABLE_REGEX = /\$\{[a-zA-Z0-9_]+\}/g;
 
 export const ENV_VARIABLES_CLEAN_REGEX = /[\$\{\}]+/g;
 
+export const CLI_COMMANDS = Object.freeze({
+  deploy: 'deploy',
+  ip: 'ip',
+  project: 'project',
+  service: 'service',
+  exec: 'exec',
+  init: 'init',
+  login: 'login',
+  logs: 'logs',
+  registry: 'registry',
+});
+
 /**
  * @param {string} name
  */
@@ -106,6 +118,7 @@ export function getEnvVariableRegex(name) {
  * }} setSocketCli
  * @property {{
  *   version: string;
+ *   command: keyof typeof CLI_COMMANDS
  * }} setSocketServer
  * @property {string} loginCli
  * @property {string} loginServer

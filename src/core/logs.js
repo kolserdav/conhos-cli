@@ -13,6 +13,7 @@ import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constan
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { parseMessageCli } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
 
 /**
  * @typedef {import('../connectors/ws.js').WSProps} WSProps
@@ -44,7 +45,7 @@ export default class Logs extends WS {
    * @param {string} serviceName
    */
   constructor(options, props, serviceName) {
-    super(options, props);
+    super(options, CLI_COMMANDS.logs, props);
     this.serviceName = serviceName;
   }
 
