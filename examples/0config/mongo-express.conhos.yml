@@ -15,6 +15,9 @@ services:
     version: latest
     depends_on:
       - mongo0
+    ports:
+      - port: 8081
+        type: proxy
     environment:
       - ME_CONFIG_BASICAUTH_USERNAME=admin
       - ME_CONFIG_BASICAUTH_PASSWORD=password

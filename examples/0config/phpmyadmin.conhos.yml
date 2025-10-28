@@ -17,5 +17,11 @@ services:
     size: pico
     active: true
     version: latest
+    ports:
+      - port: 8081
+        type: proxy
+    environment:
+      - PMA_HOST=service-phpmyadmin-mysql0
+      - PMA_PORT=3306
     depends_on:
       - mysql0
