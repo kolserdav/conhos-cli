@@ -227,6 +227,12 @@ export default class Registry extends WS {
 
     if (code !== 0) {
       this.console.warn('Build exit with non success code, see errors above', '');
+      if (this.options.cache) {
+        this.console.warn(
+          'You use "cache" option, maybe you need to create "docker-container" engine builder first:',
+          'docker buildx create --name cache-builder --driver docker-container --use'
+        );
+      }
     } else {
       this.console.info('Successfully build and upload image', name);
     }
