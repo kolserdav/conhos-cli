@@ -2,8 +2,7 @@ node_modules
 .env
 dist
 tmp
-hosting-cli.yml
-conhos.yml
+conhos.yaml
 examples/python/venv
 examples/wordpress
 examples/hello-world/package-lock.json

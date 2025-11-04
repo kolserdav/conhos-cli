@@ -1,9 +1,14 @@
 name: phpmyadmin
 services:
   mysql0:
-    image: mysql
     size: mili
+    image: mysql
+    ports:
+      - port: 3306
+        type: proxy
+        public: false
     active: true
+    volume: /var/lib/mysql
     version: latest
     volumes:
       - https://raw.githubusercontent.com/kolserdav/conhos-cli/master/examples/mysql/config/my.cnf:/etc/mysql/conf.d/my.cnf
@@ -13,15 +18,17 @@ services:
       - MYSQL_PASSWORD=pass
       - MYSQL_DATABASE=db_name
   phpmyadmin0:
-    image: phpmyadmin
     size: pico
+    image: phpmyadmin
+    ports:
+      - port: 80
+        type: proxy
+        public: true
+        rewrite: /$2
+        location: /das(/|$)(.*) # Run in subPath
     active: true
     version: latest
-    ports:
-      - port: 8081
-        type: proxy
     environment:
       - PMA_HOST=service-phpmyadmin-mysql0
       - PMA_PORT=3306
-    depends_on:
-      - mysql0
+      - PMA_ABSOLUTE_URI=https://my-domain.cloud.conhos.ru/das/

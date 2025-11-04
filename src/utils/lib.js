@@ -24,6 +24,7 @@ import {
   REGISTRY_PROXY_SUBDOMAIN,
   REGISTRY_SUBDOMAIN,
   REGISTRY_DOMAIN,
+  CONFIG_FILE_NAME_A,
 } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
 import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
@@ -300,8 +301,9 @@ export function getPackageName(cwd = undefined) {
  */
 export function getConfigFilePath(cwd = undefined) {
   let fileYml = path.resolve(cwd || CWD, CONFIG_FILE_NAME);
+  let fileYaml = path.resolve(cwd || CWD, CONFIG_FILE_NAME_A);
   if (!existsSync(fileYml)) {
-    fileYml = fileYml.replace(/yaml$/, 'yml');
+    fileYml = fileYaml;
   }
   return fileYml;
 }

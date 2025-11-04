@@ -18,7 +18,7 @@ import {
   PACKAGE_NAME,
   EXCLUDE_DEFAULT,
 } from '../utils/constants.js';
-import { computeCostService, isCustomService, isCommonService } from 'conhos-vscode/dist/lib.js';
+import { computeCostService } from 'conhos-vscode/dist/lib.js';
 import {
   getConfigFilePath,
   getPackageName,
@@ -313,16 +313,15 @@ export default class Init extends WS {
 
     const fpm = service === 'php' && /fpm/.test(version);
 
-    const customService = isCustomService(service);
     /**
      * @type {ConfigFile['services'][0]['exclude']}
      */
     let exclude;
     // Group services
-    if (customService) {
-      ports = await this.getPorts(fpm);
-      exclude = EXCLUDE_DEFAULT[customService].concat(exclude || []).filter(filterUnique);
-    }
+    ports = await this.getPorts(fpm);
+    exclude = (EXCLUDE_DEFAULT[/** @type {typeof as<ServiceTypeCustom>} */ (as)(service)] || [])
+      .concat(exclude || [])
+      .filter(filterUnique);
 
     const firstPort = (ports || [])[0]?.port;
 
@@ -368,7 +367,7 @@ export default class Init extends WS {
       size: /** @type {typeof as<ServiceSize>} */ (as)(size),
       active: true,
       version,
-      pwd: isCommonService(service) ? undefined : './',
+      pwd: undefined,
       exclude,
       command,
       ports: ports?.length ? ports : undefined,
@@ -440,6 +439,7 @@ export default class Init extends WS {
     _ports.push({
       port: parseInt(port, 10),
       type,
+      public: false,
     });
 
     const anotherPort = await inquirer.confirm('Do you want to add another listened port?', false);

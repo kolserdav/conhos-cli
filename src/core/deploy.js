@@ -38,7 +38,7 @@ import {
   VOLUME_LOCAL_REGEX,
 } from 'conhos-vscode/dist/constants.js';
 import Inquirer from '../utils/inquirer.js';
-import { findVolumeByName, isCustomService } from 'conhos-vscode/dist/lib.js';
+import { findVolumeByName } from 'conhos-vscode/dist/lib.js';
 import {
   CLI_COMMANDS,
   ENV_VARIABLE_REGEX,
@@ -368,8 +368,8 @@ export default class Deploy extends WS {
   getNeedUploadServices(services) {
     return Object.keys(services)
       .map((item) => {
-        const { pwd, image } = services[item];
-        return pwd !== undefined && isCustomService(image);
+        const { pwd } = services[item];
+        return pwd !== undefined;
       })
       .filter((item) => item);
   }

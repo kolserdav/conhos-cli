@@ -10,8 +10,9 @@ Ports are a parameter of the [Service](./ConfigFile.md#services) level:
 ports:
   - port: 3000
     type: http
-    # Optional
-    ws: true # Default false
+    public: true # Defaults to false
+    # Required when type: php
+    script_filename: /var/www/html/index.php
     # Optional
     location: /path-url # Default "/"
     # Optional
@@ -27,7 +28,7 @@ ports:
     # Optional
     buffering: off # Default on
     # Optional
-    http_version: '1.1' # Default 1.0
+    http_version: '1.0' # Default 1.1
     # Optional
     headers:
       'Header-Name': 'Header-Value'
@@ -61,15 +62,17 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-Proto $scheme;
+
         # Timeouts
-        client_body_timeout ${timeout};
         proxy_connect_timeout ${timeout};
         proxy_send_timeout ${timeout};
         proxy_read_timeout ${timeout};
         proxy_request_buffering ${timeout};
+
         # Buffering
         proxy_buffering ${buffering};
-        proxy_http_version ${buffering};
+        proxy_http_version ${http_version};
+
         # Custom headers
         ${HEADERS} # More on page below
         # Redirect to container port
@@ -98,11 +101,13 @@ server {
         add_header X-Forwarded-For $proxy_add_x_forwarded_for;
         add_header Host $host;
         add_header X-Forwarded-Proto $scheme;
-        # FPM settings
-        fastcgi_pass ${HOST}:${port};
-        fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME ${WORKING_DIR}/$fastcgi_script_name;
-        include fastcgi_params;
+
+        # FCGI settings
+        include /etc/nginx/fastcgi_params;
+        fastcgi_index "index.php";
+        fastcgi_param SCRIPT_FILENAME "/var/www/html/index.php";
+	    fastcgi_pass ${HOST}:${port};
+
         # Custom headers
         ${HEADERS} # More details below on the page
     }
@@ -140,24 +145,3 @@ location /location {
     index index.html;
 }
 ```
-
----
-
-## Magic parameters
-
-Parameters that create configuration assemblies
-
----
-
-- ​​**ws** [![anchor](https://conhos.ru/images/icons/link.svg)](#web-socket)
-
-  Configuration for websocket, _when passed `true` the following fields are added:_
-
-```nginx
-proxy_http_version 1.1;
-proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection "Upgrade";
-
-```
-
----

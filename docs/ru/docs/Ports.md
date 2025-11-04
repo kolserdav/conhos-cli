@@ -10,8 +10,9 @@
 ports:
   - port: 3000
     type: proxy # proxy | php
-    # Опционально
-    ws: true # По умолчанию false
+    public: true # По умолчанию false
+    # Обязательно когда type: php
+    script_filename: /var/www/html/index.php
     # Опционально
     location: /path-url # По умолчанию "/"
     # Опционально
@@ -27,7 +28,7 @@ ports:
     # Опционально
     buffering: off # По умолчанию on
     # Опционально
-    http_version: '1.1' # По умолчанию 1.0
+    http_version: '1.0' # По умолчанию 1.1
     # Опционально
     headers:
       'Header-Name': 'Header-Value'
@@ -61,17 +62,20 @@ server  {
         proxy_set_header    X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header    Host $host;
         proxy_set_header    X-Forwarded-Proto $scheme;
+
         # Таймауты
-        client_body_timeout     ${timeout};
         proxy_connect_timeout   ${timeout};
         proxy_send_timeout      ${timeout};
         proxy_read_timeout      ${timeout};
         proxy_request_buffering ${timeout};
+
         # Буфферизация
         proxy_buffering ${buffering};
-        proxy_http_version ${buffering};
+        proxy_http_version ${http_version};
+
         # Пользовательские заголовки
         ${HEADERS} # Подробнее ниже на странице
+
         # Перенаправление на порт контейнера
         proxy_pass          https://${HOST}:${port}${proxy_path};
     }
@@ -92,23 +96,21 @@ server  {
        try_files $uri $uri/ =404;
     }
 
-    location ~ \.php$ {
+    location / {
         # Заголовки по умолчанию
         add_header    X-Real-IP  $remote_addr;
         add_header    X-Forwarded-For $proxy_add_x_forwarded_for;
         add_header    Host $host;
         add_header    X-Forwarded-Proto $scheme;
-        # Настройки FPM
-        fastcgi_pass ${HOST}:${port};
-	    fastcgi_index index.php;
-        fastcgi_param SCRIPT_FILENAME ${WORKING_DIR}/$fastcgi_script_name;
-        include fastcgi_params;
+
+        # Настройки FCGI
+        include /etc/nginx/fastcgi_params;
+        fastcgi_index "index.php";
+        fastcgi_param SCRIPT_FILENAME "/var/www/html/index.php";
+			  fastcgi_pass ${HOST}:${port};
+
         # Пользовательские заголовки
         ${HEADERS} # Подробнее ниже на странице
-    }
-
-    location ~ /\.ht {
-        deny all;
     }
 }
 ```
@@ -140,24 +142,3 @@ location /location {
     index index.html;
 }
 ```
-
----
-
-## Волшебные параметры
-
-Параметры которые создают сборки кофигурации
-
----
-
-- **ws** [![якорь](https://conhos.ru/images/icons/link.svg)](#web-socket)
-
-  Конфигурация для вебсокета, _когда передано `true` добавляются следущие поля:_
-
-```nginx
-proxy_http_version 1.1;
-proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection "Upgrade";
-
-```
-
----
