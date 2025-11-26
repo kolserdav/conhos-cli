@@ -305,7 +305,7 @@ export default class WS {
       return;
     }
     this.conn.on('error', (error) => {
-      this.console.error('Failed WS connection', { error, WEBSOCKET_ADDRESS });
+      this.console.error('Failed WS connection', `url: ${WEBSOCKET_ADDRESS}`);
       return this.exit(1);
     });
     // eslint-disable-next-line @typescript-eslint/no-this-alias
