@@ -11,10 +11,8 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { resolve } from 'path';
 import { format } from 'date-fns';
-import { isCommonServicePublic } from 'conhos-vscode/dist/lib.js';
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'fs';
 import {
-  ENVIRONMENT_REQUIRED_COMMON,
   SERVICES_COMMON,
   SERVICES_COMMON_PUBLIC,
   SERVICES_CUSTOM,
@@ -149,7 +147,7 @@ function getForwardLink({ index, array, postfixArray, postfixIndex, lang, _curre
       ? ''
       : postfixArray[postfixIndex + 1]
       ? firstCapitalize(
-          isCommonServicePublic(as(postfixArray[postfixIndex + 1])) === null
+          postfixArray[postfixIndex + 1] !== undefined
             ? postfixArray[postfixIndex + 1]
             : postfixArray[0]
         )
@@ -282,7 +280,7 @@ function createTemplate(lang) {
         DATABASE_NAME,
         DATABASE: _item,
         DATABASE_UPPERCASE: _item.toUpperCase(),
-        ENVIRONMENT: createEnvironment(_item),
+        ENVIRONMENT: '',
       });
     });
     dataD.push(dataItem);
@@ -356,18 +354,6 @@ function createTemplate(lang) {
 
   writeFileSync(`${METADATA_FILE_PREFIX}-${lang}.json`, JSON.stringify(metadata));
   writeFileSync(SITEMAP_PATH, sitemap);
-}
-
-/**
- * @param {ServiceTypeCommon} type
- */
-function createEnvironment(type) {
-  let res = '';
-  ENVIRONMENT_REQUIRED_COMMON[type].forEach((item, index) => {
-    const newLine = ENVIRONMENT_REQUIRED_COMMON[type][index + 1] === undefined ? '' : '\n';
-    res += `      - ${item}=value${index}${newLine}`;
-  });
-  return res;
 }
 
 /**
