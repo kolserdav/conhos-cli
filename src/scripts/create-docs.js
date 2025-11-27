@@ -97,11 +97,9 @@ function getBackLink({ index, array, postfixArray, postfixIndex, lang, _currentI
     postfixIndex === 0
       ? ''
       : postfixArray[postfixIndex - 1]
-      ? firstCapitalize(
-          isCommonServicePublic(as(postfixArray[postfixIndex - 1])) === null
-            ? postfixArray[postfixIndex - 1]
-            : ''
-        )
+      ? firstCapitalize(postfixArray[postfixIndex - 1]) !== undefined
+        ? postfixArray[postfixIndex - 1]
+        : ''
       : '';
   return {
     BACK_LINK_NAME:
