@@ -24,12 +24,8 @@ import {
 } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
-import {
-  checkConfig,
-  createLastStreamMessage,
-  findVolumeByName,
-  getPosition,
-} from 'conhos-vscode/dist/lib.js';
+import { createLastStreamMessage, findVolumeByName } from 'conhos-vscode/dist/lib.js';
+import { initSchema, checkConfig } from 'conhos-vscode/dist/schema.js';
 import Yaml from '../utils/yaml.js';
 import {
   PROTOCOL_CLI,
@@ -109,6 +105,8 @@ export class WSInterface {
     console.warn('Handler must be impelemented');
   }
 }
+
+const metadsl = initSchema();
 
 /**
  * @class
@@ -474,33 +472,20 @@ export default class WS {
     const volumes = changeRes.volumes || {};
 
     if (!this.withoutCheck && !withoutCheck) {
-      let checkConfigGenerator = checkConfig(
-        { config, configText: data },
-        { deployData: this.deployData, projectDelete: this.options.delete || false, fast: true }
-      );
-
-      /**
-       * @type {CheckConfigResult[]}
-       */
-      let checkErr = [];
-      for await (const message of checkConfigGenerator) {
-        checkErr.push(message);
-        if (message.exit) {
-          break;
-        }
-      }
-      checkErr = checkErr.concat(this.checkVolumes({ config, configText: data }));
-      let checkExit = false;
-      checkErr.forEach((item) => {
-        if (!withoutWarns) {
-          console[item.exit ? 'error' : 'warn'](item.msg, item.data);
-        } else if (item.exit) {
-          this.console.error(item.msg, item.data);
-        }
-        if (item.exit) {
-          checkExit = true;
-        }
+      let { syncs } = metadsl.checkSchema({
+        config: data,
+        skipAsync: true,
+        state: { deployData: this.deployData, userId: '', token: '' },
       });
+
+      let checkExit = false;
+      syncs.forEach(({ errors }) => {
+        errors.forEach((message) => {
+          this.console.error(message, '');
+          checkExit = true;
+        });
+      });
+
       if (checkExit) {
         await wait(1000);
         return this.exit(1);
@@ -697,96 +682,6 @@ export default class WS {
     } else {
       this.handler({ failedLogin: false, sessionExists: false });
     }
-  }
-
-  /**
-   * @private
-   * @param {{config: ConfigFile; configText: string}} param0
-   * @returns {CheckConfigResult[]}
-   */
-  checkVolumes({ config, configText }) {
-    /**
-     * @type {CheckConfigResult[]}
-     */
-    const res = [];
-    const { services, volumes: volumesGlobal } = config;
-    if (!services) {
-      return res;
-    }
-    Object.keys(services).forEach((item) => {
-      const { volumes, active } = services[item];
-      if (!active || !volumes) {
-        return;
-      }
-      volumes.forEach((_item) => {
-        const name = _item.split(':')[0];
-        const vol = findVolumeByName({ volumes: volumesGlobal, name });
-        if (vol) {
-          return;
-        }
-
-        const localM = _item.match(VOLUME_LOCAL_REGEX);
-        if (!localM) {
-          return;
-        }
-        const localPath = localM[0].replace(VOLUME_LOCAL_POSTFIX_REGEX, '');
-        if (!existsSync(localPath)) {
-          res.push({
-            msg: `Service "${item}" has wrong volume "${_item}". Local path is not exists:`,
-            data: localPath,
-            exit: true,
-            position: getPosition({
-              config,
-              configText,
-              field: 'services',
-              service: {
-                name: item,
-                property: 'volumes',
-                value: _item,
-              },
-            }),
-          });
-        } else {
-          const stats = statSync(localPath);
-          if (stats.isDirectory()) {
-            res.push({
-              msg: `Service "${item}" has wrong volume "${_item}".`,
-              data: "Directory can't be a volume, only files",
-              exit: true,
-              position: getPosition({
-                config,
-                configText,
-                field: 'services',
-                service: {
-                  name: item,
-                  property: 'volumes',
-                  value: _item,
-                },
-              }),
-            });
-          }
-          if (stats.size >= VOLUME_UPLOAD_MAX_SIZE) {
-            res.push({
-              msg: `Volume file '${localPath}' of service "${item}" is too big.`,
-              data: `Maximum size of volume file is: ${VOLUME_UPLOAD_MAX_SIZE / 1000}kb`,
-              exit: true,
-              position: getPosition({
-                config,
-                configText,
-                field: 'services',
-                service: {
-                  name: item,
-                  property: 'volumes',
-                  value: localPath,
-                },
-              }),
-            });
-          }
-        }
-      });
-    });
-
-    return res;
   }
 
   /**

@@ -27,7 +27,6 @@ import {
   CONFIG_FILE_NAME_A,
 } from './constants.js';
 import { ERROR_LOG_PREFIX } from 'conhos-vscode/dist/constants.js';
-import { createLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 import EventEmitter from 'events';
 
 /**
