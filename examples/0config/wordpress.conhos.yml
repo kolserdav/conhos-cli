@@ -20,7 +20,9 @@ services:
       - mariadb0
     ports:
       - port: 9000
+        public: true
         type: php
+        script_filename: /var/www/html/index.php
     environment:
       - PORT=9000
   mariadb0:
