@@ -12,6 +12,7 @@ services:
     pwd: ./
     ports:
       - port: 3000
+        public: true
         type: proxy
     command: bundle install && ruby server.rb
     environment:

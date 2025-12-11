@@ -17,6 +17,7 @@ services:
       - mongo0
     ports:
       - port: 8081
+        public: true
         type: proxy
     environment:
       - ME_CONFIG_BASICAUTH_USERNAME=admin

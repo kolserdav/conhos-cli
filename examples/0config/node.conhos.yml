@@ -12,6 +12,7 @@ services:
     pwd: ./hello-world
     ports:
       - port: 3000
+        public: true
         type: proxy
     command: npm i && npm run start
     environment:
