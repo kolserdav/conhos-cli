@@ -24,7 +24,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `Golang` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Golang` container in the [official Golang repository](https://hub.docker.com/_/golang/tags)
+> Check the current version of the `Golang` container in the [Golang registry](https://conhos.ru/registry/golang?scope=global)
 
 ```yml
 name: my-golang-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Hosting Golang Redis](./HostingGolangRedis.md)
+[Hosting Golang mongo <<<](./HostingGolangmongo.md) | [>>> Hosting Golang Adminer](./HostingGolangAdminer.md)

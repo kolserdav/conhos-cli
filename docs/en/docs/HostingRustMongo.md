@@ -14,7 +14,7 @@ If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility
 
 Configuration file for creating a `Rust` service in Container Hosting with a `Mongo` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Mongo` container in the [official Mongo repository](https://hub.docker.com/_/mongo/tags)
+> Check the current version of the `Mongo` container in the [Mongo registry](https://conhos.ru/registry/mongo?scope=global)
 
 ```yml
 name: my-rust-mongo-project
@@ -36,8 +36,7 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - MONGO_INITDB_ROOT_USERNAME=value0
-      - MONGO_INITDB_ROOT_PASSWORD=value1
+
   postgres0:
     type: mongo
     size: mili
@@ -45,8 +44,7 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - MONGO_INITDB_ROOT_USERNAME=value0
-      - MONGO_INITDB_ROOT_PASSWORD=value1
+
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `mongo0` the name of the host variable inside the container that references this service via `depends_on` will be `MONGO0_HOST`
@@ -63,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Rust Mariadb <<<](./HostingRustMariadb.md) | [>>> Hosting Rust Rabbitmq](./HostingRustRabbitmq.md)
+[Hosting Rust mariadb <<<](./HostingRustmariadb.md) | [>>> Hosting Rust Rabbitmq](./HostingRustRabbitmq.md)

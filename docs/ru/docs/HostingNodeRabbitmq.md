@@ -14,7 +14,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Node` с поднятием сервера базы данных `Rabbitmq` и подключение к нему из приложения, а также опциональный пример поднятия `Adminer` для администрирования баз данных. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Rabbitmq` контейнера уточнить в [официальном репозитории Rabbitmq](https://hub.docker.com/_/rabbitmq/tags)
+> Актуальную версию `Rabbitmq` контейнера уточнить в [реестре образов Rabbitmq](https://conhos.ru/registry/rabbitmq?scope=global)
 
 ```yml
 name: my-node-rabbitmq-project
@@ -36,8 +36,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - RABBITMQ_DEFAULT_PASS=value0
-      - RABBITMQ_DEFAULT_USER=value1
+
   rabbitmq0:
     image: rabbitmq
     size: mili
@@ -45,8 +44,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - RABBITMQ_DEFAULT_PASS=value0
-      - RABBITMQ_DEFAULT_USER=value1
+
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по названию сервиса`rabbitmq0`.
@@ -63,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Node Mongo <<<](./HostingNodeMongo.md) | [>>> Хостинг Node Redis](./HostingNodeRedis.md)
+[Хостинг Node mongo <<<](./HostingNodemongo.md) | [>>> Хостинг Node Adminer](./HostingNodeAdminer.md)

@@ -24,7 +24,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `Python` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Python` container in the [official Python repository](https://hub.docker.com/_/python/tags)
+> Check the current version of the `Python` container in the [Python registry](https://conhos.ru/registry/python?scope=global)
 
 ```yml
 name: my-python-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Python Mongo <<<](./HostingPythonMongo.md) | [>>> Hosting Python Redis](./HostingPythonRedis.md)
+[Hosting Python mongo <<<](./HostingPythonmongo.md) | [>>> Hosting Python Adminer](./HostingPythonAdminer.md)

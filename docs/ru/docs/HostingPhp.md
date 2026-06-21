@@ -24,7 +24,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Php`. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Php` контейнера уточнить в [официальном репозитории Php](https://hub.docker.com/_/php/tags)
+> Актуальную версию `Php` контейнера уточнить в [реестре образов Php](https://conhos.ru/registry/php?scope=global)
 
 ```yml
 name: my-php-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Php Mongo <<<](./HostingPhpMongo.md) | [>>> Хостинг Php Redis](./HostingPhpRedis.md)
+[Хостинг Php mongo <<<](./HostingPhpmongo.md) | [>>> Хостинг Php Adminer](./HostingPhpAdminer.md)

@@ -24,7 +24,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Ruby`. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Ruby` контейнера уточнить в [официальном репозитории Ruby](https://hub.docker.com/_/ruby/tags)
+> Актуальную версию `Ruby` контейнера уточнить в [реестре образов Ruby](https://conhos.ru/registry/ruby?scope=global)
 
 ```yml
 name: my-ruby-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Ruby Mongo <<<](./HostingRubyMongo.md) | [>>> Хостинг Ruby Redis](./HostingRubyRedis.md)
+[Хостинг Ruby mongo <<<](./HostingRubymongo.md) | [>>> Хостинг Ruby Adminer](./HostingRubyAdminer.md)

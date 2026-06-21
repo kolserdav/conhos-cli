@@ -24,7 +24,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `Rust` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Rust` container in the [official Rust repository](https://hub.docker.com/_/rust/tags)
+> Check the current version of the `Rust` container in the [Rust registry](https://conhos.ru/registry/rust?scope=global)
 
 ```yml
 name: my-rust-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Rust Mongo <<<](./HostingRustMongo.md) | [>>> Hosting Rust Redis](./HostingRustRedis.md)
+[Hosting Rust mongo <<<](./HostingRustmongo.md) | [>>> Hosting Rust Adminer](./HostingRustAdminer.md)

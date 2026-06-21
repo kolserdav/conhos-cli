@@ -14,7 +14,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Golang` с поднятием сервера базы данных `Mysql` и подключение к нему из приложения, а также опциональный пример поднятия `Adminer` для администрирования баз данных. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Mysql` контейнера уточнить в [официальном репозитории Mysql](https://hub.docker.com/_/mysql/tags)
+> Актуальную версию `Mysql` контейнера уточнить в [реестре образов Mysql](https://conhos.ru/registry/mysql?scope=global)
 
 ```yml
 name: my-golang-mysql-project
@@ -36,10 +36,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - MYSQL_ROOT_PASSWORD=value0
-      - MYSQL_USER=value1
-      - MYSQL_PASSWORD=value2
-      - MYSQL_DATABASE=value3
+
   mysql0:
     image: mysql
     size: mili
@@ -47,10 +44,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - MYSQL_ROOT_PASSWORD=value0
-      - MYSQL_USER=value1
-      - MYSQL_PASSWORD=value2
-      - MYSQL_DATABASE=value3
+
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по названию сервиса`mysql0`.
@@ -67,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang Postgres <<<](./HostingGolangPostgres.md) | [>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)
+[Хостинг Golang postgres <<<](./HostingGolangpostgres.md) | [>>> Хостинг Golang Mariadb](./HostingGolangMariadb.md)

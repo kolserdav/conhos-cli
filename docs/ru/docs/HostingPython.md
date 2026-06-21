@@ -24,7 +24,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Python`. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Python` контейнера уточнить в [официальном репозитории Python](https://hub.docker.com/_/python/tags)
+> Актуальную версию `Python` контейнера уточнить в [реестре образов Python](https://conhos.ru/registry/python?scope=global)
 
 ```yml
 name: my-python-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Python Mongo <<<](./HostingPythonMongo.md) | [>>> Хостинг Python Redis](./HostingPythonRedis.md)
+[Хостинг Python mongo <<<](./HostingPythonmongo.md) | [>>> Хостинг Python Adminer](./HostingPythonAdminer.md)

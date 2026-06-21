@@ -14,7 +14,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Node` с поднятием сервера базы данных `Postgres` и подключение к нему из приложения, а также опциональный пример поднятия `Adminer` для администрирования баз данных. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Postgres` контейнера уточнить в [официальном репозитории Postgres](https://hub.docker.com/_/postgres/tags)
+> Актуальную версию `Postgres` контейнера уточнить в [реестре образов Postgres](https://conhos.ru/registry/postgres?scope=global)
 
 ```yml
 name: my-node-postgres-project
@@ -36,9 +36,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - POSTGRES_PASSWORD=value0
-      - POSTGRES_USER=value1
-      - POSTGRES_DB=value2
+
   postgres0:
     image: postgres
     size: mili
@@ -46,9 +44,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - POSTGRES_PASSWORD=value0
-      - POSTGRES_USER=value1
-      - POSTGRES_DB=value2
+
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по названию сервиса`postgres0`.
@@ -65,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Node Redis <<<](./HostingNodeRedis.md) | [>>> Хостинг Node Mysql](./HostingNodeMysql.md)
+[Хостинг Node redis <<<](./HostingNoderedis.md) | [>>> Хостинг Node Mysql](./HostingNodeMysql.md)

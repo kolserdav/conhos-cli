@@ -24,7 +24,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Rust`. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Rust` контейнера уточнить в [официальном репозитории Rust](https://hub.docker.com/_/rust/tags)
+> Актуальную версию `Rust` контейнера уточнить в [реестре образов Rust](https://conhos.ru/registry/rust?scope=global)
 
 ```yml
 name: my-rust-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Rust Mongo <<<](./HostingRustMongo.md) | [>>> Хостинг Rust Redis](./HostingRustRedis.md)
+[Хостинг Rust mongo <<<](./HostingRustmongo.md) | [>>> Хостинг Rust Adminer](./HostingRustAdminer.md)

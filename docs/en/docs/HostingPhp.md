@@ -24,7 +24,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `Php` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Php` container in the [official Php repository](https://hub.docker.com/_/php/tags)
+> Check the current version of the `Php` container in the [Php registry](https://conhos.ru/registry/php?scope=global)
 
 ```yml
 name: my-php-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Php Mongo <<<](./HostingPhpMongo.md) | [>>> Hosting Php Redis](./HostingPhpRedis.md)
+[Hosting Php mongo <<<](./HostingPhpmongo.md) | [>>> Hosting Php Adminer](./HostingPhpAdminer.md)

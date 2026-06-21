@@ -24,7 +24,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `Node` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Node` container in the [official Node repository](https://hub.docker.com/_/node/tags)
+> Check the current version of the `Node` container in the [Node registry](https://conhos.ru/registry/node?scope=global)
 
 ```yml
 name: my-node-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Node Mongo <<<](./HostingNodeMongo.md) | [>>> Hosting Node Redis](./HostingNodeRedis.md)
+[Hosting Node mongo <<<](./HostingNodemongo.md) | [>>> Hosting Node Adminer](./HostingNodeAdminer.md)

@@ -14,7 +14,7 @@ If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility
 
 Configuration file for creating a `Golang` service in Container Hosting with a `Mysql` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Mysql` container in the [official Mysql repository](https://hub.docker.com/_/mysql/tags)
+> Check the current version of the `Mysql` container in the [Mysql registry](https://conhos.ru/registry/mysql?scope=global)
 
 ```yml
 name: my-golang-mysql-project
@@ -36,10 +36,7 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - MYSQL_ROOT_PASSWORD=value0
-      - MYSQL_USER=value1
-      - MYSQL_PASSWORD=value2
-      - MYSQL_DATABASE=value3
+
   postgres0:
     type: mysql
     size: mili
@@ -47,10 +44,7 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - MYSQL_ROOT_PASSWORD=value0
-      - MYSQL_USER=value1
-      - MYSQL_PASSWORD=value2
-      - MYSQL_DATABASE=value3
+
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `mysql0` the name of the host variable inside the container that references this service via `depends_on` will be `MYSQL0_HOST`
@@ -67,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Golang Postgres <<<](./HostingGolangPostgres.md) | [>>> Hosting Golang Mariadb](./HostingGolangMariadb.md)
+[Hosting Golang postgres <<<](./HostingGolangpostgres.md) | [>>> Hosting Golang Mariadb](./HostingGolangMariadb.md)

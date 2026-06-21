@@ -72,7 +72,7 @@ if (!existsSync(DOCS_PATH)) {
 }
 
 if (!existsSync(RESOURCES_GENERATED_PATH)) {
-  mkdirSync(RESOURCES_GENERATED_PATH);
+  mkdirSync(RESOURCES_GENERATED_PATH, { recursive: true });
 }
 
 const tempDir = readdirSync(TEMPLATES_PATH);
@@ -218,7 +218,7 @@ function createTemplate(lang) {
     const dataItem = {
       NAME: firstCapitalize(item),
       TYPE: item,
-      HUB: 'https://hub.docker.com/_/',
+      HUB: 'https://conhos.ru/registry/',
       COMMAND: COMMAND_DEFAULT[item],
       LINKS: '',
       EXCLUDE: EXCLUDE_DEFAULT[item][0],
@@ -292,6 +292,9 @@ function createTemplate(lang) {
   let sitemap = '';
 
   data.forEach((item) => {
+    if (item.TYPE === 'custom') {
+      return;
+    }
     const keys = Object.keys(item);
     let result = `${templateDatabase}`;
     keys.forEach((_item) => {
@@ -325,6 +328,9 @@ function createTemplate(lang) {
   });
 
   dataD.forEach((item) => {
+    if (item.TYPE === 'custom') {
+      return;
+    }
     const keys = Object.keys(item);
     let result = `${template}`;
     keys.forEach((_item) => {

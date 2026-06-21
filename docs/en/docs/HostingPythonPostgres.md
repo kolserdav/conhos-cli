@@ -14,7 +14,7 @@ If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility
 
 Configuration file for creating a `Python` service in Container Hosting with a `Postgres` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Postgres` container in the [official Postgres repository](https://hub.docker.com/_/postgres/tags)
+> Check the current version of the `Postgres` container in the [Postgres registry](https://conhos.ru/registry/postgres?scope=global)
 
 ```yml
 name: my-python-postgres-project
@@ -36,9 +36,7 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - POSTGRES_PASSWORD=value0
-      - POSTGRES_USER=value1
-      - POSTGRES_DB=value2
+
   postgres0:
     type: postgres
     size: mili
@@ -46,9 +44,7 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - POSTGRES_PASSWORD=value0
-      - POSTGRES_USER=value1
-      - POSTGRES_DB=value2
+
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `postgres0` the name of the host variable inside the container that references this service via `depends_on` will be `POSTGRES0_HOST`
@@ -65,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Python Redis <<<](./HostingPythonRedis.md) | [>>> Hosting Python Mysql](./HostingPythonMysql.md)
+[Hosting Python redis <<<](./HostingPythonredis.md) | [>>> Hosting Python Mysql](./HostingPythonMysql.md)

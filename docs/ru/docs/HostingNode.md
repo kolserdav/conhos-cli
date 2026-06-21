@@ -24,7 +24,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Node`. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Node` контейнера уточнить в [официальном репозитории Node](https://hub.docker.com/_/node/tags)
+> Актуальную версию `Node` контейнера уточнить в [реестре образов Node](https://conhos.ru/registry/node?scope=global)
 
 ```yml
 name: my-node-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Node Mongo <<<](./HostingNodeMongo.md) | [>>> Хостинг Node Redis](./HostingNodeRedis.md)
+[Хостинг Node mongo <<<](./HostingNodemongo.md) | [>>> Хостинг Node Adminer](./HostingNodeAdminer.md)

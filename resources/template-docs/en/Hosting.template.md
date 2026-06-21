@@ -18,7 +18,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `${{NAME}}` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `${{NAME}}` container in the [official ${{NAME}} repository](${{HUB}}${{TYPE}}/tags)
+> Check the current version of the `${{NAME}}` container in the [${{NAME}} registry](${{HUB}}${{TYPE}}?scope=global)
 
 ```yml
 name: my-${{TYPE}}-project

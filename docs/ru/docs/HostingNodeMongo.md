@@ -14,7 +14,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Node` с поднятием сервера базы данных `Mongo` и подключение к нему из приложения, а также опциональный пример поднятия `Adminer` для администрирования баз данных. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Mongo` контейнера уточнить в [официальном репозитории Mongo](https://hub.docker.com/_/mongo/tags)
+> Актуальную версию `Mongo` контейнера уточнить в [реестре образов Mongo](https://conhos.ru/registry/mongo?scope=global)
 
 ```yml
 name: my-node-mongo-project
@@ -36,8 +36,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - MONGO_INITDB_ROOT_USERNAME=value0
-      - MONGO_INITDB_ROOT_PASSWORD=value1
+
   mongo0:
     image: mongo
     size: mili
@@ -45,8 +44,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - MONGO_INITDB_ROOT_USERNAME=value0
-      - MONGO_INITDB_ROOT_PASSWORD=value1
+
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по названию сервиса`mongo0`.
@@ -63,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Node Mariadb <<<](./HostingNodeMariadb.md) | [>>> Хостинг Node Rabbitmq](./HostingNodeRabbitmq.md)
+[Хостинг Node mariadb <<<](./HostingNodemariadb.md) | [>>> Хостинг Node Rabbitmq](./HostingNodeRabbitmq.md)

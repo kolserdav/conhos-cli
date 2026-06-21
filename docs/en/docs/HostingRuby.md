@@ -24,7 +24,7 @@ If you installed the [conhos](https://www.npmjs.com/package/conhos) utility earl
 
 Configuration file for creating the `Ruby` service in Container Hosting. More details in [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Ruby` container in the [official Ruby repository](https://hub.docker.com/_/ruby/tags)
+> Check the current version of the `Ruby` container in the [Ruby registry](https://conhos.ru/registry/ruby?scope=global)
 
 ```yml
 name: my-ruby-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Ruby Mongo <<<](./HostingRubyMongo.md) | [>>> Hosting Ruby Redis](./HostingRubyRedis.md)
+[Hosting Ruby mongo <<<](./HostingRubymongo.md) | [>>> Hosting Ruby Adminer](./HostingRubyAdminer.md)

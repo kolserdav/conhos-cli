@@ -14,7 +14,7 @@ If you have installed the [conhos](https://www.npmjs.com/package/conhos) utility
 
 Configuration file for creating a `Node` service in Container Hosting with a `Mariadb` database server running and connecting to it from an application, and an optional example of updating `Adminer` to administer the database. More details in the [Configuration File](./ConfigFile.md#example_configuration_file).
 
-> Check the current version of the `Mariadb` container in the [official Mariadb repository](https://hub.docker.com/_/mariadb/tags)
+> Check the current version of the `Mariadb` container in the [Mariadb registry](https://conhos.ru/registry/mariadb?scope=global)
 
 ```yml
 name: my-node-mariadb-project
@@ -36,10 +36,7 @@ services:
     environment:
       - PORT=3000
       # Next we forward the connection variables
-      - MARIADB_ROOT_PASSWORD=value0
-      - MARIADB_USER=value1
-      - MARIADB_PASSWORD=value2
-      - MARIADB_DATABASE=value3
+
   postgres0:
     type: mariadb
     size: mili
@@ -47,10 +44,7 @@ services:
     version: latest
     environment:
       # Variables for initializing the database
-      - MARIADB_ROOT_PASSWORD=value0
-      - MARIADB_USER=value1
-      - MARIADB_PASSWORD=value2
-      - MARIADB_DATABASE=value3
+
 ```
 
 > The database host will be accessible in the application container via the environment variable `[SERVICE_NAME]_HOST`, for example for the service `mariadb0` the name of the host variable inside the container that references this service via `depends_on` will be `MARIADB0_HOST`
@@ -67,4 +61,4 @@ conhos deploy
 
 Continue studying
 
-[Hosting Node Mysql <<<](./HostingNodeMysql.md) | [>>> Hosting Node Mongo](./HostingNodeMongo.md)
+[Hosting Node mysql <<<](./HostingNodemysql.md) | [>>> Hosting Node Mongo](./HostingNodeMongo.md)

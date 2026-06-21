@@ -14,7 +14,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Golang` с поднятием сервера базы данных `Mariadb` и подключение к нему из приложения, а также опциональный пример поднятия `Adminer` для администрирования баз данных. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Mariadb` контейнера уточнить в [официальном репозитории Mariadb](https://hub.docker.com/_/mariadb/tags)
+> Актуальную версию `Mariadb` контейнера уточнить в [реестре образов Mariadb](https://conhos.ru/registry/mariadb?scope=global)
 
 ```yml
 name: my-golang-mariadb-project
@@ -36,10 +36,7 @@ services:
     environment:
       - PORT=3000
       # Далее пробрасываем переменные для подключения
-      - MARIADB_ROOT_PASSWORD=value0
-      - MARIADB_USER=value1
-      - MARIADB_PASSWORD=value2
-      - MARIADB_DATABASE=value3
+
   mariadb0:
     image: mariadb
     size: mili
@@ -47,10 +44,7 @@ services:
     version: latest
     environment:
       # Переменные для инициализации базы данных
-      - MARIADB_ROOT_PASSWORD=value0
-      - MARIADB_USER=value1
-      - MARIADB_PASSWORD=value2
-      - MARIADB_DATABASE=value3
+
 ```
 
 > Хост базы данных будет доступен в контейнере приложения по названию сервиса`mariadb0`.
@@ -67,4 +61,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang Mysql <<<](./HostingGolangMysql.md) | [>>> Хостинг Golang Mongo](./HostingGolangMongo.md)
+[Хостинг Golang mysql <<<](./HostingGolangmysql.md) | [>>> Хостинг Golang Mongo](./HostingGolangMongo.md)

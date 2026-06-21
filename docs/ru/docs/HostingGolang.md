@@ -24,7 +24,7 @@
 
 Файл конфигурации для создания в Контейнерном хостинге сервиса `Golang`. Подробнее в [Файл конфигурации](./ConfigFile.md#пример_файла_конфигурации).
 
-> Актуальную версию `Golang` контейнера уточнить в [официальном репозитории Golang](https://hub.docker.com/_/golang/tags)
+> Актуальную версию `Golang` контейнера уточнить в [реестре образов Golang](https://conhos.ru/registry/golang?scope=global)
 
 ```yml
 name: my-golang-project
@@ -57,4 +57,4 @@ conhos deploy
 
 Продолжить изучение
 
-[Хостинг Golang Mongo <<<](./HostingGolangMongo.md) | [>>> Хостинг Golang Redis](./HostingGolangRedis.md)
+[Хостинг Golang mongo <<<](./HostingGolangmongo.md) | [>>> Хостинг Golang Adminer](./HostingGolangAdminer.md)
