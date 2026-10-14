@@ -189,7 +189,7 @@ deploy:
 
 The number of service instances (containers) that will respond via the load balancer.
 
-> This parameter is only valid for executable services and for [custom container](#custom-container)
+> This parameter is only valid for executable services and for [custom container](#service-custom-image)
 
 ```yml
 deploy:
