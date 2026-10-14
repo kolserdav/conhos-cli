@@ -3,7 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/conhos.svg)](https://www.npmjs.com/package/conhos)
 [![License](https://img.shields.io/npm/l/conhos.svg)](LICENSE)
 
-**Conhos CLI (`conhos`)** is the official open-source command-line interface for the **[Conhos.ru Container Hosting](https://conhos.ru)** service.
+**Conhos CLI (`conhos`)** is the official open-source command-line interface for the **[Conhos.ru Config Hosting](https://conhos.ru)** service.
 
 This tool allows developers to easily manage and deploy their applications on the Conhos platform directly from their local machine.
 
