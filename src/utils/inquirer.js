@@ -24,7 +24,7 @@ export default class Inquirer {
   async promptPassword(name) {
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'password', name, mask: '*' }).then((d) => {
+      prompt({ type: 'password', name, mask: '*', message: name }).then((d) => {
         resolve(d[name]);
       });
     });
@@ -40,7 +40,7 @@ export default class Inquirer {
   async list(name, choices, def, all = false) {
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'list', name, choices, default: def }).then((d) => {
+      prompt({ type: 'select', name, choices, default: def, message: name }).then((d) => {
         let result = d[name];
         if (!all) {
           const value = d[name].match(/[a-z_]+/);
@@ -60,7 +60,7 @@ export default class Inquirer {
   async promptServiceCommand(name, choices) {
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'list', name, choices, default: 'd' }).then((d) => {
+      prompt({ type: 'select', name, choices, default: 'd', message: name }).then((d) => {
         resolve(d[name]);
       });
     });
@@ -76,7 +76,7 @@ export default class Inquirer {
   async input(name, def, validate = () => true) {
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'input', name, default: def, validate }).then((d) => {
+      prompt({ type: 'input', name, default: def, validate, message: name }).then((d) => {
         resolve(d[name] || def);
       });
     });
@@ -94,7 +94,7 @@ export default class Inquirer {
     console.info('\nList all options', 'H');
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'expand', name, default: def, choices, validate }).then((d) => {
+      prompt({ type: 'expand', name, default: def, choices, validate, message: name }).then((d) => {
         resolve(d[name]);
       });
     });
@@ -109,7 +109,7 @@ export default class Inquirer {
   async confirm(name, def) {
     const prompt = inquirer.createPromptModule();
     return new Promise((resolve) => {
-      prompt({ type: 'confirm', name, default: def }).then((d) => {
+      prompt({ type: 'confirm', name, default: def, message: name }).then((d) => {
         resolve(d[name]);
       });
     });

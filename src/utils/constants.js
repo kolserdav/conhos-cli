@@ -10,7 +10,7 @@
  ******************************************************************************************/
 import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
-import os, { userInfo } from 'os';
+import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
