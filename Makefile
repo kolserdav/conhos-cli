@@ -1,6 +1,7 @@
 DEPLOYMENT = cli-dev
 DEPLOYMENT_PROD = cli
 PREFIX = conhos
+NAMESPACE = conhos-dev
 NAME = cli-dev
 NAME_PROD = cli
 DOCKERFILE = Dockerfile.dev
@@ -17,6 +18,6 @@ build:
 build-prod:
 	make build NAME=$(NAME_PROD) DOCKERFILE=$(DOCKERFILE_PROD)
 restart:
-	kubectl rollout restart -n conhos-dev deploy $(DEPLOYMENT)
+	kubectl rollout restart -n $(NAMESPACE) deploy $(DEPLOYMENT)
 restart-prod:
 	make restart DEPLOYMENT=$(DEPLOYMENT_PROD)
