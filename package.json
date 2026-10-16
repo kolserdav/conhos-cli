@@ -1,6 +1,6 @@
 {
   "name": "conhos",
-  "version": "4.4.12",
+  "version": "4.4.13",
   "description": "Command-line interface for the Conhos.ru Config Hosting service.",
   "type": "module",
   "repository": "https://github.com/kolserdav/conhos.git",
@@ -30,7 +30,7 @@
     "cache-changed": "^1.3.2",
     "chalk": "^6.0.1",
     "commander": "^15.0.0",
-    "conhos-vscode": "^3.0.9",
+    "conhos-vscode": "^3.0.13",
     "dotenv": "^18.0.7",
     "filesize": "^11.0.26",
     "inquirer": "^14.2.3",
