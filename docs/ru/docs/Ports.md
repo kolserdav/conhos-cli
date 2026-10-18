@@ -12,6 +12,8 @@ ports:
     type: proxy # proxy | php
     public: true # По умолчанию false
     # Обязательно когда type: php
+    # Если меняете уже после создания, сервер может не подхватить изменение, нужно его дернуть
+    # например изменив location на один перезапуск.
     script_filename: /var/www/html/index.php
     # Опционально
     location: /path-url # По умолчанию "/"

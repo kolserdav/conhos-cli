@@ -12,6 +12,8 @@ ports:
     type: http
     public: true # Defaults to false
     # Required when type: php
+    # If you make changes after the initial setup, the server might not pick them up; you’ll need to nudge it—
+    # for example, by modifying the 'location' setting, which will trigger a restart.
     script_filename: /var/www/html/index.php
     # Optional
     location: /path-url # Default "/"
