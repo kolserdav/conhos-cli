@@ -1,6 +1,19 @@
 # List of changes
 
-**4.3.11-IN PROGRESS**
+**4.34.16-IN PROGRESS**
+
+- `[Website, Server]` Replaced the `Awstats` statistics service with `Go Access`
+- `[CLI]` Replaced the terminal used for the `exec` command with a more user-friendly and powerful one
+- `[Website, Extension]` AI assistant for creating configuration files
+
+**4.34.15-16.10.2026**
+
+- `[Core]` Disabled the `ftp` service
+- `[Server]` Fixed issues where requests between nodes would hang
+- `[Website, Server]` Replaced the `Filestash` file manager with `Filebrowser Quantum`
+- `[Website]` Replaced the terminal on the "Service" page with a more user-friendly and powerful one
+
+**4.3.11-26.06.2025**
 
 - `[Core]` The system infrastructure has been migrated from Docker swarm to Kubernetes...
 - `[Server]` Fixed premature removal of git listener when `Unable to connect to Git` notification was received if github is temporarily unavailable
