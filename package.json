@@ -1,6 +1,6 @@
 {
   "name": "conhos",
-  "version": "4.4.15",
+  "version": "4.5.0",
   "description": "Command-line interface for the Conhos.ru Config Hosting service.",
   "type": "module",
   "repository": "https://github.com/kolserdav/conhos.git",
@@ -61,11 +61,11 @@
     "exclude": [
       "node_modules"
     ],
-    "name": "Sergey Kolmiller",
+    "name": "Sergei Kolmiller",
     "email": "kolserdav@conhos.ru",
     "license": "MIT",
     "licenseText": "See LICENSE file",
     "copyright": "kolserdav, All rights reserved (c)",
-    "renewAll": false
+    "renewAll": true
   }
 }

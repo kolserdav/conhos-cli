@@ -1,18 +1,18 @@
 /******************************************************************************************
  * Repository: Conhos cli
  * File name: exec.js
- * Author: Sergey Kolmiller
+ * Author: Sergei Kolmiller
  * Email: <kolserdav@conhos.ru>
  * License: MIT
  * License text: See LICENSE file
  * Copyright: kolserdav, All rights reserved (c)
- * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
+ * Create Date: Fri Oct 23 2026 22:22:33 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WebSocket from 'ws';
 import pkg from '@xterm/headless';
 import WS from '../connectors/ws.js';
-import { CLI_COMMANDS, EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
-import { PACKAGE_NAME } from '../utils/constants.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
+import { PACKAGE_NAME, TTYD_AUTH_ADDRESS } from '../utils/constants.js';
 import { as, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 
 const { Terminal } = pkg;
@@ -29,7 +29,6 @@ const { Terminal } = pkg;
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
-// ttyd protocol constants
 /** @type {number} */
 const TTYD_CMD_INPUT = '0'.charCodeAt(0);
 
@@ -118,11 +117,10 @@ export default class Exec extends WS {
    * @private
    * @param {WSMessageCli<'execCli'>} msg
    */
-  async execCli({ data: { url } }) {
-    this.console.info(EXEC_CONNECT_URL_MESSAGE, url);
-
-    const ttydAddress = process.env.TTYD_AUTH_ADDRESS || 'wss://ttyd-auth.conhos.ru';
-    const ttydWs = new WebSocket(ttydAddress + '/ws');
+  async execCli({ data: { serviceId, projectId } }) {
+    this.serviceId = serviceId;
+    this.projectId = projectId;
+    const ttydWs = new WebSocket(TTYD_AUTH_ADDRESS + '/ws');
     ttydWs.binaryType = 'nodebuffer';
 
     const token = this.token || '';
@@ -184,13 +182,12 @@ export default class Exec extends WS {
     };
 
     ttydWs.on('open', () => {
-      this.console.info('TTYD WebSocket connection opened', '');
       try {
         ttydWs.send(
           JSON.stringify({
             token,
-            serviceId: '6394de18-91e7-4340-b963-0617dad2ec53', // do not FIXME !!! it's needed for tests
-            projectId: '1d2c7812-d6d4-44d1-ad70-6de5ba12f55f', // do not FIXME !!! it's needed for tests
+            serviceId: this.serviceId,
+            projectId: this.projectId,
           })
         );
       } catch (e) {
@@ -201,7 +198,6 @@ export default class Exec extends WS {
       const buf = Buffer.isBuffer(d) ? d : Buffer.from(as(d));
       if (buf.length === 0) return;
 
-      // Auth JSON начинается с '{' (0x7b)
       if (buf[0] === 0x7b) {
         const text = buf.toString('utf8');
         let parsed = null;
@@ -213,6 +209,7 @@ export default class Exec extends WS {
         if (!parsed || !parsed.status) return;
 
         if (parsed.status === 'ok') {
+          this.console.info('Terminal opened', 'to close it use "exit" command');
           const cols = process.stdout.columns || 80;
           const rows = process.stdout.rows || 24;
           sendBinary(ttydWs, buildInitPacket(cols, rows));
