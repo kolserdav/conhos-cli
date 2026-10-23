@@ -1,12 +1,12 @@
 /******************************************************************************************
  * Repository: Conhos cli
  * File name: logs.js
- * Author: Sergey Kolmiller
+ * Author: Sergei Kolmiller
  * Email: <kolserdav@conhos.ru>
  * License: MIT
  * License text: See LICENSE file
  * Copyright: kolserdav, All rights reserved (c)
- * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
+ * Create Date: Fri Oct 23 2026 22:22:33 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WS from '../connectors/ws.js';
 import { HEADER_CONN_ID, LOGS_REQUEST_TIMEOUT } from 'conhos-vscode/dist/constants.js';

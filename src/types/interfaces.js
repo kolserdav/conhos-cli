@@ -1,3 +1,13 @@
+/******************************************************************************************
+ * Repository: Conhos cli
+ * File name: interfaces.js
+ * Author: Sergei Kolmiller
+ * Email: <kolserdav@conhos.ru>
+ * License: MIT
+ * License text: See LICENSE file
+ * Copyright: kolserdav, All rights reserved (c)
+ * Create Date: Fri Oct 23 2026 22:22:33 GMT+0700 (Krasnoyarsk Standard Time)
+ ******************************************************************************************/
 export const EXEC_CONNECT_URL_MESSAGE = 'Connection url';
 
 ///////////// Env variables /////////////
@@ -35,14 +45,6 @@ export function getEnvVariableRegex(name) {
  * @typedef {import("conhos-vscode").Status} Status
  * @typedef {import("conhos-vscode").ServiceTypeCommon} ServiceTypeCommon
  * @typedef {import("cache-changed").CacheItem} CacheItem
- */
-
-/**
- * @typedef {{
- *  close: {
- *    message: string;
- *  };
- * }} ExecMessageData
  */
 
 /**
@@ -98,15 +100,6 @@ export function getEnvVariableRegex(name) {
  *    code?: number;
  *    end: 'end';
  *  } & EmitterData} CliServerResponse
- */
-
-/**
- * @template {keyof ExecMessageData} T
- * @typedef {{
- *  type: T;
- *  connId: string;
- *  data: ExecMessageData[T];
- * }} ExecMessage
  */
 
 /**
@@ -238,7 +231,8 @@ export function getEnvVariableRegex(name) {
  *   repl: number;
  * }} execServer
  * @property {{
- *   url: string;
+ *   serviceId: string;
+ *   projectId: string;
  * }} execCli
  * @property {{
  *   name: string;

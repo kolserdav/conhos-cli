@@ -1,22 +1,21 @@
 /******************************************************************************************
  * Repository: Conhos cli
- * File name: logs.js
- * Author: Sergey Kolmiller
+ * File name: exec.js
+ * Author: Sergei Kolmiller
  * Email: <kolserdav@conhos.ru>
  * License: MIT
  * License text: See LICENSE file
  * Copyright: kolserdav, All rights reserved (c)
- * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
+ * Create Date: Fri Oct 23 2026 22:22:33 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WebSocket from 'ws';
-import readline from 'readline';
+import pkg from '@xterm/headless';
 import WS from '../connectors/ws.js';
-import { CLI_COMMANDS, EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
-import { PACKAGE_NAME } from '../utils/constants.js';
+import { CLI_COMMANDS } from '../types/interfaces.js';
+import { PACKAGE_NAME, TTYD_AUTH_ADDRESS } from '../utils/constants.js';
 import { as, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
-import Inquirer from '../utils/inquirer.js';
-import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
-import { Readable, Writable } from 'stream';
+
+const { Terminal } = pkg;
 
 /**
  * @typedef {import('../connectors/ws.js').WSProps} WSProps
@@ -30,7 +29,46 @@ import { Readable, Writable } from 'stream';
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
-const inquirer = new Inquirer();
+/** @type {number} */
+const TTYD_CMD_INPUT = '0'.charCodeAt(0);
+
+/**
+ * @param {number} cmd
+ * @param {Uint8Array} payload
+ * @returns {Uint8Array}
+ */
+function buildTtydPacket(cmd, payload) {
+  /** @type {Uint8Array} */
+  const out = new Uint8Array(1 + payload.length);
+  out[0] = cmd;
+  out.set(payload, 1);
+  return out;
+}
+
+/**
+ * @param {string} data
+ * @returns {Uint8Array}
+ */
+function buildInputPacket(data) {
+  return buildTtydPacket(TTYD_CMD_INPUT, new TextEncoder().encode(data));
+}
+
+/**
+ * @param {number} cols
+ * @param {number} rows
+ * @returns {Uint8Array}
+ */
+function buildInitPacket(cols, rows) {
+  return new TextEncoder().encode(JSON.stringify({ columns: cols, rows }));
+}
+
+/**
+ * @param {WebSocket} socket
+ * @param {Uint8Array} packet
+ */
+function sendBinary(socket, packet) {
+  socket.send(packet.buffer);
+}
 
 export default class Exec extends WS {
   /**
@@ -38,17 +76,6 @@ export default class Exec extends WS {
    * @type {string}
    */
   serviceName;
-
-  /**
-   * @private
-   * @type {string[]}
-   */
-  history = [];
-
-  /**
-   * @private
-   */
-  historyIndex = 0;
 
   /**
    * @public
@@ -88,73 +115,143 @@ export default class Exec extends WS {
 
   /**
    * @private
-   */
-  showStartLine() {
-    stdoutWriteStart(`${this.serviceName}# `);
-  }
-
-  /**
-   * @private
    * @param {WSMessageCli<'execCli'>} msg
    */
-  async execCli({ data: { url } }) {
-    this.console.info(EXEC_CONNECT_URL_MESSAGE, url);
-    const socket = new WebSocket(url, ['test']);
+  async execCli({ data: { serviceId, projectId } }) {
+    this.serviceId = serviceId;
+    this.projectId = projectId;
+    const ttydWs = new WebSocket(TTYD_AUTH_ADDRESS + '/ws');
+    ttydWs.binaryType = 'nodebuffer';
 
-    socket.on('close', () => {
-      this.console.warn('Connection aborting', 'Try again later');
-      return this.exit(1);
+    const token = this.token || '';
+
+    const headlessTerm = new Terminal({
+      cols: process.stdout.columns || 80,
+      rows: process.stdout.rows || 24,
+      scrollback: 1000,
+      allowProposedApi: true,
     });
 
-    socket.on('message', (d) => {
-      const str = d.toString();
-      if (str) {
-        if (isLastStreamMessage(str) && this.options.interractive) {
-          process.stdout.write(str);
-          this.showStartLine();
-        } else {
-          stdoutWriteStart('');
-          this.console.Log(str.replace(/\n$/, ''));
+    /**
+     * @type {((...args: any[]) => void) | null}
+     */
+    let stdinDataHandler = null;
+    /**
+     * @type {((...args: any[]) => void) | null}
+     */
+    let stdoutResizeHandler = null;
+    let rawModeEnabled = false;
+    let exited = false;
+
+    const cleanup = () => {
+      if (rawModeEnabled && process.stdin.isTTY && process.stdin.setRawMode) {
+        try {
+          process.stdin.setRawMode(false);
+        } catch {
+          /* ignore */
         }
+        rawModeEnabled = false;
+      }
+      try {
+        process.stdin.pause();
+      } catch {
+        /* ignore */
+      }
+      if (stdinDataHandler) {
+        process.stdin.off('data', stdinDataHandler);
+        stdinDataHandler = null;
+      }
+      if (stdoutResizeHandler) {
+        process.stdout.off('resize', stdoutResizeHandler);
+        stdoutResizeHandler = null;
+      }
+      try {
+        headlessTerm.dispose();
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const doExit = (code = 0) => {
+      if (exited) return;
+      exited = true;
+      cleanup();
+      stdoutWriteStart('');
+      this.console.info('Terminal exited', this.serviceName);
+      this.exit(code);
+    };
+
+    ttydWs.on('open', () => {
+      try {
+        ttydWs.send(
+          JSON.stringify({
+            token,
+            serviceId: this.serviceId,
+            projectId: this.projectId,
+          })
+        );
+      } catch (e) {
+        this.console.error('Failed to send auth', String(e));
+      }
+    });
+    ttydWs.on('message', (d) => {
+      const buf = Buffer.isBuffer(d) ? d : Buffer.from(as(d));
+      if (buf.length === 0) return;
+
+      if (buf[0] === 0x7b) {
+        const text = buf.toString('utf8');
+        let parsed = null;
+        try {
+          parsed = JSON.parse(text);
+        } catch {
+          return;
+        }
+        if (!parsed || !parsed.status) return;
+
+        if (parsed.status === 'ok') {
+          this.console.info('Terminal opened', 'to close it use "exit" command');
+          const cols = process.stdout.columns || 80;
+          const rows = process.stdout.rows || 24;
+          sendBinary(ttydWs, buildInitPacket(cols, rows));
+
+          if (process.stdin.isTTY && process.stdin.setRawMode) {
+            process.stdin.setRawMode(true);
+          }
+          process.stdin.resume();
+          process.stdin.setEncoding('utf8');
+
+          process.stdin.on('data', (data) => {
+            sendBinary(ttydWs, buildInputPacket(as(data)));
+          });
+        }
+        return;
+      }
+
+      if (buf[0] === 0x30) {
+        process.stdout.write(buf.slice(1).toString('utf8'));
+        return;
       }
     });
 
-    this.showStartLine();
-
-    let input = process.stdin;
-    let output = process.stdout;
-    let terminal = true;
-    if (process.env.IS_SERVER === 'true') {
-      terminal = false;
-      input = /** @type {any} */ (as)(new Readable({ read() {} }));
-      const Console = this.console;
-      output = /** @type {any} */ (as)(
-        new Writable({
-          write(chunk, encoding, callback) {
-            Console.log(chunk.toString());
-            callback();
-          },
-        })
-      );
-    }
-
-    this.rl = readline.createInterface({
-      // @ts-ignore
-      input,
-      output: this.options.interractive ? output : undefined,
-      terminal,
+    ttydWs.on('close', (code) => {
+      this.console.warn('TTYD connection closed', code);
+      doExit(0);
     });
 
-    this.rl.on('line', (input) => {
-      this.history.push();
-      socket.send(input);
+    ttydWs.on('error', (e) => {
+      this.console.error('TTYD WebSocket error', e.message);
     });
 
-    this.rl.on('close', () => {
-      stdoutWriteStart('');
-      this.console.info('Terminal exited', this.serviceName);
-      return this.exit(0);
-    });
+    const onSignal = () => {
+      try {
+        ttydWs.close();
+      } catch {
+        /* ignore */
+      }
+      doExit(0);
+    };
+    process.once('SIGINT', onSignal);
+    process.once('SIGTERM', onSignal);
   }
 
   /**

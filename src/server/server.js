@@ -1,3 +1,13 @@
+/******************************************************************************************
+ * Repository: Conhos cli
+ * File name: server.js
+ * Author: Sergei Kolmiller
+ * Email: <kolserdav@conhos.ru>
+ * License: MIT
+ * License text: See LICENSE file
+ * Copyright: kolserdav, All rights reserved (c)
+ * Create Date: Fri Oct 23 2026 22:22:33 GMT+0700 (Krasnoyarsk Standard Time)
+ ******************************************************************************************/
 import http2 from 'http2';
 import Deploy from '../core/deploy.js';
 import { readFileSync } from 'fs';

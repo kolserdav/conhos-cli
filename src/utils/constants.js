@@ -1,12 +1,12 @@
 /******************************************************************************************
  * Repository: Conhos cli
  * File name: constants.js
- * Author: Sergey Kolmiller
+ * Author: Sergei Kolmiller
  * Email: <kolserdav@conhos.ru>
  * License: MIT
  * License text: See LICENSE file
  * Copyright: kolserdav, All rights reserved (c)
- * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
+ * Create Date: Fri Oct 23 2026 22:22:33 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import dotenv from 'dotenv';
 import { readFileSync } from 'fs';
@@ -36,7 +36,9 @@ if (process.env.LOGIN_PAGE) {
   );
 }
 
-export const REGISTRY_DOMAIN = process.env.REGISTRY_DOMAIN;
+export const REGISTRY_DOMAIN = process.env.REGISTRY_DOMAIN || 'registry.conhos.ru';
+
+export const TTYD_AUTH_ADDRESS = process.env.TTYD_AUTH_ADDRESS || 'wss://ttyd-auth.conhos.ru';
 
 export const SERVER_ADDRESS = process.env.SERVER_ADDRESS || 'https://server.conhos.ru';
 if (process.env.SERVER_ADDRESS) {

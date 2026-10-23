@@ -1,12 +1,17 @@
 # List of changes
 
-**4.34.16-IN PROGRESS**
+**4.5.1-IN PROGRESS**
 
-- `[Website, Server]` Replaced the `Awstats` statistics service with `Go Access`
-- `[CLI]` Replaced the terminal used for the `exec` command with a more user-friendly and powerful one
 - `[Website, Extension]` AI assistant for creating configuration files
 
-**4.34.15-16.10.2026**
+**4.5.0-23.10.2026**
+
+- `[Website, Server]` Replaced `Awstats` with `GoAccess` for statistics
+- `[CLI]` Replaced the terminal used for the `exec` command with a more user-friendly and powerful one
+- `[Website]` Added interactive page updates when a project is deleted
+- `[Website]` Improved the appearance of certain elements
+
+**4.4.15-16.10.2026**
 
 - `[Core]` Disabled the `ftp` service
 - `[Server]` Fixed issues where requests between nodes would hang
