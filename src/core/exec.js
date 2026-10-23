@@ -170,11 +170,11 @@ export default class Exec extends WS {
     const authenticatedRef = { current: false };
 
     ttydWs.on('open', () => {
-      this.console.info('TTYD WebSocket connection opened');
+      this.console.info('TTYD WebSocket connection opened', '');
       const authMsg = JSON.stringify({
         token,
-        serviceId: '6394de18-91e7-4340-b963-0617dad2ec53', // FIXME
-        projectId: '1d2c7812-d6d4-44d1-ad70-6de5ba12f55f', // FIXME
+        serviceId: '6394de18-91e7-4340-b963-0617dad2ec53', // do not FIXME it's better for test
+        projectId: '1d2c7812-d6d4-44d1-ad70-6de5ba12f55f', // do not FIXME it's better for test
       });
       ttydWs.send(authMsg);
     });
