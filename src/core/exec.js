@@ -9,16 +9,11 @@
  * Create Date: Sun Sep 01 2024 13:12:51 GMT+0700 (Krasnoyarsk Standard Time)
  ******************************************************************************************/
 import WebSocket from 'ws';
-import readline from 'readline';
 import pkg from '@xterm/headless';
-
 import WS from '../connectors/ws.js';
 import { CLI_COMMANDS, EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
 import { as, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
-import Inquirer from '../utils/inquirer.js';
-import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
-import { Readable, Writable } from 'stream';
 
 const { Terminal } = pkg;
 
@@ -34,15 +29,9 @@ const { Terminal } = pkg;
  * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
-const inquirer = new Inquirer();
-
 // ttyd protocol constants
 /** @type {number} */
 const TTYD_CMD_INPUT = '0'.charCodeAt(0);
-/** @type {number} */
-const TTYD_CMD_RESIZE = '1'.charCodeAt(0);
-/** @type {number} */
-const TTYD_CMD_OUTPUT = '0'.charCodeAt(0);
 
 /**
  * @param {number} cmd
@@ -70,16 +59,6 @@ function buildInputPacket(data) {
  * @param {number} rows
  * @returns {Uint8Array}
  */
-function buildResizePacket(cols, rows) {
-  const json = JSON.stringify({ columns: cols, rows });
-  return buildTtydPacket(TTYD_CMD_RESIZE, new TextEncoder().encode(json));
-}
-
-/**
- * @param {number} cols
- * @param {number} rows
- * @returns {Uint8Array}
- */
 function buildInitPacket(cols, rows) {
   return new TextEncoder().encode(JSON.stringify({ columns: cols, rows }));
 }
@@ -98,17 +77,6 @@ export default class Exec extends WS {
    * @type {string}
    */
   serviceName;
-
-  /**
-   * @private
-   * @type {string[]}
-   */
-  history = [];
-
-  /**
-   * @private
-   */
-  historyIndex = 0;
 
   /**
    * @public
@@ -148,13 +116,6 @@ export default class Exec extends WS {
 
   /**
    * @private
-   */
-  showStartLine() {
-    stdoutWriteStart(`${this.serviceName}# `);
-  }
-
-  /**
-   * @private
    * @param {WSMessageCli<'execCli'>} msg
    */
   async execCli({ data: { url } }) {
@@ -165,10 +126,7 @@ export default class Exec extends WS {
     ttydWs.binaryType = 'nodebuffer';
 
     const token = this.token || '';
-    const authenticatedRef = { current: false };
 
-    // Headless-терминал для парсинга ANSI и хранения буфера.
-    // allowProposedApi нужен для доступа к buffer.active.
     const headlessTerm = new Terminal({
       cols: process.stdout.columns || 80,
       rows: process.stdout.rows || 24,
@@ -177,11 +135,11 @@ export default class Exec extends WS {
     });
 
     /**
-     * @type {Function | null}
+     * @type {((...args: any[]) => void) | null}
      */
     let stdinDataHandler = null;
     /**
-     * @type {Function | null}
+     * @type {((...args: any[]) => void) | null}
      */
     let stdoutResizeHandler = null;
     let rawModeEnabled = false;
@@ -225,22 +183,6 @@ export default class Exec extends WS {
       this.exit(code);
     };
 
-    // Рендерим видимую область headless-буфера в stdout.
-    // Это компромисс: при частых обновлениях возможно мигание.
-    const renderBuffer = () => {
-      const buf = headlessTerm.buffer.active;
-      const rows = headlessTerm.rows;
-      const lines = [];
-      for (let y = 0; y < rows; y++) {
-        const line = buf.getLine(buf.viewportY + y);
-        lines.push(line ? line.translateToString(true) : '');
-      }
-      // Возвращаем курсор в начало экрана и перерисовываем
-      const out = '\x1b[H' + lines.join('\r\n');
-      process.stdout.write(out);
-      console.error('[RENDER]', out.slice(0, 200));
-    };
-
     ttydWs.on('open', () => {
       this.console.info('TTYD WebSocket connection opened', '');
       try {
@@ -255,104 +197,43 @@ export default class Exec extends WS {
         this.console.error('Failed to send auth', String(e));
       }
     });
-
     ttydWs.on('message', (d) => {
-      // Текстовый фрейм — auth JSON
-      console.log(d.toString());
-      if (typeof d === 'string') {
+      const buf = Buffer.isBuffer(d) ? d : Buffer.from(as(d));
+      if (buf.length === 0) return;
+
+      // Auth JSON начинается с '{' (0x7b)
+      if (buf[0] === 0x7b) {
+        const text = buf.toString('utf8');
         let parsed = null;
         try {
-          parsed = JSON.parse(d);
+          parsed = JSON.parse(text);
         } catch {
-          /* not json */
-        }
-        if (parsed && parsed.status) {
-          if (parsed.status === 'ok') {
-            authenticatedRef.current = true;
-            this.console.info('TTYD authenticated, sending init packet');
-
-            const cols = process.stdout.columns || 80;
-            const rows = process.stdout.rows || 24;
-            try {
-              sendBinary(ttydWs, buildInitPacket(cols, rows));
-            } catch (e) {
-              this.console.error('Failed to send init packet', String(e));
-            }
-
-            // Синхронизируем размер headless-терминала с реальным
-            try {
-              headlessTerm.resize(cols, rows);
-            } catch {
-              /* ignore */
-            }
-
-            if (process.stdin.isTTY && process.stdin.setRawMode) {
-              try {
-                process.stdin.setRawMode(true);
-                rawModeEnabled = true;
-              } catch {
-                /* ignore */
-              }
-            }
-            process.stdin.resume();
-            process.stdin.setEncoding('utf8');
-
-            stdinDataHandler = (data) => {
-              if (!authenticatedRef.current) return;
-              try {
-                sendBinary(ttydWs, buildInputPacket(data));
-              } catch (e) {
-                this.console.error('Failed to send input packet', e?.message || e);
-              }
-            };
-            process.stdin.on('data', stdinDataHandler);
-
-            stdoutResizeHandler = () => {
-              if (!authenticatedRef.current) return;
-              const c = process.stdout.columns || 80;
-              const r = process.stdout.rows || 24;
-              try {
-                headlessTerm.resize(c, r);
-                sendBinary(ttydWs, buildResizePacket(c, r));
-              } catch (e) {
-                this.console.error('Failed to send resize packet', e?.message || e);
-              }
-            };
-            process.stdout.on('resize', stdoutResizeHandler);
-          } else if (parsed.status === 'error') {
-            this.console.error('TTYD auth error', parsed.message || 'auth failed');
-            try {
-              ttydWs.close();
-            } catch {
-              /* ignore */
-            }
-          }
           return;
         }
+        if (!parsed || !parsed.status) return;
+
+        if (parsed.status === 'ok') {
+          const cols = process.stdout.columns || 80;
+          const rows = process.stdout.rows || 24;
+          sendBinary(ttydWs, buildInitPacket(cols, rows));
+
+          if (process.stdin.isTTY && process.stdin.setRawMode) {
+            process.stdin.setRawMode(true);
+          }
+          process.stdin.resume();
+          process.stdin.setEncoding('utf8');
+
+          process.stdin.on('data', (data) => {
+            sendBinary(ttydWs, buildInputPacket(as(data)));
+          });
+        }
+        return;
       }
 
-      // Бинарный фрейм — OUTPUT от ttyd
-      let buf;
-      if (Buffer.isBuffer(d)) buf = d;
-      else if (d instanceof ArrayBuffer) buf = Buffer.from(d);
-      else if (Array.isArray(d)) buf = Buffer.concat(d);
-      else return;
-
-      if (buf.length === 0) return;
-      if (buf[0] !== TTYD_CMD_OUTPUT) return;
-
-      const text = buf.slice(1).toString('utf8');
-      console.error('[OUTPUT]', JSON.stringify(text));
-
-      // Передаём данные в headless-терминал для парсинга ANSI
-      headlessTerm.write(text, () => {
-        // После парсинга перерисовываем видимую область
-        try {
-          renderBuffer();
-        } catch {
-          /* ignore */
-        }
-      });
+      if (buf[0] === 0x30) {
+        process.stdout.write(buf.slice(1).toString('utf8'));
+        return;
+      }
     });
 
     ttydWs.on('close', (code) => {
