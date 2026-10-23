@@ -27,6 +27,7 @@
   "author": "kolserdav",
   "license": "MIT",
   "dependencies": {
+    "@xterm/headless": "^6.0.0",
     "cache-changed": "^1.3.2",
     "chalk": "^6.0.1",
     "commander": "^15.0.0",
@@ -34,7 +35,6 @@
     "dotenv": "^18.0.7",
     "filesize": "^11.0.26",
     "inquirer": "^14.2.3",
-    "node-pty": "^1.1.0",
     "open": "^11.0.4",
     "tar": "^7.5.22",
     "uuid": "^14.0.3",

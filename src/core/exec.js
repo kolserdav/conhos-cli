@@ -10,7 +10,8 @@
  ******************************************************************************************/
 import WebSocket from 'ws';
 import readline from 'readline';
-import NodePty from 'node-pty';
+import pkg from '@xterm/headless';
+
 import WS from '../connectors/ws.js';
 import { CLI_COMMANDS, EXEC_CONNECT_URL_MESSAGE } from '../types/interfaces.js';
 import { PACKAGE_NAME } from '../utils/constants.js';
@@ -18,6 +19,8 @@ import { as, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
 import Inquirer from '../utils/inquirer.js';
 import { isLastStreamMessage } from 'conhos-vscode/dist/lib.js';
 import { Readable, Writable } from 'stream';
+
+const { Terminal } = pkg;
 
 /**
  * @typedef {import('../connectors/ws.js').WSProps} WSProps
@@ -159,164 +162,218 @@ export default class Exec extends WS {
 
     const ttydAddress = process.env.TTYD_AUTH_ADDRESS || 'wss://ttyd-auth.conhos.ru';
     const ttydWs = new WebSocket(ttydAddress + '/ws');
+    ttydWs.binaryType = 'nodebuffer';
 
-    let token = this.token || '';
-    const serviceId = this.serviceName;
-    const projectId = this.options.project || 'no-project';
-
-    /** @type {{ current: import('node-pty').IPty | null }} */
-    const terminalRef = { current: null };
-    /** @type {{ current: boolean }} */
+    const token = this.token || '';
     const authenticatedRef = { current: false };
+
+    // Headless-терминал для парсинга ANSI и хранения буфера.
+    // allowProposedApi нужен для доступа к buffer.active.
+    const headlessTerm = new Terminal({
+      cols: process.stdout.columns || 80,
+      rows: process.stdout.rows || 24,
+      scrollback: 1000,
+      allowProposedApi: true,
+    });
+
+    /**
+     * @type {Function | null}
+     */
+    let stdinDataHandler = null;
+    /**
+     * @type {Function | null}
+     */
+    let stdoutResizeHandler = null;
+    let rawModeEnabled = false;
+    let exited = false;
+
+    const cleanup = () => {
+      if (rawModeEnabled && process.stdin.isTTY && process.stdin.setRawMode) {
+        try {
+          process.stdin.setRawMode(false);
+        } catch {
+          /* ignore */
+        }
+        rawModeEnabled = false;
+      }
+      try {
+        process.stdin.pause();
+      } catch {
+        /* ignore */
+      }
+      if (stdinDataHandler) {
+        process.stdin.off('data', stdinDataHandler);
+        stdinDataHandler = null;
+      }
+      if (stdoutResizeHandler) {
+        process.stdout.off('resize', stdoutResizeHandler);
+        stdoutResizeHandler = null;
+      }
+      try {
+        headlessTerm.dispose();
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const doExit = (code = 0) => {
+      if (exited) return;
+      exited = true;
+      cleanup();
+      stdoutWriteStart('');
+      this.console.info('Terminal exited', this.serviceName);
+      this.exit(code);
+    };
+
+    // Рендерим видимую область headless-буфера в stdout.
+    // Это компромисс: при частых обновлениях возможно мигание.
+    const renderBuffer = () => {
+      const buf = headlessTerm.buffer.active;
+      const rows = headlessTerm.rows;
+      const lines = [];
+      for (let y = 0; y < rows; y++) {
+        const line = buf.getLine(buf.viewportY + y);
+        lines.push(line ? line.translateToString(true) : '');
+      }
+      // Возвращаем курсор в начало экрана и перерисовываем
+      const out = '\x1b[H' + lines.join('\r\n');
+      process.stdout.write(out);
+      console.error('[RENDER]', out.slice(0, 200));
+    };
 
     ttydWs.on('open', () => {
       this.console.info('TTYD WebSocket connection opened', '');
-      const authMsg = JSON.stringify({
-        token,
-        serviceId: '6394de18-91e7-4340-b963-0617dad2ec53', // do not FIXME it's better for test
-        projectId: '1d2c7812-d6d4-44d1-ad70-6de5ba12f55f', // do not FIXME it's better for test
-      });
-      ttydWs.send(authMsg);
+      try {
+        ttydWs.send(
+          JSON.stringify({
+            token,
+            serviceId: '6394de18-91e7-4340-b963-0617dad2ec53', // do not FIXME !!! it's needed for tests
+            projectId: '1d2c7812-d6d4-44d1-ad70-6de5ba12f55f', // do not FIXME !!! it's needed for tests
+          })
+        );
+      } catch (e) {
+        this.console.error('Failed to send auth', String(e));
+      }
     });
 
     ttydWs.on('message', (d) => {
-      const res = d.toString().trim();
-      if (res.startsWith('{') && res.endsWith('}')) {
-        let parsed;
-
+      // Текстовый фрейм — auth JSON
+      console.log(d.toString());
+      if (typeof d === 'string') {
+        let parsed = null;
         try {
-          parsed = JSON.parse(res);
-        } catch (e) {
+          parsed = JSON.parse(d);
+        } catch {
+          /* not json */
+        }
+        if (parsed && parsed.status) {
+          if (parsed.status === 'ok') {
+            authenticatedRef.current = true;
+            this.console.info('TTYD authenticated, sending init packet');
+
+            const cols = process.stdout.columns || 80;
+            const rows = process.stdout.rows || 24;
+            try {
+              sendBinary(ttydWs, buildInitPacket(cols, rows));
+            } catch (e) {
+              this.console.error('Failed to send init packet', String(e));
+            }
+
+            // Синхронизируем размер headless-терминала с реальным
+            try {
+              headlessTerm.resize(cols, rows);
+            } catch {
+              /* ignore */
+            }
+
+            if (process.stdin.isTTY && process.stdin.setRawMode) {
+              try {
+                process.stdin.setRawMode(true);
+                rawModeEnabled = true;
+              } catch {
+                /* ignore */
+              }
+            }
+            process.stdin.resume();
+            process.stdin.setEncoding('utf8');
+
+            stdinDataHandler = (data) => {
+              if (!authenticatedRef.current) return;
+              try {
+                sendBinary(ttydWs, buildInputPacket(data));
+              } catch (e) {
+                this.console.error('Failed to send input packet', e?.message || e);
+              }
+            };
+            process.stdin.on('data', stdinDataHandler);
+
+            stdoutResizeHandler = () => {
+              if (!authenticatedRef.current) return;
+              const c = process.stdout.columns || 80;
+              const r = process.stdout.rows || 24;
+              try {
+                headlessTerm.resize(c, r);
+                sendBinary(ttydWs, buildResizePacket(c, r));
+              } catch (e) {
+                this.console.error('Failed to send resize packet', e?.message || e);
+              }
+            };
+            process.stdout.on('resize', stdoutResizeHandler);
+          } else if (parsed.status === 'error') {
+            this.console.error('TTYD auth error', parsed.message || 'auth failed');
+            try {
+              ttydWs.close();
+            } catch {
+              /* ignore */
+            }
+          }
           return;
         }
-
-        if (!parsed || !parsed.status) return;
-
-        if (parsed.status === 'ok') {
-          authenticatedRef.current = true;
-          this.console.info('TTYD authenticated, sending init packet');
-
-          const term = terminalRef.current;
-          if (term) {
-            const cols = term.cols ?? 80;
-            const rows = term.rows ?? 24;
-            const initPacket = buildInitPacket(cols, rows);
-            sendBinary(ttydWs, initPacket);
-
-            // Now that we're authenticated, enable terminal input forwarding
-            term.onData((data) => {
-              const inputPacket = buildInputPacket(data);
-              sendBinary(ttydWs, inputPacket);
-            });
-          }
-        } else if (parsed.status === 'error') {
-          this.console.error('TTYD auth error', parsed.message || 'auth failed');
-          ttydWs.close();
-        }
-        return;
       }
 
-      if (d instanceof ArrayBuffer) {
-        const bytes = new Uint8Array(d);
-        if (bytes.length === 0) return;
-        const cmd = bytes[0];
+      // Бинарный фрейм — OUTPUT от ttyd
+      let buf;
+      if (Buffer.isBuffer(d)) buf = d;
+      else if (d instanceof ArrayBuffer) buf = Buffer.from(d);
+      else if (Array.isArray(d)) buf = Buffer.concat(d);
+      else return;
 
-        if (cmd === TTYD_CMD_OUTPUT) {
-          const text = new TextDecoder().decode(bytes.slice(1));
-          const term = terminalRef.current;
-          if (term) {
-            term.write(text);
-          }
+      if (buf.length === 0) return;
+      if (buf[0] !== TTYD_CMD_OUTPUT) return;
+
+      const text = buf.slice(1).toString('utf8');
+      console.error('[OUTPUT]', JSON.stringify(text));
+
+      // Передаём данные в headless-терминал для парсинга ANSI
+      headlessTerm.write(text, () => {
+        // После парсинга перерисовываем видимую область
+        try {
+          renderBuffer();
+        } catch {
+          /* ignore */
         }
-      }
+      });
     });
 
     ttydWs.on('close', (code) => {
       this.console.warn('TTYD connection closed', code);
-      if (terminalRef.current) {
-        terminalRef.current.kill();
-      }
+      doExit(0);
     });
 
     ttydWs.on('error', (e) => {
       this.console.error('TTYD WebSocket error', e.message);
     });
 
-    // Create node-pty terminal
-    const termCommand = process.platform === 'win32' ? 'cmd.exe' : '/bin/bash';
-    const term = NodePty.spawn(termCommand, [], {
-      name: 'xterm-256color',
-      cwd: process.env.HOME || process.env.USERPROFILE || '.',
-      env: { ...process.env, TERM: 'xterm-256color' },
-    });
-
-    terminalRef.current = term;
-
-    // Handle terminal exit
-    term.onExit(() => {
-      stdoutWriteStart('');
-      this.console.info('Terminal exited', this.serviceName);
-      ttydWs.close();
-      this.exit(0);
-    });
-
-    // Set up stdin for terminal input
-    const isInteractive = this.options.interractive && process.stdin.isTTY;
-
-    if (isInteractive) {
-      // Enable raw mode for proper terminal input handling
-      if (process.stdin.setRawMode) {
-        process.stdin.setRawMode(true);
+    const onSignal = () => {
+      try {
+        ttydWs.close();
+      } catch {
+        /* ignore */
       }
-      process.stdin.resume();
-      process.stdin.setEncoding('utf8');
-
-      process.stdin.on('data', (data) => {
-        term.write(data);
-      });
-
-      // Handle terminal resize
-      process.stdout.on('resize', () => {
-        const cols = process.stdout.columns || 80;
-        const rows = process.stdout.rows || 24;
-        term.resize(cols, rows);
-        const resizePacket = buildResizePacket(cols, rows);
-        sendBinary(ttydWs, resizePacket);
-      });
-    } else {
-      // Non-interactive mode (server mode)
-      this.rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-        terminal: false,
-      });
-
-      this.rl.on('line', (input) => {
-        this.history.push();
-        term.write(input + '\n');
-      });
-
-      this.rl.on('close', () => {
-        stdoutWriteStart('');
-        this.console.info('Terminal exited', this.serviceName);
-        return this.exit(0);
-      });
-    }
-
-    // Cleanup on exit
-    const cleanup = () => {
-      if (process.stdin.setRawMode) {
-        process.stdin.setRawMode(false);
-      }
-      process.stdin.pause();
-      if (this.rl) {
-        this.rl.close();
-      }
+      doExit(0);
     };
-
-    process.on('SIGINT', cleanup);
-    process.on('SIGTERM', cleanup);
-    process.on('exit', cleanup);
+    process.once('SIGINT', onSignal);
+    process.once('SIGTERM', onSignal);
   }
 
   /**
