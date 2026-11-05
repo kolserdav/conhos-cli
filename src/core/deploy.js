@@ -15,7 +15,14 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import { as, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import {
+  as,
+  getPackagePath,
+  getRegistryOrigin,
+  parseMessageCli,
+  readDockerConfig,
+  stdoutWriteStart,
+} from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
   CLOUD_LOG_PREFIX,
@@ -23,6 +30,7 @@ import {
   CONFIG_FILE_NAME_A,
   CWD,
   PACKAGE_NAME,
+  REGISTRY_DOMAIN,
   UPLOAD_CHUNK_SIZE,
   UPLOAD_PERCENT_DIFF,
   UPLOAD_SPEED_INTERVAL,
@@ -624,6 +632,34 @@ export default class Deploy extends WS {
       return;
     }
 
+    const dockerConfig = readDockerConfig();
+    if (!dockerConfig) {
+      this.console.warn(
+        'Docker config file is not exists',
+        `Run '${msg?.packageName} login' first`
+      );
+      this.exit(1);
+      return;
+    }
+    if (!dockerConfig.auths) {
+      this.console.warn(
+        'Docker config file has wrong format',
+        `Remove it and run '${msg?.packageName} login' then`
+      );
+      this.exit(1);
+      return;
+    }
+    const registryOrigin = getRegistryOrigin();
+    if (!dockerConfig.auths[registryOrigin]) {
+      this.console.warn(
+        'Docker config file have no registry token',
+        `Run '${msg?.packageName} login' first`
+      );
+      this.exit(1);
+      return;
+    }
+    this.cliSecret = dockerConfig.auths[registryOrigin].auth;
+
     const { name, services } = this.config;
 
     const packageProjectPath = getPackagePath(this.cwd || null, name);
@@ -656,6 +692,7 @@ export default class Deploy extends WS {
           ssl: this.options.ssl || false,
           env,
           runInNode: process.env.RUN_IN_NODE,
+          cliSecret: this.cliSecret,
         },
         status: 'info',
         connId: this.connId,

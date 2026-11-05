@@ -12,7 +12,13 @@ import WebSocket from 'ws';
 import { readFileSync, existsSync, writeFileSync, statSync } from 'fs';
 import path, { resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { SESSION_FILE_NAME, PACKAGE_NAME, CLOUD_LOG_PREFIX, HOME_DIR } from '../utils/constants.js';
+import {
+  SESSION_FILE_NAME,
+  PACKAGE_NAME,
+  CLOUD_LOG_PREFIX,
+  HOME_DIR,
+  DOCKER_CONFIG_PATH,
+} from '../utils/constants.js';
 import {
   getPackagePath,
   console,
@@ -21,11 +27,14 @@ import {
   getFile,
   wait,
   stdoutWriteStart,
+  createDockerConfig,
+  getRegistryOrigin,
+  readDockerConfig,
 } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
 import { createLastStreamMessage, findVolumeByName } from 'conhos-vscode/dist/lib.js';
-import { initSchema, checkConfig } from 'conhos-vscode/dist/schema.js';
+import { initSchema } from 'conhos-vscode/dist/schema.js';
 import Yaml from '../utils/yaml.js';
 import {
   PROTOCOL_CLI,
@@ -236,6 +245,18 @@ export default class WS {
   volumes = {};
 
   /**
+   * @protected
+   * @type {boolean}
+   */
+  isLogin = false;
+
+  /**
+   * @protected
+   * @type {string}
+   */
+  cliSecret = '';
+
+  /**
    * @param {Options} options
    * @param {keyof typeof CLI_COMMANDS } command
    * @param {WSProps} props
@@ -350,9 +371,13 @@ export default class WS {
    */
   async listenCheckToken(msg) {
     const { data, token, userId } = msg;
-    const { skipSetProject } = data;
+    const { skipSetProject, cliSecret } = data;
 
     this.setUserId(userId);
+
+    if (cliSecret) {
+      this.createDockerConfig({ userId, token: cliSecret });
+    }
 
     if (!skipSetProject) {
       const conf = await this.getConfig();
@@ -663,6 +688,7 @@ export default class WS {
           packageName: PACKAGE_NAME,
           data: {
             skipSetProject,
+            isLogin: this.isLogin,
           },
           message: '',
           status: 'info',
@@ -678,6 +704,7 @@ export default class WS {
           packageName: PACKAGE_NAME,
           data: {
             skipSetProject,
+            isLogin: this.isLogin,
           },
           message: '',
           status: 'info',
@@ -767,5 +794,29 @@ export default class WS {
    */
   setToken(token) {
     this.token = token;
+  }
+
+  /**
+   * @protected
+   * @param {{
+   *  userId: string;
+   *  token: string
+   * }} param0
+   */
+  createDockerConfig({ userId, token }) {
+    const domain = getRegistryOrigin();
+    if (!existsSync(DOCKER_CONFIG_PATH)) {
+      this.console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
+      createDockerConfig({ userId, token, domain }, { auths: {} });
+      return;
+    }
+    const dockerConfig = readDockerConfig();
+    if (dockerConfig) {
+      createDockerConfig({ userId, token, domain }, dockerConfig);
+    } else {
+      this.console.warn('Docker config is not changed', '');
+      return;
+    }
+    this.console.info('Docker config changed', DOCKER_CONFIG_PATH);
   }
 }

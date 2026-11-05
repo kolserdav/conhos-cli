@@ -186,7 +186,10 @@ export default class Init extends WS {
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
    * @returns {string}
    */
-  getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour }) {
+  getCostString(
+    item,
+    { sizes, baseCost, baseValue, baseStorageCostHour, baseCostPerPod, baseShiftPriceCoeff }
+  ) {
     const cost = computeCostService(
       {
         serviceSize: /** @type {typeof as<ServiceSize>} */ (as)(item.name),
@@ -198,6 +201,8 @@ export default class Init extends WS {
         baseCost,
         baseValue,
         baseStorageCostHour,
+        baseCostPerPod,
+        baseShiftPriceCoeff,
       }
     );
     if (!cost) {
@@ -234,7 +239,15 @@ export default class Init extends WS {
    */
   async handleDeployData(param0) {
     const {
-      data: { sizes, baseCost, baseValue, services, baseStorageCostHour },
+      data: {
+        sizes,
+        baseCost,
+        baseValue,
+        services,
+        baseStorageCostHour,
+        baseCostPerPod,
+        baseShiftPriceCoeff,
+      },
     } = param0;
 
     this.console.info("It's adding service to the config file...", this.configFile);
@@ -266,7 +279,6 @@ export default class Init extends WS {
 
       this.console.info('Project successfully initialized', this.configFile);
       return this.exit(0);
-      return;
     }
 
     /**
@@ -296,7 +308,14 @@ export default class Init extends WS {
     const size = await inquirer.list(
       'Select size of service',
       sizes.map((item) =>
-        this.getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour })
+        this.getCostString(item, {
+          sizes,
+          baseCost,
+          baseValue,
+          baseStorageCostHour,
+          baseCostPerPod,
+          baseShiftPriceCoeff,
+        })
       ),
       SIZE_INDEX_DEFAULT
     );

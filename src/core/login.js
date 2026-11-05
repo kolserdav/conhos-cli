@@ -10,20 +10,12 @@
  ******************************************************************************************/
 import { existsSync, rmSync, writeFileSync } from 'fs';
 import WS from '../connectors/ws.js';
-import {
-  createDockerConfig,
-  getPackagePath,
-  getRegistryOrigin,
-  openBrowser,
-  parseMessageCli,
-  readDockerConfig,
-} from '../utils/lib.js';
+import { getPackagePath, openBrowser, parseMessageCli } from '../utils/lib.js';
 import {
   SESSION_FILE_NAME,
   LOGIN_PAGE,
   QUERY_STRING_CONN_ID,
   PACKAGE_NAME,
-  DOCKER_CONFIG_PATH,
 } from '../utils/constants.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
@@ -40,6 +32,11 @@ import { CLI_COMMANDS } from '../types/interfaces.js';
 /**
  * @template T
  * @typedef {import('../connectors/ws.js').WSMessageCli<any>} WsMessage<T>
+ */
+
+/**
+ * @template {keyof WSMessageDataCli} T
+ * @typedef {import('../types/interfaces.js').WSMessageCli<T>} WSMessageCli<T>
  */
 
 const inquirer = new Inquirer();
@@ -75,6 +72,8 @@ export default class Login extends WS {
       }
       return this.exit(0);
     }
+
+    this.isLogin = true;
 
     this.conn.on('message', async (d) => {
       const rawMessage = /** @type {typeof parseMessageCli<any>} */ (parseMessageCli)(d.toString());
@@ -118,15 +117,14 @@ export default class Login extends WS {
 
   /**
    * @private
-   * @param {WsMessage<WSMessageDataCli['loginCli']>} param0
+   * @param {WSMessageCli<'loginCli'>} param0
    * @returns
    */
-  async listenLogin({ token, message, userId }) {
+  async listenLogin({ token, message, userId, data: { cliSecret } }) {
     if (!token) {
       this.console.warn("Session token wasn't get from the server", '');
       this.console.warn(message, '');
       return this.exit(1);
-      return;
     }
     /**
      * @type {Session}
@@ -146,34 +144,12 @@ export default class Login extends WS {
     const authPath = getPackagePath(null, SESSION_FILE_NAME);
     writeFileSync(authPath, JSON.stringify(session));
 
-    this.createDockerConfig({ userId, token });
+    if (cliSecret) {
+      this.createDockerConfig({ userId, token: cliSecret });
+    }
 
     this.console.info('Successfully logged in', '');
     return this.exit(0);
-  }
-
-  /**
-   * @private
-   * @param {{
-   *  userId: string;
-   *  token: string
-   * }} param0
-   */
-  createDockerConfig({ userId, token }) {
-    const domain = getRegistryOrigin();
-    if (!existsSync(DOCKER_CONFIG_PATH)) {
-      this.console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
-      createDockerConfig({ userId, token, domain }, { auths: {} });
-      return;
-    }
-    const dockerConfig = readDockerConfig();
-    if (dockerConfig) {
-      createDockerConfig({ userId, token, domain }, dockerConfig);
-    } else {
-      this.console.warn('Docker config is not changed', '');
-      return;
-    }
-    this.console.info('Docker config changed', DOCKER_CONFIG_PATH);
   }
 
   /**

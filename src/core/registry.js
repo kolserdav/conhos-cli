@@ -205,8 +205,9 @@ export default class Registry extends WS {
       '--platform',
       'linux/amd64',
       '--tag',
-      `${registryUrl}/${this.userId}/${name}:latest`,
+      `${registryUrl}/${this.userId}/${name}:${this.options.version || 'latest'}`,
     ];
+    this.console.info('Run command', command.join(' '));
     if (this.options.cache) {
       command = command.concat([
         '--cache-from',
