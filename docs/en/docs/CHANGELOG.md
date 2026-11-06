@@ -2,6 +2,8 @@
 
 **4.5.1-IN PROGRESS**
 
+- `[Core]` Fixed a bug where disk space usage statistics were calculated incorrectly
+- `[Website]` Fixed a bug with the 'Update statistics' button on the Service page
 - `[Website, Extension]` AI assistant for creating configuration files
 
 **4.5.0-23.10.2026**

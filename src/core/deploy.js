@@ -632,34 +632,6 @@ export default class Deploy extends WS {
       return;
     }
 
-    const dockerConfig = readDockerConfig();
-    if (!dockerConfig) {
-      this.console.warn(
-        'Docker config file is not exists',
-        `Run '${msg?.packageName} login' first`
-      );
-      this.exit(1);
-      return;
-    }
-    if (!dockerConfig.auths) {
-      this.console.warn(
-        'Docker config file has wrong format',
-        `Remove it and run '${msg?.packageName} login' then`
-      );
-      this.exit(1);
-      return;
-    }
-    const registryOrigin = getRegistryOrigin();
-    if (!dockerConfig.auths[registryOrigin]) {
-      this.console.warn(
-        'Docker config file have no registry token',
-        `Run '${msg?.packageName} login' first`
-      );
-      this.exit(1);
-      return;
-    }
-    this.cliSecret = dockerConfig.auths[registryOrigin].auth;
-
     const { name, services } = this.config;
 
     const packageProjectPath = getPackagePath(this.cwd || null, name);
@@ -692,7 +664,6 @@ export default class Deploy extends WS {
           ssl: this.options.ssl || false,
           env,
           runInNode: process.env.RUN_IN_NODE,
-          cliSecret: this.cliSecret,
         },
         status: 'info',
         connId: this.connId,

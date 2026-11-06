@@ -74,7 +74,7 @@ export function getEnvVariableRegex(name) {
  *  context?: string;
  *  cacheDir?: string;
  *  cache?: boolean;
- *  version?: string;
+ *  tag?: string;
  * }} Options
  */
 
@@ -142,7 +142,6 @@ export function getEnvVariableRegex(name) {
  *   interractive: boolean;
  *   ssl: boolean;
  *   env: Record<string, string>
- *   cliSecret: string;
  *   runInNode?: string;
  * }} prepareDeployServer
  * @property {{
