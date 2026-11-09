@@ -1,6 +1,6 @@
 {
   "name": "conhos",
-  "version": "4.5.1",
+  "version": "5.0.0",
   "description": "Command-line interface for the Conhos.ru Config Hosting service.",
   "type": "module",
   "repository": "https://github.com/kolserdav/conhos.git",

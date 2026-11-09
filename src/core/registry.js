@@ -172,7 +172,7 @@ export default class Registry extends WS {
     const loginCode = await new Promise((resolve) => {
       const cmd = spawn(
         'docker',
-        ['login', REGISTRY_DOMAIN, '--username', token[0], '--password-stdin'],
+        ['login', getRegistryOrigin(), '--username', token[0], '--password-stdin'],
         {
           stdio: ['pipe', 'pipe', 'pipe'],
           env: {
