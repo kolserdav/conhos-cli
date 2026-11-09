@@ -303,7 +303,6 @@ export default class Init extends WS {
     if (!serv) {
       this.console.error('Unexpected error. Service is temporarily unavailable.', '');
       return this.exit(1);
-      return;
     }
     const size = await inquirer.list(
       'Select size of service',
@@ -320,17 +319,29 @@ export default class Init extends WS {
       SIZE_INDEX_DEFAULT
     );
 
-    const version =
-      serv.tags.length === 0
-        ? await inquirer.input(`Set ${serv.name} version from ${serv.hub}/tags`, 'latest')
-        : await inquirer.list(
-            `Select ${serv.name} version`,
-            serv.tags.map((item) => item.toString()),
-            serv.tags.length,
-            true
-          );
-
-    const fpm = service === 'php' && /fpm/.test(version);
+    let fpm = service === 'php';
+    /**
+     * @type {string | undefined }
+     */
+    let customImage = undefined;
+    /**
+     * @type {string | undefined }
+     */
+    let version = undefined;
+    if (service !== 'custom') {
+      version =
+        serv.tags.length === 0
+          ? await inquirer.input(`Set ${serv.name} version from ${serv.hub}/tags`, 'latest')
+          : await inquirer.list(
+              `Select ${serv.name} version`,
+              serv.tags.map((item) => item.toString()),
+              serv.tags.length,
+              true
+            );
+      fpm = /fpm/.test(version);
+    } else {
+      customImage = await inquirer.input('Set custom image', 'my-image:latest');
+    }
 
     /**
      * @type {ConfigFile['services'][0]['exclude']}
@@ -385,6 +396,7 @@ export default class Init extends WS {
       image: service,
       size: /** @type {typeof as<ServiceSize>} */ (as)(size),
       active: true,
+      customImage,
       version,
       pwd: undefined,
       exclude,

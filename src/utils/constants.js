@@ -36,7 +36,7 @@ if (process.env.LOGIN_PAGE) {
   );
 }
 
-export const REGISTRY_DOMAIN = process.env.REGISTRY_DOMAIN || 'registry.conhos.ru';
+export const REGISTRY_DOMAIN = process.env.REGISTRY_DOMAIN || 'hub.conhos.ru';
 
 export const TTYD_AUTH_ADDRESS = process.env.TTYD_AUTH_ADDRESS || 'wss://ttyd-auth.conhos.ru';
 
