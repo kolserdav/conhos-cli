@@ -74,6 +74,7 @@ export function getEnvVariableRegex(name) {
  *  context?: string;
  *  cacheDir?: string;
  *  cache?: boolean;
+ *  tag?: string;
  * }} Options
  */
 
@@ -113,14 +114,19 @@ export function getEnvVariableRegex(name) {
  *   version: string;
  *   command: keyof typeof CLI_COMMANDS
  * }} setSocketServer
- * @property {string} loginCli
+ * @property {{
+ *   token: string;
+ *   cliSecret: string | null;
+ * }} loginCli
  * @property {string} loginServer
  * @property {{
  *   checked: boolean;
  *   skipSetProject: boolean;
+ *   cliSecret?: string | null;
  *   errMess?: string;
  * }} checkTokenCli
  * @property {{
+ *   isLogin: boolean;
  *   skipSetProject: boolean;
  * }} checkTokenServer
  * @property {{

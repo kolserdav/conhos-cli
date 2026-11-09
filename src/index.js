@@ -210,15 +210,9 @@ registryCommand
   .option('--cache-dir <string>', 'Local cached directory [Default /tmp]')
   .option('-c, --context <string>', 'Build context dir [Default .]')
   .option('--no-cache', 'Do not use cache')
+  .option('-t, --tag <string>', 'Tag version')
   .action(async (options) => {
     new Registry('build', options, {});
-  });
-
-registryCommand
-  .command('list')
-  .description('Show all remote images')
-  .action(async (options) => {
-    new Registry('list', options, {});
   });
 
 program

@@ -186,7 +186,10 @@ export default class Init extends WS {
    * @param {Omit<WSMessageDataCli['deployData'], 'services'>} param1
    * @returns {string}
    */
-  getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour }) {
+  getCostString(
+    item,
+    { sizes, baseCost, baseValue, baseStorageCostHour, baseCostPerPod, baseShiftPriceCoeff }
+  ) {
     const cost = computeCostService(
       {
         serviceSize: /** @type {typeof as<ServiceSize>} */ (as)(item.name),
@@ -198,6 +201,8 @@ export default class Init extends WS {
         baseCost,
         baseValue,
         baseStorageCostHour,
+        baseCostPerPod,
+        baseShiftPriceCoeff,
       }
     );
     if (!cost) {
@@ -234,7 +239,15 @@ export default class Init extends WS {
    */
   async handleDeployData(param0) {
     const {
-      data: { sizes, baseCost, baseValue, services, baseStorageCostHour },
+      data: {
+        sizes,
+        baseCost,
+        baseValue,
+        services,
+        baseStorageCostHour,
+        baseCostPerPod,
+        baseShiftPriceCoeff,
+      },
     } = param0;
 
     this.console.info("It's adding service to the config file...", this.configFile);
@@ -266,7 +279,6 @@ export default class Init extends WS {
 
       this.console.info('Project successfully initialized', this.configFile);
       return this.exit(0);
-      return;
     }
 
     /**
@@ -291,27 +303,45 @@ export default class Init extends WS {
     if (!serv) {
       this.console.error('Unexpected error. Service is temporarily unavailable.', '');
       return this.exit(1);
-      return;
     }
     const size = await inquirer.list(
       'Select size of service',
       sizes.map((item) =>
-        this.getCostString(item, { sizes, baseCost, baseValue, baseStorageCostHour })
+        this.getCostString(item, {
+          sizes,
+          baseCost,
+          baseValue,
+          baseStorageCostHour,
+          baseCostPerPod,
+          baseShiftPriceCoeff,
+        })
       ),
       SIZE_INDEX_DEFAULT
     );
 
-    const version =
-      serv.tags.length === 0
-        ? await inquirer.input(`Set ${serv.name} version from ${serv.hub}/tags`, 'latest')
-        : await inquirer.list(
-            `Select ${serv.name} version`,
-            serv.tags.map((item) => item.toString()),
-            serv.tags.length,
-            true
-          );
-
-    const fpm = service === 'php' && /fpm/.test(version);
+    let fpm = service === 'php';
+    /**
+     * @type {string | undefined }
+     */
+    let customImage = undefined;
+    /**
+     * @type {string | undefined }
+     */
+    let version = undefined;
+    if (service !== 'custom') {
+      version =
+        serv.tags.length === 0
+          ? await inquirer.input(`Set ${serv.name} version from ${serv.hub}/tags`, 'latest')
+          : await inquirer.list(
+              `Select ${serv.name} version`,
+              serv.tags.map((item) => item.toString()),
+              serv.tags.length,
+              true
+            );
+      fpm = /fpm/.test(version);
+    } else {
+      customImage = await inquirer.input('Set custom image', 'my-image:latest');
+    }
 
     /**
      * @type {ConfigFile['services'][0]['exclude']}
@@ -366,6 +396,7 @@ export default class Init extends WS {
       image: service,
       size: /** @type {typeof as<ServiceSize>} */ (as)(size),
       active: true,
+      customImage,
       version,
       pwd: undefined,
       exclude,

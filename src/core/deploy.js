@@ -15,7 +15,14 @@ import CacheChanged from 'cache-changed';
 import { createReadStream, existsSync, mkdirSync, rmSync, stat } from 'fs';
 import { basename, normalize, resolve } from 'path';
 import WS from '../connectors/ws.js';
-import { as, getPackagePath, parseMessageCli, stdoutWriteStart } from '../utils/lib.js';
+import {
+  as,
+  getPackagePath,
+  getRegistryOrigin,
+  parseMessageCli,
+  readDockerConfig,
+  stdoutWriteStart,
+} from '../utils/lib.js';
 import {
   CACHE_FILE_NAME,
   CLOUD_LOG_PREFIX,
@@ -23,6 +30,7 @@ import {
   CONFIG_FILE_NAME_A,
   CWD,
   PACKAGE_NAME,
+  REGISTRY_DOMAIN,
   UPLOAD_CHUNK_SIZE,
   UPLOAD_PERCENT_DIFF,
   UPLOAD_SPEED_INTERVAL,

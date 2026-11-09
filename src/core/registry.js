@@ -23,6 +23,7 @@ import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { mkdir } from 'fs/promises';
 import { CLI_COMMANDS } from '../types/interfaces.js';
+import { PACKAGE_NAME, REGISTRY_DOMAIN } from '../utils/constants.js';
 
 /**
  * @typedef {import('../connectors/ws.js').WSProps} WSProps
@@ -51,7 +52,7 @@ import { CLI_COMMANDS } from '../types/interfaces.js';
  *   expires_in: number;
  *   issued_at: string;
  * }} RegistryAuthResponse
- * @typedef { 'build' | 'list' } RegistrySubcommand
+ * @typedef { 'build'  } RegistrySubcommand
  */
 
 export default class Registry extends WS {
@@ -119,68 +120,9 @@ export default class Registry extends WS {
       case 'build':
         this.build();
         break;
-      case 'list':
-        this.list();
-        break;
       default:
         this.console.warn('Default command not implement', this.subCommand);
     }
-  }
-
-  /**
-   * @returns {Promise<void>}
-   */
-
-  async list() {
-    const dockerConfig = readDockerConfig();
-    if (!dockerConfig) {
-      this.console.warn('Unauthorized', "Run 'conhos login' first");
-      this.exit(1);
-      return;
-    }
-
-    const registryOrigin = getRegistryOrigin();
-    if (!dockerConfig.auths[registryOrigin]) {
-      this.console.warn('Unauthorized', "Run 'conhos login' first");
-      this.exit(1);
-      return;
-    }
-
-    const authStr = Buffer.from(dockerConfig.auths[registryOrigin].auth, 'base64').toString(
-      'utf-8'
-    );
-    const autArr = authStr.split(':');
-    const username = autArr[0];
-    const password = autArr[1];
-
-    const auth = await this.auth({ username, password });
-    if (auth.error) {
-      this.console.error('Failed to auth in registry', auth.error);
-      this.exit(1);
-      return;
-    }
-    const res = await new Promise((resolve) => {
-      fetch(`${getRegistryProxyOrigin()}/catalog?username=${username}`, {
-        headers: {
-          Authorization: `Bearer ${auth.token}`,
-        },
-        method: 'GET',
-      })
-        .then((r) => {
-          return r.json();
-        })
-        .then((data) => {
-          resolve(data);
-        });
-    });
-    if (res.error) {
-      this.console.error('Failed to get repositories', res.error);
-      this.exit(1);
-      return;
-    }
-    this.console.info('Repositories:', '', '');
-    this.console.Log(`${res.repositories.join('\n')}`);
-    this.exit(0);
   }
 
   /**
@@ -192,11 +134,77 @@ export default class Registry extends WS {
     if (!name) {
       return;
     }
+
+    this.console.info('Check registry token', '...');
+    const dockerConfig = readDockerConfig();
+    if (!dockerConfig) {
+      this.console.warn('Docker config file is not exists', `Run '${PACKAGE_NAME} login' first`);
+      this.exit(1);
+      return;
+    }
+    if (!dockerConfig.auths) {
+      this.console.warn(
+        'Docker config file has wrong format',
+        `Remove it and run '${PACKAGE_NAME} login' then`
+      );
+      this.exit(1);
+      return;
+    }
+    const registryOrigin = getRegistryOrigin();
+    if (!dockerConfig.auths[registryOrigin]) {
+      this.console.warn(
+        'Docker config file has no registry token',
+        `Run '${PACKAGE_NAME} login' first`
+      );
+      this.exit(1);
+      return;
+    }
+    if (!dockerConfig.auths[registryOrigin].auth) {
+      this.console.warn(
+        'Docker config file has wrong registry token section',
+        `Run '${PACKAGE_NAME} login' first`
+      );
+      this.exit(1);
+      return;
+    }
+    const token = atob(dockerConfig.auths[registryOrigin].auth).split(':');
+
+    const loginCode = await new Promise((resolve) => {
+      const cmd = spawn(
+        'docker',
+        ['login', getRegistryOrigin(), '--username', token[0], '--password-stdin'],
+        {
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: {
+            ...process.env,
+            FORCE_COLOR: '1',
+          },
+        }
+      );
+
+      cmd.stdin.write(token[1]);
+      cmd.stdin.end();
+
+      cmd.on('error', (e) => {
+        this.console.error('Failed to login docker', e.message);
+        return this.exit(1);
+      });
+
+      cmd.on('close', (code) => {
+        resolve(code);
+      });
+    });
+
+    if (loginCode !== 0) {
+      this.console.warn(
+        `Registry token expired, open our Hub to authenticate via Conhos to refresh session`,
+        getRegistryOrigin()
+      );
+      this.exit(1);
+    }
+
     const tmpDir = tmpdir();
     const cacheDir = resolve(tmpDir, name);
-    await mkdir(cacheDir, { recursive: true }).catch((err) => {
-      this.console.error('Failed to create tmp dir for cache', err);
-    });
     let command = [
       'buildx',
       'build',
@@ -205,14 +213,21 @@ export default class Registry extends WS {
       '--platform',
       'linux/amd64',
       '--tag',
-      `${registryUrl}/${this.userId}/${name}:latest`,
+      `${registryUrl}/${this.userId}/${name}:${this.options.tag || 'latest'}`,
     ];
+    this.console.info('Run command', command.join(' '));
+
+    const cachePath = this.options.cacheDir || cacheDir;
+    await mkdir(cachePath, { recursive: true }).catch((err) => {
+      this.console.error('Failed to create tmp dir for cache', err);
+    });
+
     if (this.options.cache) {
       command = command.concat([
         '--cache-from',
-        `type=local,src=${this.options.cacheDir || cacheDir}`,
+        `type=local,src=${cachePath}`,
         '--cache-to',
-        `type=local,dest=${this.options.cacheDir || cacheDir},mode=max`,
+        `type=local,dest=${cachePath},mode=max`,
       ]);
     }
     command = command.concat(['--output', '"type=registry"', this.options.context || '.']);
@@ -244,7 +259,10 @@ export default class Registry extends WS {
         );
       }
     } else {
-      this.console.info('Successfully build and upload image', name);
+      this.console.info(
+        `Successfully build and upload image '${name}'`,
+        `${getRegistryOrigin()}/harbor/projects`
+      );
     }
     return this.exit(code);
   }
