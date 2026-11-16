@@ -1,10 +1,12 @@
 # List of changes
 
-**4.5.1-IN PROGRESS**
+**5.0.1-IN PROGRESS**
 
 - `[Core]` Fixed a bug where disk space usage statistics were calculated incorrectly
 - `[Website]` Fixed a bug with the 'Update statistics' button on the Service page
 - `[Website, Extension]` AI assistant for creating configuration files
+- `[CLI]` Fixed a bug in the registry session
+- `[Core, Website, CLI]` Replaced the container image registry with Harbor
 
 **4.5.0-23.10.2026**
 
