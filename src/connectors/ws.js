@@ -30,6 +30,7 @@ import {
   createDockerConfig,
   getRegistryOrigin,
   readDockerConfig,
+  getRegistryDomain,
 } from '../utils/lib.js';
 import Crypto from '../utils/crypto.js';
 import Inquirer from '../utils/inquirer.js';
@@ -47,6 +48,7 @@ import {
 } from 'conhos-vscode/dist/constants.js';
 import { tmpdir } from 'os';
 import { CLI_COMMANDS } from '../types/interfaces.js';
+import { spawn } from 'child_process';
 
 const __filenameNew = fileURLToPath(import.meta.url);
 
@@ -377,6 +379,8 @@ export default class WS {
 
     if (cliSecret) {
       this.createDockerConfig({ userId, token: cliSecret });
+
+      await this.checkRegistryToken();
     }
 
     if (!skipSetProject) {
@@ -724,6 +728,77 @@ export default class WS {
   }
 
   /**
+   * @protected
+   * @returns {Promise<1 | 0>}
+   */
+  async checkRegistryToken() {
+    this.console.info('Check registry token', '...');
+    const dockerConfig = readDockerConfig();
+    if (!dockerConfig) {
+      this.console.warn('Docker config file is not exists', `Run '${PACKAGE_NAME} login' first`);
+      return 1;
+    }
+    if (!dockerConfig.auths) {
+      this.console.warn(
+        'Docker config file has wrong format',
+        `Remove it and run '${PACKAGE_NAME} login' then`
+      );
+      return 1;
+    }
+    const registryOrigin = getRegistryOrigin();
+    if (!dockerConfig.auths[registryOrigin]) {
+      this.console.warn(
+        'Docker config file has no registry token',
+        `Run '${PACKAGE_NAME} login' first`
+      );
+      return 1;
+    }
+    if (!dockerConfig.auths[registryOrigin].auth) {
+      this.console.warn(
+        'Docker config file has wrong registry token section',
+        `Run '${PACKAGE_NAME} login' first`
+      );
+      return 1;
+    }
+    const token = atob(dockerConfig.auths[registryOrigin].auth).split(':');
+
+    const loginCode = await new Promise((resolve) => {
+      const cmd = spawn(
+        'docker',
+        ['login', getRegistryOrigin(), '--username', token[0], '--password-stdin'],
+        {
+          stdio: ['pipe', 'pipe', 'pipe'],
+          env: {
+            ...process.env,
+            FORCE_COLOR: '1',
+          },
+        }
+      );
+
+      cmd.stdin.write(token[1]);
+      cmd.stdin.end();
+
+      cmd.on('error', (e) => {
+        this.console.error('Failed to login docker', e.message);
+        return this.exit(1);
+      });
+
+      cmd.on('close', (code) => {
+        resolve(code);
+      });
+    });
+
+    if (loginCode !== 0) {
+      this.console.warn(
+        `Registry token expired, open our Hub to authenticate via Conhos to refresh session`,
+        getRegistryOrigin()
+      );
+      return 1;
+    }
+    return 0;
+  }
+
+  /**
    *
    * @param {WSMessageCli<WSMessageDataCli['any']>} msg
    */
@@ -801,22 +876,32 @@ export default class WS {
    * @param {{
    *  userId: string;
    *  token: string
+   *  byOrigin?: boolean;
    * }} param0
    */
-  createDockerConfig({ userId, token }) {
-    const domain = getRegistryOrigin();
+  createDockerConfig({ userId, token, byOrigin }) {
+    const origin = getRegistryOrigin();
+    const domain = getRegistryDomain();
     if (!existsSync(DOCKER_CONFIG_PATH)) {
       this.console.info('Docker config file is not exists, will create', DOCKER_CONFIG_PATH);
       createDockerConfig({ userId, token, domain }, { auths: {} });
+      if (!byOrigin) {
+        this.createDockerConfig({ userId, token, byOrigin: true });
+      }
       return;
     }
     const dockerConfig = readDockerConfig();
     if (dockerConfig) {
-      createDockerConfig({ userId, token, domain }, dockerConfig);
+      createDockerConfig({ userId, token, domain: byOrigin ? origin : domain }, dockerConfig);
+      if (!byOrigin) {
+        this.createDockerConfig({ userId, token, byOrigin: true });
+      }
     } else {
       this.console.warn('Docker config is not changed', '');
       return;
     }
-    this.console.info('Docker config changed', DOCKER_CONFIG_PATH);
+    if (byOrigin) {
+      this.console.info('Docker config changed', DOCKER_CONFIG_PATH);
+    }
   }
 }

@@ -79,7 +79,6 @@ export default class Registry extends WS {
     if (this.subCommand === 'build' && !this.options.name) {
       this.console.warn('Option "name" is required for build', '-n|--name [string]');
       return this.exit(2);
-      return;
     }
   }
 
@@ -135,72 +134,9 @@ export default class Registry extends WS {
       return;
     }
 
-    this.console.info('Check registry token', '...');
-    const dockerConfig = readDockerConfig();
-    if (!dockerConfig) {
-      this.console.warn('Docker config file is not exists', `Run '${PACKAGE_NAME} login' first`);
-      this.exit(1);
-      return;
-    }
-    if (!dockerConfig.auths) {
-      this.console.warn(
-        'Docker config file has wrong format',
-        `Remove it and run '${PACKAGE_NAME} login' then`
-      );
-      this.exit(1);
-      return;
-    }
-    const registryOrigin = getRegistryOrigin();
-    if (!dockerConfig.auths[registryOrigin]) {
-      this.console.warn(
-        'Docker config file has no registry token',
-        `Run '${PACKAGE_NAME} login' first`
-      );
-      this.exit(1);
-      return;
-    }
-    if (!dockerConfig.auths[registryOrigin].auth) {
-      this.console.warn(
-        'Docker config file has wrong registry token section',
-        `Run '${PACKAGE_NAME} login' first`
-      );
-      this.exit(1);
-      return;
-    }
-    const token = atob(dockerConfig.auths[registryOrigin].auth).split(':');
-
-    const loginCode = await new Promise((resolve) => {
-      const cmd = spawn(
-        'docker',
-        ['login', getRegistryOrigin(), '--username', token[0], '--password-stdin'],
-        {
-          stdio: ['pipe', 'pipe', 'pipe'],
-          env: {
-            ...process.env,
-            FORCE_COLOR: '1',
-          },
-        }
-      );
-
-      cmd.stdin.write(token[1]);
-      cmd.stdin.end();
-
-      cmd.on('error', (e) => {
-        this.console.error('Failed to login docker', e.message);
-        return this.exit(1);
-      });
-
-      cmd.on('close', (code) => {
-        resolve(code);
-      });
-    });
-
-    if (loginCode !== 0) {
-      this.console.warn(
-        `Registry token expired, open our Hub to authenticate via Conhos to refresh session`,
-        getRegistryOrigin()
-      );
-      this.exit(1);
+    const chToken = await this.checkRegistryToken();
+    if (chToken !== 0) {
+      this.exit(chToken);
     }
 
     const tmpDir = tmpdir();
