@@ -7,6 +7,7 @@
 - `[Website, Extension]` AI assistant for creating configuration files
 - `[CLI]` Fixed a bug in the registry session
 - `[Core, Website, CLI]` Replaced the container image registry with Harbor
+- `[Website]` Fixed a bug where push notifications were being disabled
 
 **4.5.0-23.10.2026**
 
